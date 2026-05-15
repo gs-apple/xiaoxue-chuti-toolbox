@@ -1,94 +1,75 @@
+# main.py — 小学出题工具箱 (tkinter 版)
+import tkinter as tk
+from tkinter import ttk
 import sys
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QTabWidget,
-                             QVBoxLayout, QWidget)
-# 导入各子页面
+
+from widgets import GradientButton
 from shuxue_ui import ShuxueTabWidget
 from zi_tie_ui import ZiTieTabWidget
 from zuowen_ui import ZuowenTabWidget
-from zhenti_ui import ZhentiTabWidget  # 新增真题下载
+from zhenti_ui import ZhentiTabWidget
 
 
-class MathGeneratorUI(QMainWindow):
+class MathGeneratorApp:
     def __init__(self):
-        super().__init__()
-        self.setWindowTitle("小学出题工具箱")
-        self.setFixedSize(750, 750)
-        self.center()
-        self.init_ui()
+        self.root = tk.Tk()
+        self.root.title("小学出题工具箱")
+        self.root.geometry("700x700")
+        self.root.resizable(False, False)
+        self._center()
+        self._init_ui()
 
-    def center(self):
-        """将窗口移动到屏幕中央"""
-        screen = QApplication.desktop().screenGeometry()
-        x = (screen.width() - self.width()) // 2
-        y = (screen.height() - self.height()) // 2
-        self.move(x, y)
+    def _center(self):
+        self.root.update_idletasks()
+        w = self.root.winfo_width()
+        h = self.root.winfo_height()
+        sw = self.root.winfo_screenwidth()
+        sh = self.root.winfo_screenheight()
+        x = (sw - w) // 2
+        y = (sh - h) // 2
+        self.root.geometry(f"700x700+{x}+{y}")
 
-    def init_ui(self):
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(4, 4, 4, 4)
-        main_layout.setSpacing(5)
+    def _init_ui(self):
+        style = ttk.Style()
+        style.theme_use("default")
+        BG = "#f0f0f0"
+        self.root.configure(bg=BG)
+        style.configure("TFrame", background=BG)
+        style.configure("TLabelframe", background=BG)
+        style.configure("TLabelframe.Label", background=BG, font=("Microsoft YaHei", 10, "bold"))
+        style.configure("TNotebook", borderwidth=0, background=BG)
+        # 现代风选项卡
+        style.configure("TNotebook.Tab",
+                         font=("Microsoft YaHei", 11, "bold"),
+                         padding=[16, 6],
+                         background="#e2e8f0", foreground="#475569")
+        style.map("TNotebook.Tab",
+                   background=[("selected", "#2563eb"), ("active", "#cbd5e1")],
+                   foreground=[("selected", "#ffffff"), ("active", "#1e293b")])
 
-        # 顶部标签栏
-        self.tab_bar = QTabWidget()
-        self.tab_bar.setStyleSheet("""
-            QTabWidget {
-                font-family: 'Microsoft YaHei', 'SimHei';
-                font-size: 13px;
-                background-color: #f8f9fa;
-            }
-            QTabWidget::pane {
-                border: 1px solid #e1e4e8;
-                border-radius: 8px;
-                background-color: white;
-                margin-top: 5px;
-            }
-            QTabBar::tab {
-                font-size: 14px;
-                font-family: 'Microsoft YaHei', 'SimHei';
-                padding: 8px 16px;
-                margin-right: 3px;
-                min-width: 50px;
-                height: 15px;
-                border-radius: 8px 8px 0 0;
-                background-color: #e9ecef;
-                color: #495057;
-            }
-            QTabBar::tab:selected {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                                          stop:0 #4dabf7, stop:1 #339af0);
-                color: white;
-                border: 1px solid #339af0;
-                border-bottom: none;
-            }
-            QTabBar::tab:hover:!selected {
-                background-color: #dee2e6;
-                color: #212529;
-            }
-        """)
+        notebook = ttk.Notebook(self.root)
+        notebook.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
 
         # 数学标签页
-        self.math_tab = ShuxueTabWidget()
-        self.tab_bar.addTab(self.math_tab, "数学")
+        self.math_tab = ShuxueTabWidget(notebook)
+        notebook.add(self.math_tab.frame, text="  数学  ")
 
         # 字帖标签页
-        self.zitie_tab = ZiTieTabWidget()
-        self.tab_bar.addTab(self.zitie_tab, "字帖")
+        self.zitie_tab = ZiTieTabWidget(notebook)
+        notebook.add(self.zitie_tab.frame, text="  字帖  ")
 
         # 作文标签页
-        self.zuowen_tab = ZuowenTabWidget()
-        self.tab_bar.addTab(self.zuowen_tab, "作文")
+        self.zuowen_tab = ZuowenTabWidget(notebook)
+        notebook.add(self.zuowen_tab.frame, text="  作文  ")
 
         # 真题下载标签页
-        self.zhenti_tab = ZhentiTabWidget()
-        self.tab_bar.addTab(self.zhenti_tab, "真题下载")
+        self.zhenti_tab = ZhentiTabWidget(notebook)
+        notebook.add(self.zhenti_tab.frame, text="  真题下载  ")
 
-        main_layout.addWidget(self.tab_bar)
+    def run(self):
+        self.root.mainloop()
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MathGeneratorUI()
-    window.show()
-    sys.exit(app.exec_())
+    app = MathGeneratorApp()
+    app.run()

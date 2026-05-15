@@ -1,50 +1,47 @@
-# zuowen_ui.py
-from PyQt5.QtWidgets import (QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QGridLayout,
-                             QComboBox, QListWidget, QLineEdit, QTextEdit,
-                             QPushButton, QLabel, QFrame)
-from PyQt5.QtCore import Qt, QSize
+# zuowen_ui.py — 作文标签页 (tkinter 版，保留原版布局)
+import tkinter as tk
+from tkinter import ttk
+from widgets import GradientButton
 
-# 统一类名：ZuowenTabWidget，和你math_ui里的导入名完全一致
-class ZuowenTabWidget(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.init_ui()
+BG = "#f0f0f0"
+MODERN_BTN = dict(bg="#2563eb", fg="white", font=("Microsoft YaHei", 10, "bold"),
+                   bd=0, relief="flat", activebackground="#1d4ed8",
+                   activeforeground="white", width=10, height=1,
+                   cursor="hand2")
 
-    def init_ui(self):
-        # 作文标签页主布局（完全还原你截图的容器位置，不做任何修改）
-        main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(8, 8, 8, 8)
-        main_layout.setSpacing(6)
 
-        # 1. 课本作文 + 自由作文 容器（无外框）
-        group1 = QWidget()
-        group1_layout = QHBoxLayout(group1)
-        group1_layout.setContentsMargins(0, 0, 0, 0)
-        group1_layout.setSpacing(15)
+class ZuowenTabWidget:
+    def __init__(self, parent):
+        self.frame = tk.Frame(parent, bg=BG)
+        self._init_ui()
 
-        # 1.1 课本作文区域
-        textbook_group = QGroupBox("课本作文")
-        textbook_outer = QHBoxLayout(textbook_group)
-        textbook_outer.setContentsMargins(6, 6, 6, 6)
-        textbook_outer.setSpacing(8)
+    def _init_ui(self):
+        main_layout = tk.Frame(self.frame, bg=BG)
+        main_layout.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
 
-        # 左侧：年级下拉 + 单元列表
-        left_widget = QWidget()
-        textbook_layout = QVBoxLayout(left_widget)
-        textbook_layout.setContentsMargins(0, 0, 0, 0)
-        textbook_layout.setSpacing(5)
+        # ========== 顶部：课本作文 + 自由作文 ==========
+        top_frame = tk.Frame(main_layout, bg=BG)
+        top_frame.pack(fill=tk.X)
 
-        # 年级下拉框（限宽）
-        self.grade_combo = QComboBox()
-        self.grade_combo.setMaximumWidth(100)
-        grade_list = [
-            "一年级", "二年级", "三年级", "四年级", "五年级", "六年级",
-            "七年级", "八年级", "九年级"
-        ]
-        self.grade_combo.addItems(grade_list)
-        textbook_layout.addWidget(self.grade_combo)
+        # 1.1 课本作文
+        textbook_group = ttk.LabelFrame(top_frame, text="课本作文")
+        textbook_group.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
 
-        # 统编版1-9年级单元作文题目
+        textbook_inner = tk.Frame(textbook_group, bg=BG)
+        textbook_inner.pack(fill=tk.BOTH, expand=True, padx=6, pady=6)
+
+        # 左侧：年级 + 单元列表
+        left_frame = tk.Frame(textbook_inner, bg=BG)
+        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        self.grade_combo = ttk.Combobox(left_frame, width=8, state="readonly",
+                                         values=["一年级", "二年级", "三年级",
+                                                 "四年级", "五年级", "六年级",
+                                                 "七年级", "八年级", "九年级"])
+        self.grade_combo.current(0)
+        self.grade_combo.pack(fill=tk.X, pady=(0, 4))
+        self.grade_combo.bind("<<ComboboxSelected>>", lambda e: self._on_grade_changed())
+
         self.unit_zuowen_titles = {
             "一年级": [
                 "第一单元：我说我做",
@@ -138,7 +135,6 @@ class ZuowenTabWidget(QWidget):
             ]
         }
 
-        # 各单元对应作文要求
         self.unit_zuowen_requires = {
             "一年级": [
                 "用简单的话说说自己会做什么，语句通顺，表达清楚。",
@@ -232,183 +228,105 @@ class ZuowenTabWidget(QWidget):
             ]
         }
 
-        # 单元列表
-        self.unit_list = QListWidget()
-        self.unit_list.addItems(self.unit_zuowen_titles["一年级"])
-        # 年级切换自动更新单元题目并清空作文要求
-        self.grade_combo.currentTextChanged.connect(self._on_grade_changed)
-        textbook_layout.addWidget(self.unit_list)
-        textbook_outer.addWidget(left_widget, stretch=1)
+        self.unit_list = tk.Listbox(left_frame, height=8, font=("Microsoft YaHei", 10))
+        self.unit_list.pack(fill=tk.BOTH, expand=True)
+        self.unit_list.insert(0, *self.unit_zuowen_titles["一年级"])
+        self.unit_list.bind("<<ListboxSelect>>", lambda e: self._on_unit_selected())
 
-        # 右侧：作文要求显示区
-        right_widget = QWidget()
-        right_layout = QVBoxLayout(right_widget)
-        right_layout.setContentsMargins(0, 0, 0, 0)
-        right_layout.setSpacing(3)
-        right_layout.addWidget(QLabel("作文要求"))
-        self.unit_require_edit = QTextEdit()
-        self.unit_require_edit.setReadOnly(True)
-        self.unit_require_edit.setPlaceholderText("选择左侧单元题目后显示作文要求…")
-        right_layout.addWidget(self.unit_require_edit)
-        textbook_outer.addWidget(right_widget, stretch=1)
+        # 右侧：作文要求
+        right_frame = tk.Frame(textbook_inner, bg=BG)
+        right_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(5, 0))
 
-        # 单元选中联动作文要求
-        self.unit_list.currentRowChanged.connect(self._on_unit_selected)
+        tk.Label(right_frame, text="作文要求", font=("Microsoft YaHei", 10)).pack(anchor="w")
+        self.unit_require_text = tk.Text(right_frame, bg=BG, height=6, wrap=tk.WORD, state="disabled",
+                                          font=("Microsoft YaHei", 10))
+        self.unit_require_text.pack(fill=tk.BOTH, expand=True)
 
-        group1_layout.addWidget(textbook_group, stretch=3)
+        # 1.2 自由作文
+        free_group = ttk.LabelFrame(top_frame, text="自由作文")
+        free_group.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(5, 0))
 
-        # 1.2 自由作文区域
-        free_group = QGroupBox("自由作文")
-        free_layout = QGridLayout(free_group)
-        free_layout.setContentsMargins(6, 4, 6, 4)
-        free_layout.setSpacing(3)
+        free_inner = tk.Frame(free_group, bg=BG)
+        free_inner.pack(fill=tk.BOTH, expand=True, padx=6, pady=6)
 
-        # 作文类型
-        free_layout.addWidget(QLabel("作文类型"), 0, 0)
-        self.type_combo = QComboBox()
-        self.type_combo.addItems(["续写", "命题作文", "半命题作文", "话题作文", "材料作文"])
-        free_layout.addWidget(self.type_combo, 0, 1)
+        row0 = tk.Frame(free_inner, bg=BG)
+        row0.pack(fill=tk.X, pady=2)
+        tk.Label(row0, text="作文类型", font=("Microsoft YaHei", 10)).pack(side=tk.LEFT)
+        self.type_combo = ttk.Combobox(row0, width=12, state="readonly",
+                                        values=["续写", "命题作文", "半命题作文",
+                                                "话题作文", "材料作文"])
+        self.type_combo.current(0)
+        self.type_combo.pack(side=tk.LEFT, padx=(5, 0))
 
-        # 作文题目
-        free_layout.addWidget(QLabel("作文题目"), 1, 0)
-        self.title_edit = QLineEdit()
-        free_layout.addWidget(self.title_edit, 1, 1)
+        row1 = tk.Frame(free_inner, bg=BG)
+        row1.pack(fill=tk.X, pady=2)
+        tk.Label(row1, text="作文题目", font=("Microsoft YaHei", 10)).pack(side=tk.LEFT)
+        self.title_edit = tk.Entry(row1, font=("Microsoft YaHei", 10))
+        self.title_edit.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 0))
 
-        # 作文要求
-        free_layout.addWidget(QLabel("作文要求"), 2, 0)
-        self.require_edit = QTextEdit()
-        self.require_edit.setFixedHeight(60)
-        free_layout.addWidget(self.require_edit, 2, 0, 1, 2)
-        group1_layout.addWidget(free_group, stretch=2)
-        main_layout.addWidget(group1)
+        tk.Label(free_inner, text="作文要求", font=("Microsoft YaHei", 10)).pack(anchor="w", pady=(4, 0))
+        self.require_text = tk.Text(free_inner, bg=BG, height=4, wrap=tk.WORD,
+                                     font=("Microsoft YaHei", 10))
+        self.require_text.pack(fill=tk.X)
 
-        # 2. 搜索区域
-        search_group = QGroupBox()
-        search_layout = QHBoxLayout(search_group)
-        search_layout.setContentsMargins(6, 6, 6, 6)
-        search_layout.setSpacing(5)
-        self.search_edit = QLineEdit()
-        self.search_edit.setPlaceholderText("搜索")
-        search_layout.addWidget(self.search_edit)
-        self.search_btn = QPushButton("搜索")
-        self.search_btn.setFixedSize(QSize(80, 32))
-        self.search_btn.setStyleSheet("""
-            QPushButton {
-                font-size: 14px;
-                background-color: #4dabf7;
-                color: white;
-                border: none;
-                border-radius: 5px;
-            }
-            QPushButton:hover {
-                background-color: #339af0;
-            }
-            QPushButton:disabled {
-                background-color: #adb5bd;
-            }
-        """)
-        search_layout.addWidget(self.search_btn)
-        main_layout.addWidget(search_group)
+        # ========== 搜索区域 ==========
+        search_frame = tk.Frame(main_layout, bg=BG)
+        search_frame.pack(fill=tk.X, pady=(5, 0))
 
-        # 3. 例文区域（方框显示，完全按要求）
-        example_group = QGroupBox("例文")
-        example_layout = QVBoxLayout(example_group)
-        example_layout.setContentsMargins(6, 6, 6, 6)
-        # 外层方框
-        self.example_frame = QFrame()
-        self.example_frame.setFrameShape(QFrame.Box)
-        self.example_frame.setFrameShadow(QFrame.Plain)
-        self.example_frame.setLineWidth(1)
-        self.example_frame.setFixedHeight(300)
-        # 内部编辑框（方格纸样式）
-        self.example_edit = QTextEdit(self.example_frame)
-        self.example_edit.setFrameStyle(QFrame.NoFrame)
-        self.example_edit.setStyleSheet("""
-            QTextEdit {
-                background-color: #ffffff;
-                background-image:
-                    repeating-linear-gradient(
-                        to bottom,
-                        transparent 0px,
-                        transparent 27px,
-                        #c8c8c8 27px,
-                        #c8c8c8 28px
-                    ),
-                    repeating-linear-gradient(
-                        to right,
-                        transparent 0px,
-                        transparent 27px,
-                        #c8c8c8 27px,
-                        #c8c8c8 28px
-                    );
-                background-position: left top;
-                font-size: 14px;
-                line-height: 28px;
-                padding: 2px 2px 2px 2px;
-            }
-        """)
-        # 填充布局
-        frame_layout = QVBoxLayout(self.example_frame)
-        frame_layout.setContentsMargins(3, 3, 3, 3)
-        frame_layout.addWidget(self.example_edit)
-        example_layout.addWidget(self.example_frame)
-        main_layout.addWidget(example_group)
+        self.search_edit = tk.Entry(search_frame, font=("Microsoft YaHei", 10))
+        self.search_edit.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
-        # 4. 功能按钮区域
-        func_group = QGroupBox("功能")
-        func_layout = QHBoxLayout(func_group)
-        func_layout.setContentsMargins(6, 4, 6, 4)
-        func_layout.setSpacing(6)
-        func_layout.addStretch()
-        
-        btn_style = """
-            QPushButton {
-                font-size: 14px;
-                background-color: #4dabf7;
-                color: white;
-                border: none;
-                border-radius: 5px;
-            }
-            QPushButton:hover {
-                background-color: #339af0;
-            }
-            QPushButton:disabled {
-                background-color: #adb5bd;
-            }
-        """
-        
-        self.clear_btn = QPushButton("清空例文")
-        self.clear_btn.setFixedSize(QSize(80, 32))
-        self.clear_btn.setStyleSheet(btn_style)
-        
-        self.export_word_btn = QPushButton("导出Word")
-        self.export_word_btn.setFixedSize(QSize(100, 32))
-        self.export_word_btn.setStyleSheet(btn_style)
-        
-        self.export_pdf_btn = QPushButton("导出PDF")
-        self.export_pdf_btn.setFixedSize(QSize(100, 32))
-        self.export_pdf_btn.setStyleSheet(btn_style)
-        
-        func_layout.addWidget(self.clear_btn)
-        func_layout.addWidget(self.export_word_btn)
-        func_layout.addWidget(self.export_pdf_btn)
-        func_layout.addStretch()
-        main_layout.addWidget(func_group)
+        self.search_btn = tk.Button(search_frame, text="搜索", width=6)
+        self.search_btn.pack(side=tk.LEFT, padx=(5, 0))
 
-    # ── 槽函数 ──────────────────────────────────────────
-    def _on_grade_changed(self, grade):
-        """年级切换：更新单元列表，并清空作文要求"""
-        self.unit_list.clear()
-        self.unit_list.addItems(self.unit_zuowen_titles[grade])
-        self.unit_require_edit.clear()
+        # ========== 例文区域 ==========
+        example_group = ttk.LabelFrame(main_layout, text="例文")
+        example_group.pack(fill=tk.BOTH, expand=True, pady=(5, 0))
 
-    def _on_unit_selected(self, row):
-        """单元选中：在右侧显示对应作文要求"""
-        if row < 0:
+        example_frame = tk.Frame(example_group, bg=BG, relief=tk.SUNKEN, bd=1)
+        example_frame.pack(fill=tk.BOTH, expand=True, padx=6, pady=6)
+
+        example_scroll = tk.Scrollbar(example_frame)
+        example_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        self.example_text = tk.Text(example_frame, bg="white", wrap=tk.WORD, height=8,
+                                     yscrollcommand=example_scroll.set,
+                                     font=("Microsoft YaHei", 11))
+        self.example_text.pack(fill=tk.BOTH, expand=True)
+        example_scroll.config(command=self.example_text.yview)
+
+        # ========== 功能区 ==========
+        func_group = ttk.LabelFrame(main_layout, text="功能区")
+        func_group.pack(fill=tk.X, pady=(5, 0))
+        func_inner = tk.Frame(func_group, bg=BG)
+        func_inner.pack(padx=5, pady=3)
+
+        self.clear_btn = GradientButton(func_inner, text="清空例文", width=100, height=32)
+        self.export_word_btn = GradientButton(func_inner, text="导出Word", width=100, height=32)
+        self.export_pdf_btn = GradientButton(func_inner, text="导出PDF", width=100, height=32)
+
+        func_inner.columnconfigure(0, weight=1)
+        func_inner.columnconfigure(4, weight=1)
+        self.clear_btn.grid(row=0, column=1, padx=3)
+        self.export_word_btn.grid(row=0, column=2, padx=3)
+        self.export_pdf_btn.grid(row=0, column=3, padx=3)
+
+    def _on_grade_changed(self):
+        grade = self.grade_combo.get()
+        self.unit_list.delete(0, tk.END)
+        self.unit_list.insert(0, *self.unit_zuowen_titles[grade])
+        self.unit_require_text.config(state="normal")
+        self.unit_require_text.delete("1.0", tk.END)
+        self.unit_require_text.config(state="disabled")
+
+    def _on_unit_selected(self):
+        sel = self.unit_list.curselection()
+        if not sel:
             return
-        grade = self.grade_combo.currentText()
+        row = sel[0]
+        grade = self.grade_combo.get()
         requires = self.unit_zuowen_requires.get(grade, [])
+        self.unit_require_text.config(state="normal")
+        self.unit_require_text.delete("1.0", tk.END)
         if row < len(requires):
-            self.unit_require_edit.setPlainText(requires[row])
-        else:
-            self.unit_require_edit.clear()
+            self.unit_require_text.insert("1.0", requires[row])
+        self.unit_require_text.config(state="disabled")

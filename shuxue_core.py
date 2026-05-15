@@ -491,6 +491,7 @@ class MathProblemGenerator:
         - 运算符随机（+、-、×、÷），位置随机
         - 不勾选括号时无括号；勾选括号时随机加一对括号
         - 结果非负且在 9999 以内
+        - 使用标准运算优先级（先乘除后加减）
         """
         for _ in range(500):
             try:
@@ -499,36 +500,21 @@ class MathProblemGenerator:
                 # 三个运算符
                 ops = [random.choice(['+', '-', '×', '÷']) for _ in range(3)]
 
-                # 根据是否使用括号构建表达式
+                # 构建表达式字符串
                 if use_bracket and random.random() < 0.4:
-                    # 有括号：随机选择括号位置（相邻两个数）
-                    bracket_pos = random.randint(0, 2)  # 0 表示括号在前两个数，1 中间两个，2 后两个
+                    bracket_pos = random.randint(0, 2)
                     if bracket_pos == 0:
                         expr = f"({nums[0]} {ops[0]} {nums[1]}) {ops[1]} {nums[2]} {ops[2]} {nums[3]} ="
-                        temp = self._calc(nums[0], ops[0], nums[1])
-                        temp = self._calc(temp, ops[1], nums[2])
-                        ans = self._calc(temp, ops[2], nums[3])
                     elif bracket_pos == 1:
                         expr = f"{nums[0]} {ops[0]} ({nums[1]} {ops[1]} {nums[2]}) {ops[2]} {nums[3]} ="
-                        temp = self._calc(nums[1], ops[1], nums[2])
-                        temp = self._calc(nums[0], ops[0], temp)
-                        ans = self._calc(temp, ops[2], nums[3])
                     else:
                         expr = f"{nums[0]} {ops[0]} {nums[1]} {ops[1]} ({nums[2]} {ops[2]} {nums[3]}) ="
-                        temp = self._calc(nums[2], ops[2], nums[3])
-                        temp = self._calc(nums[0], ops[0], nums[1])
-                        ans = self._calc(temp, ops[1], temp)  # 注意顺序：左结合后与括号结果运算
-                        # 修正：应按标准顺序，先算左边两个数，再与括号结果运算
-                        # 这里简化处理，直接按左结合计算左边两数，再与括号结果运算
-                        left_temp = self._calc(nums[0], ops[0], nums[1])
-                        ans = self._calc(left_temp, ops[1], temp)
-                        expr = f"{nums[0]} {ops[0]} {nums[1]} {ops[1]} ({nums[2]} {ops[2]} {nums[3]}) ="
                 else:
-                    # 无括号：按从左到右顺序计算
                     expr = f"{nums[0]} {ops[0]} {nums[1]} {ops[1]} {nums[2]} {ops[2]} {nums[3]} ="
-                    temp = self._calc(nums[0], ops[0], nums[1])
-                    temp = self._calc(temp, ops[1], nums[2])
-                    ans = self._calc(temp, ops[2], nums[3])
+
+                # 使用 Python eval 计算答案（标准运算优先级）
+                eval_str = expr.rstrip(' =').replace('×', '*').replace('÷', '/')
+                ans = eval(eval_str)
 
                 # 结果检查
                 if ans is None or ans < 0 or ans > 9999:
@@ -541,6 +527,7 @@ class MathProblemGenerator:
                     ans = float(ans)
                     if ans > 9999 or ans < 0:
                         continue
+                    ans = round(ans, 2)
                     ans = round(ans, 2)
 
                 return expr, ans
