@@ -162,12 +162,24 @@ def _register_fonts():
         except Exception:
             pass
 
+    # 显式注册拼音自定义字体
+    for pn in ['pinyin-me']:
+        pn_path = os.path.join(fonts_dir, pn + '.ttf')
+        if os.path.exists(pn_path):
+            try:
+                pdfmetrics.registerFont(TTFont(pn, pn_path))
+            except Exception:
+                pass
+
     for filename in os.listdir(fonts_dir):
         if filename.lower().endswith('.ttf') or filename.lower().endswith('.ttc') or filename.lower().endswith('.otf'):
             font_path = os.path.join(fonts_dir, filename)
             font_name = os.path.splitext(filename)[0]
             try:
-                pdfmetrics.registerFont(TTFont(font_name, font_path))
+                if filename.lower().endswith('.ttc'):
+                    pdfmetrics.registerFont(TTFont(font_name, font_path, subfontIndex=0))
+                else:
+                    pdfmetrics.registerFont(TTFont(font_name, font_path))
             except Exception:
                 pass
 
@@ -545,6 +557,7 @@ class ZitieGenerator:
         grid_type = self.config.grid_type
         words = self.config.chars
         font_name = self.config.font_name
+        pinyin_font = "pinyin-me"
         hanzi_type = self.config.char_type
         content_type = self.config.content_type
         
@@ -605,6 +618,7 @@ class ZitieGenerator:
             is_guoxue_mode = content_type in ("千字文", "道德经", "三字经", "弟子规", "百家姓")
             is_shuzi_mode = content_type == "数字" and not is_dakai_mode
             is_pinyin_mode = content_type == "拼音" and not is_dakai_mode
+            is_dai_pinyin_mode = hanzi_type.startswith("带拼音") and not is_dakai_mode
             
             if is_dakai_mode:
                 if is_wenyan_mode:
@@ -708,6 +722,18 @@ class ZitieGenerator:
                     else:
                         expanded_words.append(item)
 
+            elif is_dai_pinyin_mode:
+                from pypinyin import pinyin, Style
+                lines = words.replace('\r\n', '\n').split('\n')
+                processed_words = []
+                for line in lines:
+                    line = line.strip()
+                    if line:
+                        for char in line:
+                            if char.strip():
+                                py = pinyin(char, style=Style.TONE)
+                                syllable = py[0][0] if py and py[0] else ''
+                                processed_words.append({'char': char, 'pinyin': syllable})
             elif is_multi_char_mode and is_single_char_mode:
                 lines = words.replace('\r\n', '\n').split('\n')
                 chars_list = []
@@ -821,6 +847,12 @@ class ZitieGenerator:
                 chars_per_page = cols * rows_per_page
                 total_chars = len(processed_words)
                 total_pages = (total_chars + chars_per_page - 1) // chars_per_page
+            elif is_dai_pinyin_mode:
+                total_chars = len(processed_words)
+                if enable_empty_line:
+                    total_pages = (total_chars * 2 + rows_per_page - 1) // rows_per_page
+                else:
+                    total_pages = (total_chars + rows_per_page - 1) // rows_per_page
             elif is_multi_char_mode and is_single_char_mode:
                 if enable_empty_line:
                     total_pages = (len(processed_words) * 2 + rows_per_page - 1) // rows_per_page
@@ -1300,28 +1332,98 @@ class ZitieGenerator:
                             
                             current_item = processed_words[idx]
                             draw_char(c, x_pos, y_pos, current_item, font_name, font_size, is_huizi_mode)
-                    elif is_multi_char_mode and is_single_char_mode:
+                    elif is_dai_pinyin_mode:
                         page_start_line = (current_page - 1) * rows_per_page
-                        page_end_line = min(page_start_line + rows_per_page, 
+                        page_end_line = min(page_start_line + rows_per_page,
                                          len(processed_words) * 2 if enable_empty_line else len(processed_words))
-                        
+                        four_line_h = 10 * mm
+                        pinyin_font_size = font_size * 0.45
                         for page_line in range(page_start_line, page_end_line):
                             is_content_line = True
                             item_index = page_line
-                            
                             if enable_empty_line:
                                 is_content_line = (page_line % 2) == 0
                                 item_index = page_line // 2
-                            
                             if item_index >= len(processed_words):
                                 continue
-                            
                             if not is_content_line:
                                 continue
-                            
+                            row = page_line % rows_per_page
+                            item = processed_words[item_index]
+                            x_pos = start_x + 0 * cell_width + cell_width / 2 + offset["dx"]
+                            # 汉字：下方田字框
+                            y_hanzi = start_y - row * (cell_height + row_spacing) - cell_height / 2 - 11 + offset["dy"]
+                            draw_char(c, x_pos, y_hanzi, item['char'], font_name, font_size, is_huizi_mode)
+                            # 拼音：上方四线三格
+                            y_pinyin = start_y - row * (cell_height + row_spacing) - four_line_h * 2 / 3 + 0.6 * mm
+                            # 拆分基础拼音和声调符号
+                            tone_map = {0x0304: '1', 0x0301: '2', 0x030C: '3', 0x0300: '4'}
+                            py_text = item['pinyin']
+                            base_py = ''
+                            tone_char = ''
+                            for ch in py_text:
+                                cp = ord(ch)
+                                if cp in tone_map:
+                                    tone_char = ch
+                                else:
+                                    base_py += ch
+                            y_tone = y_pinyin + 0.6 * mm
+                            t_sy = 1.3
+                            from reportlab.pdfbase.pdfmetrics import stringWidth
+                            def _draw_pinyin_text(c, text, x_center, y, font, size, color):
+                                c.setFont(font, size)
+                                c.setFillColor(color)
+                                c.drawCentredString(x_center, y, text)
+                                if 't' not in text:
+                                    return
+                                parts = text.split('t', 1)
+                                w_left = stringWidth(parts[0], font, size) if parts[0] else 0
+                                w_t = stringWidth('t', font, size)
+                                total_w = stringWidth(text, font, size)
+                                x0 = x_center - total_w / 2
+                                tx = x0 + w_left + w_t / 2
+                                c.saveState()
+                                c.transform(1, 0, 0, t_sy, tx, y * (1 - t_sy))
+                                c.setFont(font, size)
+                                c.setFillColor(color)
+                                c.drawCentredString(0, 0, 't')
+                                c.restoreState()
+                            if is_huizi_mode:
+                                c.saveState()
+                                c.setFillColor(HexColor("#CCCCCC"))
+                                c.setDash([2, 2])
+                                _draw_pinyin_text(c, base_py, x_pos, y_pinyin, pinyin_font, pinyin_font_size, HexColor("#CCCCCC"))
+                                if tone_char:
+                                    c.drawCentredString(x_pos, y_tone, tone_char)
+                                c.restoreState()
+                            else:
+                                _draw_pinyin_text(c, base_py, x_pos, y_pinyin, pinyin_font, pinyin_font_size, black)
+                                if tone_char:
+                                    c.setFont(pinyin_font, pinyin_font_size)
+                                    c.setFillColor(black)
+                                    c.drawCentredString(x_pos, y_tone, tone_char)
+                    elif is_multi_char_mode and is_single_char_mode:
+                        page_start_line = (current_page - 1) * rows_per_page
+                        page_end_line = min(page_start_line + rows_per_page,
+                                         len(processed_words) * 2 if enable_empty_line else len(processed_words))
+
+                        for page_line in range(page_start_line, page_end_line):
+                            is_content_line = True
+                            item_index = page_line
+
+                            if enable_empty_line:
+                                is_content_line = (page_line % 2) == 0
+                                item_index = page_line // 2
+
+                            if item_index >= len(processed_words):
+                                continue
+
+                            if not is_content_line:
+                                continue
+
                             row = page_line % rows_per_page
                             y_pos = start_y - row * (cell_height + row_spacing) - cell_height / 2 - 11 + offset["dy"]
-                            
+
                             current_item = processed_words[item_index]
                             chars = list(current_item)
                             num_chars = len(chars)
@@ -1522,17 +1624,17 @@ class ZitieGenerator:
                                         draw_char(c, x_pos, y_pos, current_item, font_name, font_size, is_huizi_mode)
                                     elif is_pinyin_mode:
                                         # 拼音：每个拼音占一格，左对齐显示，字体稍小，位置下移
-                                        x_pos = start_x + offset["dx"]
-                                        y_pos = start_y - row * (cell_height + row_spacing) - cell_height / 2 -10 + offset["dy"]
+                                        x_pos = start_x + offset["dx"] + 1 * mm
+                                        y_pos = start_y - row * (cell_height + row_spacing) - cell_height / 2 -10 + offset["dy"] + 0.3 * mm
                                         if is_huizi_mode:
                                             c.saveState()
                                             c.setFillColor(HexColor("#CCCCCC"))
                                             c.setDash([2, 2])
-                                            c.setFont(font_name, font_size * 0.85)
+                                            c.setFont(pinyin_font, font_size * 0.68)
                                             c.drawString(x_pos, y_pos, current_item)
                                             c.restoreState()
                                         else:
-                                            c.setFont(font_name, font_size * 0.85)
+                                            c.setFont(pinyin_font, font_size * 0.68)
                                             c.setFillColor(black)
                                             c.drawString(x_pos, y_pos, current_item)
                                     else:

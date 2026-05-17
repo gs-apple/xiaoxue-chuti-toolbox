@@ -263,39 +263,37 @@ class ZiTieTabWidget:
         type_inner = tk.Frame(type_group, bg=BG)
         type_inner.pack(fill=tk.X, padx=5, pady=3)
 
-        row_a = tk.Frame(type_inner, bg=BG)
-        row_a.pack(fill=tk.X, pady=1)
+        type_grid = tk.Frame(type_inner, bg=BG)
+        type_grid.pack(fill=tk.X, pady=1)
+
         self._huizi_var = tk.IntVar()
-        self.cb_huizi = tk.Checkbutton(row_a, text="灰字",
+        self.cb_huizi = tk.Checkbutton(type_grid, text="灰字",
                                         variable=self._huizi_var,
                                         font=("Microsoft YaHei", 10))
-        self.cb_huizi.pack(side=tk.LEFT)
+        self.cb_huizi.grid(row=0, column=0, sticky="w")
 
-        self._type_var = tk.StringVar(value="duozi")
-        type_opts_a = [("单字", "duozi"), ("笔顺", "bishun"),
-                        ("多句", "duoju"), ("文章", "wenzhang")]
-        for text, val in type_opts_a:
-            rb = tk.Radiobutton(row_a, text=text, variable=self._type_var, value=val,
-                                 command=self._on_type_changed,
-                                 font=("Microsoft YaHei", 10))
-            rb.pack(side=tk.LEFT)
-
-        row_b = tk.Frame(type_inner, bg=BG)
-        row_b.pack(fill=tk.X, pady=1)
         self._miaohong_var = tk.IntVar()
-        self.cb_miaohong = tk.Checkbutton(row_b, text="描红",
+        self.cb_miaohong = tk.Checkbutton(type_grid, text="描红",
                                            variable=self._miaohong_var,
                                            state="disabled",
                                            font=("Microsoft YaHei", 10))
-        self.cb_miaohong.pack(side=tk.LEFT)
+        self.cb_miaohong.grid(row=1, column=0, sticky="w")
 
+        self._type_var = tk.StringVar(value="duozi")
+        type_opts_a = [("单字", "duozi"), ("笔顺", "bishun"),
+                        ("带拼音", "duoju"), ("文章", "wenzhang")]
         type_opts_b = [("单字+1行", "duozi1"), ("笔顺+1行", "bishun1"),
-                        ("多句+1行", "duoju1"), ("文章+1行", "wenzhang1")]
-        for text, val in type_opts_b:
-            rb = tk.Radiobutton(row_b, text=text, variable=self._type_var, value=val,
-                                 command=self._on_type_changed,
-                                 font=("Microsoft YaHei", 10))
-            rb.pack(side=tk.LEFT)
+                        ("带拼音+1行", "duoju1"), ("文章+1行", "wenzhang1")]
+        for i, ((text_a, val_a), (text_b, val_b)) in enumerate(zip(type_opts_a, type_opts_b)):
+            col = i + 1
+            rb_a = tk.Radiobutton(type_grid, text=text_a, variable=self._type_var, value=val_a,
+                                   command=self._on_type_changed,
+                                   font=("Microsoft YaHei", 10))
+            rb_a.grid(row=0, column=col, sticky="w")
+            rb_b = tk.Radiobutton(type_grid, text=text_b, variable=self._type_var, value=val_b,
+                                   command=self._on_type_changed,
+                                   font=("Microsoft YaHei", 10))
+            rb_b.grid(row=1, column=col, sticky="w")
 
         # ========== 功能区 ==========
         func_group = ttk.LabelFrame(main_layout, text="功能区")
@@ -392,6 +390,13 @@ class ZiTieTabWidget:
                 self._style_rbs[i].config(state="disabled")
             if self._style_var.get() in [3, 4, 5, 6, 7, 8]:
                 self._style_var.set(0)
+            return
+
+        if type_val in ("duoju", "duoju1"):
+            for i, rb in enumerate(self._style_rbs):
+                rb.config(state="disabled")
+            self._style_rbs[4].config(state="normal")
+            self._style_var.set(4)
             return
 
         content = self.text_content.get("1.0", tk.END).strip()
@@ -557,8 +562,8 @@ class ZiTieTabWidget:
 
         type_val = self._type_var.get()
         base_map = {
-            "duozi": "单字", "bishun": "笔顺", "duoju": "多句", "wenzhang": "文章",
-            "duozi1": "单字+1行", "bishun1": "笔顺+1行", "duoju1": "多句+1行", "wenzhang1": "文章+1行"
+            "duozi": "单字", "bishun": "笔顺", "duoju": "带拼音", "wenzhang": "文章",
+            "duozi1": "单字+1行", "bishun1": "笔顺+1行", "duoju1": "带拼音+1行", "wenzhang1": "文章+1行"
         }
         base_type = base_map.get(type_val, "单字")
 
@@ -659,7 +664,7 @@ class ZiTieTabWidget:
 
     def get_font_name(self):
         if self._content_var.get() == "pinyin_text":
-            return "GB PINYINOK-B_A"
+            return "方正楷体拼音字库"
         font_val = self._font_var.get()
         if font_val == 0:
             return "楷体_GB2312"
