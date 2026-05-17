@@ -21,9 +21,35 @@ def _frac_to_text(s):
 
 
 class ShuxueTabWidget:
+    # display text → generator map key
+    _ATTR_MAP = {
+        "10以内": "cb_10in", "20以内": "cb_20in", "100以内": "cb_100in",
+        "万以内": "cb_10000in", "小数加减": "cb_dec_addsub", "分数加减": "cb_frac_addsub",
+        "表内乘法": "cb_mul_table", "两位×一位": "cb_mul_2x1", "三位×一位": "cb_mul_3x1",
+        "两位×两位": "cb_mul_2x2", "三位×两位": "cb_mul_3x2",
+        "小数乘法": "cb_mul_dec", "分数乘法": "cb_mul_frac", "乘法简便运算": "cb_mul_simple",
+        "表内除法": "cb_div_table", "带余数除法": "cb_div_remain", "整除": "cb_div_int",
+        "除数是一位数": "cb_div_1digit", "除数是两位数": "cb_div_2digit",
+        "小数除法": "cb_div_dec", "分数除法": "cb_div_frac",
+        "连加连减": "cb_mix_addsub", "加减乘": "cb_mix_addmul",
+        "加减乘除": "cb_mix_addmulsub", "小数混合": "cb_mix_dec", "分数混合": "cb_mix_frac",
+        "找规律填数": "cb_find_rule", "等差数列": "cb_arithmetic", "简便运算": "cb_simple_calc",
+        "分数巧算": "cb_frac_skill", "定义新运算": "cb_new_op",
+        "和差倍": "cb_sum_diff", "年龄问题": "cb_age", "植树问题": "cb_tree",
+        "鸡兔同笼": "cb_chicken_rabbit", "盈亏问题": "cb_duck",
+        "工程问题": "cb_project", "行程问题": "cb_form", "浓度问题": "cb_concentration",
+        "图形计数": "cb_graph_count", "图形分割": "cb_graph_split",
+        "周长面积": "cb_perimeter", "立体图形": "cb_3d_graph", "等积变形": "cb_equal_area",
+        "奇偶分析": "cb_odd_even", "整除问题": "cb_whole_div", "余数问题": "cb_remainder",
+        "质/合问题": "cb_prime", "公约数/倍数": "cb_gcd_lcm",
+        "推理问题": "cb_logic", "统筹问题": "cb_arrange", "最优化": "cb_best",
+        "抽屉问题": "cb_draw", "容斥问题": "cb_container",
+    }
+
     def __init__(self, parent):
         self.frame = tk.Frame(parent, bg=BG)
         self._questions_data = None
+        self._is_onekey = False
         self._gen_thread = None
         self._queue = queue.Queue()
         self._checkboxes = []
@@ -200,7 +226,7 @@ class ShuxueTabWidget:
         e = tk.Entry(f, width=4, justify="center", highlightthickness=0)
         e.insert(0, "20")
         e.pack(side=tk.RIGHT)
-        attr = "cb_" + text.replace("/", "_").replace("×", "x").replace(" ", "_")
+        attr = self._ATTR_MAP.get(text, text)
         self._checkboxes.append((var, e, attr))
         return f
 
@@ -225,6 +251,7 @@ class ShuxueTabWidget:
         return selections
 
     def do_generate(self):
+        self._is_onekey = False
         selections = self._get_selections()
         if not selections:
             self.preview_text.delete("1.0", tk.END)
@@ -243,6 +270,7 @@ class ShuxueTabWidget:
         self._poll_queue()
 
     def do_onekey(self):
+        self._is_onekey = True
         grade = self.grade_combo.get()
         try:
             count = int(self.quick_count_edit.get())
@@ -292,9 +320,17 @@ class ShuxueTabWidget:
 
         if basic_qs:
             lines.append("【基础题】")
-            for idx, item in enumerate(basic_qs, 1):
-                q = item[1] if len(item) >= 2 else item[0]
-                lines.append(f"{idx:3d}. {_frac_to_text(q)}")
+            # 每行4题，与PDF导出格式一致
+            col_width = 22
+            for row_start in range(0, len(basic_qs), 4):
+                row_items = basic_qs[row_start:row_start + 4]
+                row_parts = []
+                for local_idx, item in enumerate(row_items):
+                    global_idx = row_start + local_idx + 1
+                    q = item[1] if len(item) >= 2 else item[0]
+                    cell = f"{global_idx:3d}. {_frac_to_text(q)}"
+                    row_parts.append(cell.ljust(col_width))
+                lines.append("".join(row_parts))
             lines.append("")
 
         if advance_qs:
@@ -329,7 +365,7 @@ class ShuxueTabWidget:
             from shuxue_export import export_pdf
             use_vertical = self._vertical_var.get()
             use_answer = self._answer_var.get()
-            filepath = export_pdf(self._questions_data, use_vertical, use_answer)
+            filepath = export_pdf(self._questions_data, use_vertical, use_answer, show_titles=self._is_onekey)
             self.preview_text.insert(tk.END, f"\nPDF导出成功：{filepath}")
         except Exception as e:
             self.preview_text.insert(tk.END, f"\nPDF导出失败：{e}")

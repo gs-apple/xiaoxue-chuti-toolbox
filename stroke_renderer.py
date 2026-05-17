@@ -11,33 +11,44 @@ import os
 import re
 import math
 import io
+import json
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 
 class StrokeRenderer:
-    """汉字笔顺渲染器 - 从本地 SVG 文件生成逐步叠加式笔顺图片"""
+    """汉字笔顺渲染器 - 从 stroke_data.json 加载笔画路径"""
 
-    def __init__(self, svg_dir=None):
+    def __init__(self, data_path=None):
         """
         Args:
-            svg_dir: SVG文件目录路径 (默认: ./makemeahanzi-master/svgs/)
+            data_path: stroke_data.json 路径 (默认: ./stroke_data.json)
         """
-        if svg_dir is None:
-            base = os.path.dirname(os.path.abspath(__file__))
-            svg_dir = os.path.join(base, 'makemeahanzi-master', 'svgs')
+        if data_path is None:
+            data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stroke_data.json')
 
-        self._svg_dir = svg_dir
-        self._cache = {}  # 缓存解析后的笔画路径
+        self._data_path = data_path
+        self._data = None  # 延迟加载
+        self._cache = {}
         self._font_cache = {}
 
+    def _ensure_loaded(self):
+        if self._data is not None:
+            return
+        try:
+            with open(self._data_path, 'r', encoding='utf-8') as f:
+                self._data = json.load(f)
+        except Exception:
+            self._data = {}
+
     def has_stroke_data(self, char):
-        """检查是否有该字的SVG笔顺数据"""
-        code = ord(char)
-        return os.path.exists(os.path.join(self._svg_dir, f'{code}.svg'))
+        """检查是否有该字的笔顺数据"""
+        self._ensure_loaded()
+        return str(ord(char)) in self._data
 
     def get_stroke_count(self, char):
         """获取笔画数（返回 -1 表示无数据）"""
-        paths = self._get_stroke_paths(char)
+        self._ensure_loaded()
+        paths = self._data.get(str(ord(char)))
         return len(paths) if paths else -1
 
     def _parse_svg_paths(self, svg_text):
@@ -74,25 +85,9 @@ class StrokeRenderer:
         return stroke_paths
 
     def _get_stroke_paths(self, char):
-        """获取汉字的所有笔画路径（带缓存）"""
-        if char in self._cache:
-            return self._cache[char]
-
-        code = ord(char)
-        filepath = os.path.join(self._svg_dir, f'{code}.svg')
-
-        if not os.path.exists(filepath):
-            return []
-
-        try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                text = f.read()
-
-            paths = self._parse_svg_paths(text)
-            self._cache[char] = paths
-            return paths
-        except Exception:
-            return []
+        """获取汉字的所有笔画路径"""
+        self._ensure_loaded()
+        return self._data.get(str(ord(char)), [])
 
     @staticmethod
     def _parse_svg_path_d(path_str):
@@ -266,28 +261,70 @@ class StrokeRenderer:
 
         return points
 
-    def _transform_points(self, points, grid_size, padding_ratio=0.08):
+    def _get_stroke_bbox(self, char):
+        """获取字符所有笔画的实际边界框 (min_x, min_y, max_x, max_y)"""
+        cache_key = f'_bbox_{char}'
+        if cache_key in self._cache:
+            return self._cache[cache_key]
+
+        all_paths = self._get_stroke_paths(char)
+        if not all_paths:
+            return None
+
+        min_x = min_y = float('inf')
+        max_x = max_y = float('-inf')
+
+        for path_str in all_paths:
+            commands = self._parse_svg_path_d(path_str)
+            points = self._flatten_path_to_points(commands, steps_per_segment=6)
+            for x, y in points:
+                if x < min_x: min_x = x
+                if x > max_x: max_x = x
+                # Y翻转: new_y = 900 - y
+                ty = 900 - y
+                if ty < min_y: min_y = ty
+                if ty > max_y: max_y = ty
+
+        bbox = (min_x, min_y, max_x, max_y)
+        self._cache[cache_key] = bbox
+        return bbox
+
+    def _transform_points(self, points, grid_size, padding_ratio=0.05, bbox=None):
         """
-        将 SVG 坐标系 (1024x1024) 变换到输出图像坐标系。
-        
-        makemeahanzi SVG: viewBox="0 0 1024 1024"
-        笔画组使用: transform="scale(1, -1) translate(0, -900)"
-        即 Y轴翻转 + 向上平移 900 单位。
+        将 SVG 坐标系变换到输出图像坐标系。
+        如果提供 bbox，则按笔画实际范围缩放（字更大更清晰）。
         """
         if not points:
             return []
 
         usable = grid_size * (1 - 2 * padding_ratio)
         offset = grid_size * padding_ratio
-        scale = usable / 1024.0
 
-        result = []
-        for (x, y) in points:
-            # 应用与 SVG 相同的变换: Y翻转 + 平移
-            # new_y = 900 - y
-            sx = x * scale + offset
-            sy = (900 - y) * scale + offset
-            result.append((sx, sy))
+        if bbox:
+            min_x, min_y, max_x, max_y = bbox
+            bw = max_x - min_x
+            bh = max_y - min_y
+            if bw < 1: bw = 1
+            if bh < 1: bh = 1
+            # 保持宽高比，居中放置
+            scale = min(usable / bw, usable / bh)
+            cx = (min_x + max_x) / 2
+            cy = (min_y + max_y) / 2
+            center = grid_size / 2
+
+            result = []
+            for (x, y) in points:
+                ty = 900 - y
+                sx = (x - cx) * scale + center
+                sy = (ty - cy) * scale + center
+                result.append((sx, sy))
+        else:
+            scale = usable / 1024.0
+            result = []
+            for (x, y) in points:
+                sx = x * scale + offset
+                sy = (900 - y) * scale + offset
+                result.append((sx, sy))
 
         return result
 
@@ -373,9 +410,16 @@ class StrokeRenderer:
         if up_to_stroke < 0:
             up_to_stroke = len(all_paths)
 
+        # 检查缓存
+        cache_key = (char, grid_size, up_to_stroke, stroke_color)
+        if cache_key in self._cache:
+            return self._cache[cache_key].copy()
+
         img = Image.new('RGBA', (grid_size, grid_size), (255, 255, 255, 0))
 
-        color_with_alpha = (*stroke_color, 235)  # 高不透明度，接近实心
+        color_with_alpha = (*stroke_color, 235)
+
+        bbox = self._get_stroke_bbox(char)
 
         for idx in range(min(up_to_stroke, len(all_paths))):
             path_str = all_paths[idx]
@@ -383,13 +427,56 @@ class StrokeRenderer:
             raw_points = self._flatten_path_to_points(commands, steps_per_segment=6)
 
             if raw_points:
-                points = self._transform_points(raw_points, grid_size)
+                points = self._transform_points(raw_points, grid_size, bbox=bbox)
                 if len(points) >= 3:
-                    # 使用 polygon 填充封闭轮廓 — 这是有宽度的实心笔画！
                     draw = ImageDraw.Draw(img)
                     draw.polygon(points, fill=color_with_alpha)
 
+        self._cache[cache_key] = img.copy()
         return img
+
+    def render_all_steps(self, char, grid_size, stroke_color=(180, 180, 180), ref_bbox=None):
+        """
+        高效渲染所有笔顺步骤。每笔路径只解析一次，逐步叠加。
+        ref_bbox: 统一参考边界框，所有字符用同一个bbox缩放，保持大小一致
+        返回: list of PIL.Image, 每个元素是前 N 笔的叠加图
+        """
+        all_paths = self._get_stroke_paths(char)
+        if not all_paths:
+            return []
+
+        cache_key = ('all_steps', char, grid_size, stroke_color, ref_bbox is not None)
+        if cache_key in self._cache:
+            return self._cache[cache_key]
+
+        bbox = ref_bbox if ref_bbox else self._get_stroke_bbox(char)
+        color_with_alpha = (*stroke_color, 235)
+
+        # 预计算所有笔画的多边形点（只解析一次）
+        all_polygons = []
+        for path_str in all_paths:
+            commands = self._parse_svg_path_d(path_str)
+            raw_points = self._flatten_path_to_points(commands, steps_per_segment=6)
+            if raw_points:
+                points = self._transform_points(raw_points, grid_size, bbox=bbox)
+                if len(points) >= 3:
+                    all_polygons.append(points)
+                else:
+                    all_polygons.append(None)
+            else:
+                all_polygons.append(None)
+
+        # 逐步叠加生成图片
+        images = []
+        img = Image.new('RGBA', (grid_size, grid_size), (255, 255, 255, 0))
+        for poly in all_polygons:
+            if poly:
+                draw = ImageDraw.Draw(img)
+                draw.polygon(poly, fill=color_with_alpha)
+            images.append(img.copy())
+
+        self._cache[cache_key] = images
+        return images
 
     def _render_font_mode(self, char, grid_size, up_to_stroke, stroke_color):
         """
@@ -484,6 +571,6 @@ class StrokeRenderer:
         return buf
 
 
-def create_stroke_renderer(svg_dir=None):
+def create_stroke_renderer(data_path=None):
     """工厂函数: 创建渲染器实例"""
-    return StrokeRenderer(svg_dir=svg_dir)
+    return StrokeRenderer(data_path=data_path)

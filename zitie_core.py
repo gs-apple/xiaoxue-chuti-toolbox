@@ -15,6 +15,7 @@ try:
 except ImportError:
     STROKE_RENDERER_AVAILABLE = False
 
+
 # ================= 汉字笔顺数据 =================
 STROKE_DATA = {
     '一': ['一'],
@@ -601,6 +602,7 @@ class ZitieGenerator:
             is_article_mode = (hanzi_type == "文章" or hanzi_type.startswith("文章")) and not is_dakai_mode
             is_poem_mode = content_type == "诗词" and not is_dakai_mode
             is_wenyan_mode = content_type == "文言文"
+            is_guoxue_mode = content_type in ("千字文", "道德经", "三字经", "弟子规", "百家姓")
             is_shuzi_mode = content_type == "数字" and not is_dakai_mode
             is_pinyin_mode = content_type == "拼音" and not is_dakai_mode
             
@@ -635,24 +637,23 @@ class ZitieGenerator:
             elif is_stroke_mode:
                 stroke_items = []
                 chars = words.replace('\r\n', '\n').replace('\n', '').replace(' ', '')
-                
-                # 检查是否有笔顺渲染器可用, 并检测哪些字符有 SVG 笔顺数据
-                use_svg_renderer = STROKE_RENDERER_AVAILABLE
-                renderer = None
-                if use_svg_renderer:
+
+                # 创建笔顺渲染器（统一使用同一个实例）
+                stroke_renderer = None
+                if STROKE_RENDERER_AVAILABLE:
                     try:
-                        renderer = create_stroke_renderer()
+                        stroke_renderer = create_stroke_renderer()
                     except:
-                        use_svg_renderer = False
-                
+                        pass
+
                 for char in chars:
                     if char.strip():
                         # 优先使用 SVG 笔顺渲染器获取笔画数
-                        if use_svg_renderer and renderer and renderer.has_stroke_data(char):
-                            stroke_count = renderer.get_stroke_count(char)
+                        if stroke_renderer and stroke_renderer.has_stroke_data(char):
+                            stroke_count = stroke_renderer.get_stroke_count(char)
                             stroke_items.append({
                                 'char': char,
-                                'strokes': ['svg'] * stroke_count,  # 标记为使用 SVG 渲染
+                                'strokes': ['svg'] * stroke_count,
                                 'use_svg': True,
                                 'stroke_count': stroke_count
                             })
@@ -666,6 +667,47 @@ class ZitieGenerator:
                                 'stroke_count': len(strokes)
                             })
                 processed_words = stroke_items
+
+                # 统一参考边界框（保持所有字大小一致）
+                ref_bbox = None
+                if stroke_renderer:
+                    all_min_x = all_min_y = float('inf')
+                    all_max_x = all_max_y = float('-inf')
+                    for item in processed_words:
+                        ch = item['char']
+                        if item.get('use_svg') and stroke_renderer.has_stroke_data(ch):
+                            bb = stroke_renderer._get_stroke_bbox(ch)
+                            if bb:
+                                min_x, min_y, max_x, max_y = bb
+                                if min_x < all_min_x: all_min_x = min_x
+                                if min_y < all_min_y: all_min_y = min_y
+                                if max_x > all_max_x: all_max_x = max_x
+                                if max_y > all_max_y: all_max_y = max_y
+                    if all_min_x != float('inf'):
+                        ref_bbox = (all_min_x, all_min_y, all_max_x, all_max_y)
+
+                # 展开笔顺溢出的字符: 一个字占多行时拆分成多行
+                max_stroke_cols = cols - 1
+                expanded_words = []
+                for item in processed_words:
+                    ch = item['char']
+                    use_svg = item.get('use_svg', False)
+                    if use_svg and stroke_renderer and stroke_renderer.has_stroke_data(ch):
+                        stroke_count = stroke_renderer.get_stroke_count(ch)
+                        if stroke_count <= max_stroke_cols:
+                            expanded_words.append(item)
+                        else:
+                            expanded_words.append({**item, '_stroke_start': 0, '_stroke_end': max_stroke_cols})
+                            remaining = stroke_count - max_stroke_cols
+                            offset_val = max_stroke_cols
+                            while remaining > 0:
+                                take = min(remaining, max_stroke_cols)
+                                expanded_words.append({**item, '_stroke_start': offset_val, '_stroke_end': offset_val + take, '_continuation': True})
+                                offset_val += take
+                                remaining -= take
+                    else:
+                        expanded_words.append(item)
+
             elif is_multi_char_mode and is_single_char_mode:
                 lines = words.replace('\r\n', '\n').split('\n')
                 chars_list = []
@@ -722,8 +764,8 @@ class ZitieGenerator:
             elif is_poem_mode:
                 lines = words.replace('\r\n', '\n').split('\n')
                 processed_words = [line.strip() for line in lines if line.strip()]
-            elif is_wenyan_mode:
-                # 保持编辑框中的原始格式，按空行分隔多个文言文
+            elif is_wenyan_mode or is_guoxue_mode:
+                # 保持编辑框中的原始格式，按空行分隔多个文言文/国学内容
                 raw_lines = words.replace('\r\n', '\n').split('\n')
                 # 将多个文言文分割开
                 wenyan_articles = []
@@ -786,11 +828,12 @@ class ZitieGenerator:
                     total_pages = (len(processed_words) + rows_per_page - 1) // rows_per_page
             elif is_stroke_mode:
                 # 新版SVG笔顺模式: 每个字占1行(一行内cols个格子展示笔顺步骤)
-                total_rows = len(processed_words)
+                # 使用 expanded_words 计算，因为溢出字符会拆成多行
+                total_rows = len(expanded_words)
                 if enable_empty_line:
                     total_rows *= 2  # 每字后面空一行
                 total_pages = max(1, (total_rows + rows_per_page - 1) // rows_per_page)
-            elif is_wenyan_mode:
+            elif is_wenyan_mode or is_guoxue_mode:
                 if is_dakai_mode:
                     total_chars = 0
                     for item in processed_words:
@@ -991,12 +1034,36 @@ class ZitieGenerator:
                                 content = item['content']
                                 content_lines = content.split('\n') if '\n' in content else [content]
                                 for line in content_lines:
-                                    line = '\u3000\u3000' + line
-                                    while len(line) > chars_per_line:
-                                        expanded_lines.append({'text': line[:chars_per_line], 'align': 'left'})
-                                        line = line[chars_per_line:]
-                                    if line:
-                                        expanded_lines.append({'text': line, 'align': 'left'})
+                                    if content_type == '\u9053\u5fb7\u7ecf':
+                                        # \u9053\u5fb7\u7ecf: \u7ae0\u8282\u6807\u9898\u5de6\u5bf9\u9f50\uff0c\u6b63\u6587\u9996\u884c\u7f29\u8fdb\u5de6\u5bf9\u9f50
+                                        is_chapter_title = line.startswith('\u7b2c') and '\u7ae0' in line[:6]
+                                        if is_chapter_title:
+                                            while len(line) > chars_per_line:
+                                                expanded_lines.append({'text': line[:chars_per_line], 'align': 'left'})
+                                                line = line[chars_per_line:]
+                                            if line:
+                                                expanded_lines.append({'text': line, 'align': 'left'})
+                                        else:
+                                            line = '\u3000\u3000' + line
+                                            while len(line) > chars_per_line:
+                                                expanded_lines.append({'text': line[:chars_per_line], 'align': 'left'})
+                                                line = line[chars_per_line:]
+                                            if line:
+                                                expanded_lines.append({'text': line, 'align': 'left'})
+                                    elif is_guoxue_mode:
+                                        # \u5176\u4ed6\u56fd\u5b66: \u6b63\u6587\u5c45\u4e2d
+                                        while len(line) > chars_per_line:
+                                            expanded_lines.append({'text': line[:chars_per_line], 'align': 'center'})
+                                            line = line[chars_per_line:]
+                                        if line:
+                                            expanded_lines.append({'text': line, 'align': 'center'})
+                                    else:
+                                        line = '\u3000\u3000' + line
+                                        while len(line) > chars_per_line:
+                                            expanded_lines.append({'text': line[:chars_per_line], 'align': 'left'})
+                                            line = line[chars_per_line:]
+                                        if line:
+                                            expanded_lines.append({'text': line, 'align': 'left'})
                         else:
                             text = item
                             while len(text) > chars_per_line:
@@ -1029,7 +1096,7 @@ class ZitieGenerator:
                             
                             if align == 'center':
                                 text_width_actual = c.stringWidth(text, font_name, font_size)
-                                x_pos = line_left + (text_width - text_width_actual) / 2
+                                x_pos = line_left + (text_width - text_width_actual) / 2 + 5 * mm
                             else:
                                 x_pos = line_left + 1 * mm
                             
@@ -1081,38 +1148,30 @@ class ZitieGenerator:
                         # ========== 新版笔顺模式: 逐步叠加式 SVG 渲染 ==========
                         page_start_row = (current_page - 1) * rows_per_page
                         page_end_row = page_start_row + rows_per_page  # 始终取整页行数，确保空白行也画格子
-                        
-                        # 初始化渲染器
-                        stroke_renderer = None
-                        if STROKE_RENDERER_AVAILABLE:
-                            try:
-                                stroke_renderer = create_stroke_renderer()
-                            except:
-                                pass
-                        
+
                         # ========== 笔顺模式微调配置（直接改数值即可） ==========
                         # 每种格子可独立调整: 字大小缩放、上下左右偏移、渲染分辨率
                         STROKE_TUNE = {
                             "田字格": {
-                                "grid_scale":     2.4,    # 笔顺图片分辨率倍数 (越大越清晰)
+                                "grid_scale":     3.0,    # 笔顺图片分辨率倍数 (越大越清晰)
                                 "row_offset_mm":   16.0,   # 整体上下偏移(mm), 正=下移 负=上移
-                                "inner_margin_mm": 1.5,    # 格子内边距(mm), 字与格线间距
+                                "inner_margin_mm": 1.0,    # 格子内边距(mm), 字与格线间距
                                 "offset_x_mm":     0.0,    # 字水平额外偏移(mm)
-                                "offset_y_mm":     -13.0,   # 字垂直额外偏移(mm), 正=下移 负=上移
+                                "offset_y_mm":     -14.0,  # 字垂直额外偏移(mm), 正=下移 负=上移
                             },
                             "方格": {
-                                "grid_scale":     2.4,
+                                "grid_scale":     3.0,
                                 "row_offset_mm":   10.0,
-                                "inner_margin_mm": 1.5,
+                                "inner_margin_mm": 1.0,
                                 "offset_x_mm":     0.0,
-                                "offset_y_mm":     -3.0,
+                                "offset_y_mm":     -10.0,
                             },
                             "米字格": {
-                                "grid_scale":     2.4,
+                                "grid_scale":     3.0,
                                 "row_offset_mm":   10.0,
-                                "inner_margin_mm": 1.5,
+                                "inner_margin_mm": 1.0,
                                 "offset_x_mm":     0.0,
-                                "offset_y_mm":     -3.0,
+                                "offset_y_mm":     -10.0,
                             },
                         }
                         tune = STROKE_TUNE.get(grid_type, STROKE_TUNE["田字格"])
@@ -1132,66 +1191,76 @@ class ZitieGenerator:
                                 y_cell = y_pos_base - cell_height
                                 self._draw_grid(c, grid_type, x_cell, y_cell, cell_width, cell_height)
 
-                            # 如果该行有字，嵌入内容
-                            if row_idx < len(processed_words):
-                                item = processed_words[row_idx]
+                            # 如果该行有字，嵌入内容（处理 enable_empty_line 间隔）
+                            actual_item_idx = row_idx
+                            is_content_row = True
+                            if enable_empty_line:
+                                is_content_row = (row_idx % 2) == 0
+                                actual_item_idx = row_idx // 2
+
+                            if is_content_row and actual_item_idx < len(expanded_words):
+                                item = expanded_words[actual_item_idx]
                                 char = item['char']
                                 use_svg = item.get('use_svg', False)
+                                is_continuation = item.get('_continuation', False)
 
                                 if use_svg and stroke_renderer and stroke_renderer.has_stroke_data(char):
-                                    # === SVG笔顺模式: 嵌入逐步叠加图片 ===
+                                    # === SVG笔顺模式 ===
+                                    if not is_continuation:
+                                        # 第一行: 参考字
+                                        x_pos = start_x + 0 * cell_width + cell_width / 2 + offset["dx"]
+                                        y_ref = y_center - (cell_height + row_spacing) - 3 * mm
+                                        c.setFont(font_name, font_size)
+                                        c.setFillColor(black)
+                                        c.drawCentredString(x_pos, y_ref, char)
+
+                                    # 笔顺步骤图
                                     grid_px = int(cell_width * tune["grid_scale"])
+                                    all_step_images = stroke_renderer.render_all_steps(
+                                        char, grid_px, stroke_color=(180, 180, 180), ref_bbox=ref_bbox)
 
-                                    img_sequence = stroke_renderer.render_full_sequence_for_pdf(
-                                        char=char,
-                                        grid_size=grid_px,
-                                        cols=cols,
-                                        first_char_color=(20, 20, 20),
-                                        stroke_color=(45, 50, 55),
-                                        stroke_width_ratio=0.035
-                                    )
+                                    stroke_start = item.get('_stroke_start', 0)
+                                    stroke_end = item.get('_stroke_end', len(all_step_images))
+                                    start_col = 0 if is_continuation else 1
 
-                                    if img_sequence:
-                                        for col_idx in range(cols):
-                                            if col_idx >= len(img_sequence):
-                                                break
-                                            img = img_sequence[col_idx]
-                                            if img is None or not hasattr(img, 'size'):
-                                                continue
+                                    for step in range(stroke_start, min(stroke_end, len(all_step_images))):
+                                        col_idx = start_col + (step - stroke_start)
+                                        if col_idx >= cols:
+                                            break
+                                        step_img = all_step_images[step]
 
-                                            x_cell = start_x + col_idx * cell_width
-                                            y_cell = y_pos_base - cell_height
+                                        x_cell = start_x + col_idx * cell_width
+                                        y_cell = y_pos_base - cell_height
 
-                                            try:
-                                                img_bytes = stroke_renderer.image_to_bytes(img, 'PNG')
-                                                from reportlab.lib.utils import ImageReader
-                                                img_reader = ImageReader(img_bytes)
+                                        try:
+                                            img_bytes = stroke_renderer.image_to_bytes(step_img, 'PNG')
+                                            from reportlab.lib.utils import ImageReader
+                                            img_reader = ImageReader(img_bytes)
 
-                                                img_w, img_h = img.size
-                                                aspect = img_w / img_h if img_h > 0 else 1
+                                            img_w, img_h = step_img.size
+                                            aspect = img_w / img_h if img_h > 0 else 1
 
-                                                inner_margin = tune["inner_margin_mm"] * mm
-                                                avail_w = cell_width - inner_margin * 2
-                                                avail_h = cell_height - inner_margin * 2
+                                            inner_margin = tune["inner_margin_mm"] * mm
+                                            avail_w = cell_width - inner_margin * 2
+                                            avail_h = cell_height - inner_margin * 2
 
-                                                if avail_w / avail_h > aspect:
-                                                    draw_h = avail_h
-                                                    draw_w = draw_h * aspect
-                                                else:
-                                                    draw_w = avail_w
-                                                    draw_h = draw_w / aspect
+                                            stroke_scale = 1.0
 
-                                                draw_x = x_cell + (cell_width - draw_w) / 2 + tune["offset_x_mm"] * mm
-                                                draw_y = y_cell + (cell_height - draw_h) / 2 + tune["offset_y_mm"] * mm
+                                            if avail_w / avail_h > aspect:
+                                                draw_h = avail_h * stroke_scale
+                                                draw_w = draw_h * aspect
+                                            else:
+                                                draw_w = avail_w * stroke_scale
+                                                draw_h = draw_w / aspect
 
-                                                c.drawImage(img_reader, draw_x, draw_y,
-                                                           width=draw_w, height=draw_h,
-                                                           mask='auto')
-                                            except Exception as e:
-                                                x_pos = x_cell + cell_width / 2 + offset["dx"]
-                                                c.setFont(font_name, font_size)
-                                                c.setFillColor(black)
-                                                c.drawCentredString(x_pos, y_center, char)
+                                            draw_x = x_cell + (cell_width - draw_w) / 2 + tune["offset_x_mm"] * mm
+                                            draw_y = y_cell + (cell_height - draw_h) / 2 + tune["offset_y_mm"] * mm
+
+                                            c.drawImage(img_reader, draw_x, draw_y,
+                                                       width=draw_w, height=draw_h,
+                                                       mask='auto')
+                                        except Exception:
+                                            pass
                                 else:
                                     # === 回退模式: 旧式的笔画部首字符绘制 ===
                                     strokes = item.get('strokes', [])
@@ -1301,42 +1370,96 @@ class ZitieGenerator:
                                     all_lines.extend(content_lines)
                             else:
                                 all_lines.append(article)
-                        
+
                         # 将长行拆分为多个短行（每行最多cols个字符）
                         display_lines = []
                         for line in all_lines:
                             if line == '':
-                                display_lines.append('')  # 空行直接添加
+                                display_lines.append('')
                             else:
-                                # 将长行拆分成多个短行
                                 chars = list(line)
                                 while len(chars) > cols:
                                     display_lines.append(''.join(chars[:cols]))
                                     chars = chars[cols:]
                                 if chars:
                                     display_lines.append(''.join(chars))
-                        
-                        # 计算每页的起始行和结束行
+
                         lines_per_page = rows_per_page
                         page_start_line = (current_page - 1) * lines_per_page
                         page_end_line = min(page_start_line + lines_per_page, len(display_lines))
-                        
-                        # 绘制当前页的内容
+
                         for line_idx in range(page_start_line, page_end_line):
                             row = line_idx - page_start_line
                             line = display_lines[line_idx]
-                            
                             if line == '':
-                                # 空行，跳过绘制但占用一行
                                 continue
-                            
                             y_pos = start_y - row * (cell_height + row_spacing) - cell_height / 2 - 11 + offset["dy"]
-                            
                             for col_idx, ch in enumerate(line):
-                                x_pos = start_x + col_idx * cell_width + cell_width / 2 + offset["dx"]
+                                x_pos = start_x + col_idx * cell_width + cell_width / 2 + offset["dx"] + 0.5 * mm
                                 c.setFont(font_name, font_size)
                                 c.setFillColor(black)
                                 c.drawCentredString(x_pos, y_pos, ch)
+
+                    elif is_guoxue_mode:
+                        # 国学模式: 标题和作者居中，教案格下正文也居中
+                        display_lines = []  # (text, line_type): line_type='title'/'author'/'body'/''(empty)
+                        for article_idx, article in enumerate(processed_words):
+                            if article_idx > 0:
+                                display_lines.append(('', ''))
+                            if isinstance(article, dict):
+                                display_lines.append((article['title'], 'title'))
+                                display_lines.append((article['author'], 'author'))
+                                if article['content']:
+                                    content_lines = article['content'].split('\n')
+                                    for cl in content_lines:
+                                        chars = list(cl)
+                                        while len(chars) > cols:
+                                            display_lines.append((''.join(chars[:cols]), 'body'))
+                                            chars = chars[cols:]
+                                        if chars:
+                                            display_lines.append((''.join(chars), 'body'))
+                            else:
+                                display_lines.append((article, 'body'))
+
+                        lines_per_page = rows_per_page
+                        page_start_line = (current_page - 1) * lines_per_page
+                        page_end_line = min(page_start_line + lines_per_page, len(display_lines))
+
+                        use_center_all = (grid_type == "教案格")
+
+                        for line_idx in range(page_start_line, page_end_line):
+                            row = line_idx - page_start_line
+                            line_text, line_type = display_lines[line_idx]
+                            if not line_text:
+                                continue
+
+                            y_pos = start_y - row * (cell_height + row_spacing) - cell_height / 2 - 11 + offset["dy"]
+
+                            # 标题和作者始终居中，正文仅教案格居中
+                            should_center = line_type in ('title', 'author') or (line_type == 'body' and use_center_all)
+
+                            if should_center:
+                                if cols == 1:
+                                    # 教案格等单列格子: 整体字符串右移1cm
+                                    c.setFont(font_name, font_size)
+                                    c.setFillColor(black)
+                                    c.drawString(start_x + 10 * mm, y_pos, line_text)
+                                else:
+                                    # 多列格子: 逐字居中
+                                    text_width = len(line_text) * cell_width
+                                    total_grid = cols * cell_width
+                                    start_offset = (total_grid - text_width) / 2
+                                    for col_idx, ch in enumerate(line_text):
+                                        x_pos = start_x + start_offset + col_idx * cell_width + cell_width / 2
+                                        c.setFont(font_name, font_size)
+                                        c.setFillColor(black)
+                                        c.drawCentredString(x_pos, y_pos, ch)
+                            else:
+                                for col_idx, ch in enumerate(line_text):
+                                    x_pos = start_x + col_idx * cell_width + cell_width / 2
+                                    c.setFont(font_name, font_size)
+                                    c.setFillColor(black)
+                                    c.drawCentredString(x_pos, y_pos, ch)
                     else:
                         page_start_line = (current_page - 1) * rows_per_page
                         page_end_line = min(page_start_line + rows_per_page, 

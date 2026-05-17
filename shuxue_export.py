@@ -3,6 +3,7 @@ import os
 import re
 from datetime import datetime
 from fractions import Fraction
+from shuxue_drawings import GEOMETRY_QUESTION_TYPES, extract_drawing_spec, draw_figure
 
 def _get_export_dir():
     return os.path.dirname(os.path.abspath(__file__))
@@ -132,7 +133,12 @@ def _get_font():
         _font_cache = 'Helvetica'
     return _font_cache
 
-def export_pdf(questions_data, use_vertical=False, use_answer=False):
+def _draw_bold(c, x, y, text, font_name, font_size):
+    """模拟加粗：偏移0.3pt重绘一次"""
+    c.drawString(x, y, text)
+    c.drawString(x + 0.3, y, text)
+
+def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles=False):
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.units import mm
     from reportlab.pdfgen import canvas
@@ -173,14 +179,16 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False):
     reg_row_h = 8 * mm if not use_vertical else 32 * mm
     adv_row_h = 35 * mm
 
+    MIXED_TYPES = {"cb_mix_addsub", "cb_mix_addmul", "cb_mix_addmulsub", "cb_mix_dec", "cb_mix_frac"}
+
     regular = []
     for i, item in enumerate(basic_qs):
         if len(item) >= 2:
-            regular.append((i, item[1]))
+            regular.append((i, item[0], item[1]))
     advanced = []
     for i, item in enumerate(advance_qs):
         if len(item) >= 2:
-            advanced.append((i + len(basic_qs), item[1]))
+            advanced.append((i + len(basic_qs), item[1], item[0]))
 
     # 使用临时总页数（先设为1，最后会修正）
     total_pages = [1]  # 用列表实现nonlocal修改
@@ -219,30 +227,64 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False):
 
     # 绘制基础题
     if regular:
+        # 统一重新编号（1开始），避免 normal/mixed 分组后序号错乱
+        renumbered = [(seq, q, t) for seq, (i, t, q) in enumerate(regular, 1)]
+        regular_normal = [(seq, q, t) for seq, q, t in renumbered if t not in MIXED_TYPES]
+        regular_mixed = [(seq, q, t) for seq, q, t in renumbered if t in MIXED_TYPES]
+
+        # 基础题标题（仅一键出题显示）
+        if show_titles:
+            c.setFont(fn_sun, 12)
+            _draw_bold(c, lm, cur_y, f"基础计算（{len(regular)}题）", fn_sun, 12)
+            cur_y -= reg_row_h
+
+        # 先绘制普通基础题（4列）
         col_w = uw / 4
-        for idx, (orig_i, question) in enumerate(regular):
+        for idx, (seq, question, _qtype) in enumerate(regular_normal):
             col = idx % 4
             if col == 0 and idx > 0:
                 cur_y -= reg_row_h
                 if cur_y < bm + reg_row_h:
                     cur_y = new_page()
             x = lm + col * col_w
-            label = f"{orig_i + 1:>3}. "
-            # 紧凑运算符间距
+            label = f"{seq:>3}. "
             question = question.replace(" + ", "+").replace(" - ", "-").replace(" × ", "×").replace(" ÷ ", "÷")
             parts = _split_frac_parts(question)
-            c.setFont(fn_sun, 11)
+            c.setFont(fn_sun, 11.5)
             lw = c.stringWidth(label, fn_sun, 11)
             c.drawString(x, cur_y, label)
             _draw_mixed(c, x + lw, cur_y, parts, fn_sun, 11)
 
-    # 绘制提升题
-    if advanced:
-        adv_font_size = 10
-        adv_line_gap = 5.5 * mm
-        adv_item_gap = 8 * mm
+        # 基础题结束后换行，避免与混合题重叠
+        if regular_normal:
+            last_col = len(regular_normal) % 4
+            if last_col != 0:  # 不是整行结束
+                cur_y -= reg_row_h
 
-        def wrap_text(text, max_w, fn, fs):
+        # 再绘制四则混合（3列，保留空格）
+        if regular_mixed:
+            col_w_m = uw / 3
+            for idx, (seq, question, _qtype) in enumerate(regular_mixed):
+                col = idx % 3
+                if col == 0 and idx > 0:
+                    cur_y -= reg_row_h
+                    if cur_y < bm + reg_row_h:
+                        cur_y = new_page()
+                x = lm + col * col_w_m
+                label = f"{seq:>3}. "
+                parts = _split_frac_parts(question)
+                c.setFont(fn_sun, 11.5)
+                lw = c.stringWidth(label, fn_sun, 11)
+                c.drawString(x, cur_y, label)
+                _draw_mixed(c, x + lw, cur_y, parts, fn_sun, 11)
+
+    # 绘制提升题（一行两题，无竖线分隔，留做题空间）
+    if advanced:
+        adv_font_size = 10.5
+        adv_line_gap = 5.5 * mm
+        adv_work_gap = 20 * mm  # 做题空间（缩短）
+
+        def wrap_text_adv(text, max_w, fn, fs):
             lines_out = []
             cur_line = ""
             plain = _frac_to_text(text)
@@ -260,61 +302,85 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False):
 
         # 根据是否有基础题决定起始位置
         if regular:
-            # 有基础题时，从基础题下方开始
-            cur_y -= reg_row_h + 4 * mm
-            if cur_y < bm + adv_line_gap * 2 + adv_item_gap:
+            cur_y -= reg_row_h + 4 * mm  # 基础题与提升题间距
+            if cur_y < bm + adv_line_gap + adv_work_gap:
                 cur_y = new_page()
         else:
-            # 单独出提升题时，使用首页起始位置（避免距离横线太远）
             cur_y = first_page_start_y
 
-        sep_gap = 0.5 * mm
-        mid_x = pw / 2
-        left_x = lm
-        right_x = mid_x + sep_gap / 2 + 2 * mm
-        col_w_l = mid_x - sep_gap / 2 - 2 * mm - left_x
-        col_w_r = pw - rm - right_x
+        # 提升题标题（仅一键出题显示）
+        if show_titles:
+            c.setFont(fn_sun, 12)
+            _draw_bold(c, lm, cur_y, f"运用题（{len(advanced)}题）", fn_sun, 12)
+            cur_y -= reg_row_h
 
+        FIGURE_SIZE_MM = 30
+
+        def is_geometry(item):
+            if not item or len(item) < 3:
+                return False
+            return item[2] in GEOMETRY_QUESTION_TYPES
+
+        def draw_fig_right(item, col_x, col_w, top_y):
+            if not is_geometry(item):
+                return 0
+            spec = extract_drawing_spec(item[2], item[1])
+            if not spec:
+                return 0
+            fig_size_pt = FIGURE_SIZE_MM * mm
+            fig_x = col_x + col_w - fig_size_pt
+            fig_y = top_y - fig_size_pt
+            draw_figure(c, fig_x, fig_y, fig_size_pt, fig_size_pt, spec)
+            return fig_size_pt
+
+        # 两列布局参数
+        col_gap = 6 * mm
+        col_w_adv = (uw - col_gap) / 2
+        left_x = lm
+        right_x = lm + col_w_adv + col_gap
+        text_w_adv = col_w_adv - FIGURE_SIZE_MM * mm - 2 * mm
+
+        # 配对渲染（左右各一题）
         pairs = []
         for i in range(0, len(advanced), 2):
             left_item = advanced[i]
             right_item = advanced[i + 1] if i + 1 < len(advanced) else None
             pairs.append((left_item, right_item))
 
-        def draw_sep(y_top, y_bot):
-            c.setLineWidth(0.283)
-            # 实线（不再设置虚线）
-            c.line(mid_x - sep_gap / 2, y_top, mid_x - sep_gap / 2, y_bot)
-            c.line(mid_x + sep_gap / 2, y_top, mid_x + sep_gap / 2, y_bot)
-            c.setLineWidth(0.3)
-
-        draw_sep(cur_y + 2 * mm, bm)
-
         for left_item, right_item in pairs:
-            def calc_lines(item, col_x, col_w):
-                orig_i, question = item
-                label = f"{orig_i + 1}. "
-                plain = _frac_to_text(question)
-                full = label + plain
-                c.setFont(fn_sun, adv_font_size)
-                return wrap_text(full, col_w, fn_sun, adv_font_size)
+            left_label = f"{left_item[0] + 1}. "
+            left_qtext = _frac_to_text(left_item[1])
+            left_geo = is_geometry(left_item)
+            left_w = text_w_adv if left_geo else col_w_adv
 
-            left_lines = calc_lines(left_item, left_x, col_w_l)
-            right_lines = calc_lines(right_item, right_x, col_w_r) if right_item else []
+            right_label = f"{right_item[0] + 1}. " if right_item else ""
+            right_qtext = _frac_to_text(right_item[1]) if right_item else ""
+            right_geo = is_geometry(right_item) if right_item else False
+            right_w = text_w_adv if right_geo else col_w_adv
+
+            c.setFont(fn_sun, adv_font_size)
+            left_lines = wrap_text_adv(left_label + left_qtext, left_w, fn_sun, adv_font_size) if left_qtext else []
+            right_lines = wrap_text_adv(right_label + right_qtext, right_w, fn_sun, adv_font_size) if right_qtext else []
             max_lines = max(len(left_lines), len(right_lines))
-            pair_height = max_lines * adv_line_gap + adv_item_gap
+            pair_height = max_lines * adv_line_gap + adv_work_gap
 
             if cur_y - pair_height < bm:
                 cur_y = new_page()
-                draw_sep(cur_y + 2 * mm, bm)
 
+            # 左列文字
             c.setFont(fn_sun, adv_font_size)
             for li, line_txt in enumerate(left_lines):
                 c.drawString(left_x, cur_y - li * adv_line_gap, line_txt)
+            # 左列图形
+            draw_fig_right(left_item, left_x, col_w_adv, cur_y)
+
+            # 右列文字
             if right_item:
                 c.setFont(fn_sun, adv_font_size)
                 for li, line_txt in enumerate(right_lines):
                     c.drawString(right_x, cur_y - li * adv_line_gap, line_txt)
+                draw_fig_right(right_item, right_x, col_w_adv, cur_y)
+
             cur_y -= pair_height
 
     # 答案页
@@ -330,20 +396,30 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False):
 
         c.setFont(fn_sun, 9)
         ans_line_h = 6 * mm
-        per_line = 8   # 每行9个答案
-
+        ans_sep = "    "
         ans_texts = []
         for i, ans in enumerate(all_answers):
             ans_str = _safe_fmt_answer(ans)
             ans_texts.append(f"{i + 1}. {ans_str}")
 
-        for i in range(0, len(ans_texts), per_line):
-            group = ans_texts[i:i + per_line]
-            line = "    ".join(group)
+        cur_line = ""
+        for txt in ans_texts:
+            test = cur_line + (ans_sep + txt if cur_line else txt)
+            if c.stringWidth(test, fn_sun, 9) <= uw:
+                cur_line = test
+            else:
+                if cur_line:
+                    if cur_y < bm + ans_line_h:
+                        cur_y = new_page()
+                        c.setFont(fn_sun, 9)
+                    c.drawString(lm, cur_y, cur_line)
+                    cur_y -= ans_line_h
+                cur_line = txt
+        if cur_line:
             if cur_y < bm + ans_line_h:
                 cur_y = new_page()
                 c.setFont(fn_sun, 9)
-            c.drawString(lm, cur_y, line)
+            c.drawString(lm, cur_y, cur_line)
             cur_y -= ans_line_h
 
     c.save()
@@ -363,8 +439,18 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False):
         
         # 重新绘制基础题
         if regular:
+            renumbered2 = [(seq, q, t) for seq, (i, t, q) in enumerate(regular, 1)]
+            regular_normal = [(seq, q, t) for seq, q, t in renumbered2 if t not in MIXED_TYPES]
+            regular_mixed = [(seq, q, t) for seq, q, t in renumbered2 if t in MIXED_TYPES]
+
+            # 基础题标题（仅一键出题显示）
+            if show_titles:
+                c.setFont(fn_sun, 12)
+                _draw_bold(c, lm, cur_y, f"基础计算（{len(regular)}题）", fn_sun, 12)
+                cur_y -= reg_row_h
+
             col_w = uw / 4
-            for idx, (orig_i, question) in enumerate(regular):
+            for idx, (seq, question, _qtype) in enumerate(regular_normal):
                 col = idx % 4
                 if col == 0 and idx > 0:
                     cur_y -= reg_row_h
@@ -374,92 +460,108 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False):
                         draw_header()
                         cur_y = other_page_start_y
                 x = lm + col * col_w
-                label = f"{orig_i + 1:>3}. "
+                label = f"{seq:>3}. "
                 question = question.replace(" + ", "+").replace(" - ", "-").replace(" × ", "×").replace(" ÷ ", "÷")
                 parts = _split_frac_parts(question)
-                c.setFont(fn_sun, 11)
+                c.setFont(fn_sun, 11.5)
                 lw = c.stringWidth(label, fn_sun, 11)
                 c.drawString(x, cur_y, label)
                 _draw_mixed(c, x + lw, cur_y, parts, fn_sun, 11)
+
+            # 基础题结束后换行，避免与混合题重叠
+            if regular_normal:
+                last_col = len(regular_normal) % 4
+                if last_col != 0:
+                    cur_y -= reg_row_h
+
+            if regular_mixed:
+                col_w_m = uw / 3
+                for idx, (seq, question, _qtype) in enumerate(regular_mixed):
+                    col = idx % 3
+                    if col == 0 and idx > 0:
+                        cur_y -= reg_row_h
+                        if cur_y < bm + reg_row_h:
+                            c.showPage()
+                            current_page[0] += 1
+                            draw_header()
+                            cur_y = other_page_start_y
+                    x = lm + col * col_w_m
+                    label = f"{seq:>3}. "
+                    parts = _split_frac_parts(question)
+                    c.setFont(fn_sun, 11.5)
+                    lw = c.stringWidth(label, fn_sun, 11)
+                    c.drawString(x, cur_y, label)
+                    _draw_mixed(c, x + lw, cur_y, parts, fn_sun, 11)
         
-        # 重新绘制提升题
+        # 重新绘制提升题（一行两题，无竖线分隔，留做题空间）
         if advanced:
-            adv_font_size = 10
+            adv_font_size = 10.5
             adv_line_gap = 5.5 * mm
-            adv_item_gap = 8 * mm
-            
+            adv_work_gap = 20 * mm  # 做题空间（缩短）
+
             if regular:
-                cur_y -= reg_row_h + 4 * mm
-                if cur_y < bm + adv_line_gap * 2 + adv_item_gap:
+                cur_y -= reg_row_h + 4 * mm  # 基础题与提升题间距
+                if cur_y < bm + adv_line_gap + adv_work_gap:
                     c.showPage()
                     current_page[0] += 1
                     draw_header()
                     cur_y = other_page_start_y
             else:
                 cur_y = first_page_start_y
-            
-            sep_gap = 3 * mm  # 两线间距1cm
-            mid_x = pw / 2
+
+            # 提升题标题（仅一键出题显示）
+            if show_titles:
+                c.setFont(fn_sun, 12)
+                _draw_bold(c, lm, cur_y, f"运用题（{len(advanced)}题）", fn_sun, 12)
+                cur_y -= reg_row_h
+
+            # 两列布局参数
+            col_gap = 6 * mm
+            col_w_adv = (uw - col_gap) / 2
             left_x = lm
-            right_x = mid_x + sep_gap / 2 + 2 * mm
-            col_w_l = mid_x - sep_gap / 2 - 2 * mm - left_x
-            col_w_r = pw - rm - right_x
-            
+            right_x = lm + col_w_adv + col_gap
+            text_w_adv = col_w_adv - FIGURE_SIZE_MM * mm - 2 * mm
+
             pairs = []
             for i in range(0, len(advanced), 2):
                 left_item = advanced[i]
                 right_item = advanced[i + 1] if i + 1 < len(advanced) else None
                 pairs.append((left_item, right_item))
-            
-            def draw_sep2(y_top, y_bot):
-                c.setLineWidth(0.283)
-                # 实线（不再设置虚线）
-                c.line(mid_x - sep_gap / 2, y_top, mid_x - sep_gap / 2, y_bot)
-                c.line(mid_x + sep_gap / 2, y_top, mid_x + sep_gap / 2, y_bot)
-                c.setLineWidth(0.3)
-            
-            draw_sep2(cur_y + 2 * mm, bm)
-            
+
             for left_item, right_item in pairs:
-                def calc_lines2(item, col_x, col_w):
-                    orig_i, question = item
-                    label = f"{orig_i + 1}. "
-                    plain = _frac_to_text(question)
-                    full = label + plain
-                    c.setFont(fn_sun, adv_font_size)
-                    lines_out = []
-                    cur_line = label  # 从label开始
-                    for ch in list(plain):
-                        test = cur_line + ch
-                        if c.stringWidth(test, fn_sun, adv_font_size) <= col_w:
-                            cur_line = test
-                        else:
-                            if cur_line:
-                                lines_out.append(cur_line)
-                            cur_line = ch
-                    if cur_line:
-                        lines_out.append(cur_line)
-                    return lines_out if lines_out else [""]
-                
-                left_lines = calc_lines2(left_item, left_x, col_w_l)
-                right_lines = calc_lines2(right_item, right_x, col_w_r) if right_item else []
+                left_label = f"{left_item[0] + 1}. "
+                left_qtext = _frac_to_text(left_item[1])
+                left_geo = is_geometry(left_item)
+                left_w = text_w_adv if left_geo else col_w_adv
+
+                right_label = f"{right_item[0] + 1}. " if right_item else ""
+                right_qtext = _frac_to_text(right_item[1]) if right_item else ""
+                right_geo = is_geometry(right_item) if right_item else False
+                right_w = text_w_adv if right_geo else col_w_adv
+
+                c.setFont(fn_sun, adv_font_size)
+                left_lines = wrap_text_adv(left_label + left_qtext, left_w, fn_sun, adv_font_size) if left_qtext else []
+                right_lines = wrap_text_adv(right_label + right_qtext, right_w, fn_sun, adv_font_size) if right_qtext else []
                 max_lines = max(len(left_lines), len(right_lines))
-                pair_height = max_lines * adv_line_gap + adv_item_gap
-                
+                pair_height = max_lines * adv_line_gap + adv_work_gap
+
                 if cur_y - pair_height < bm:
                     c.showPage()
                     current_page[0] += 1
                     draw_header()
                     cur_y = other_page_start_y
-                    draw_sep2(cur_y + 2 * mm, bm)
-                
+
                 c.setFont(fn_sun, adv_font_size)
                 for li, line_txt in enumerate(left_lines):
                     c.drawString(left_x, cur_y - li * adv_line_gap, line_txt)
+                draw_fig_right(left_item, left_x, col_w_adv, cur_y)
+
                 if right_item:
                     c.setFont(fn_sun, adv_font_size)
                     for li, line_txt in enumerate(right_lines):
                         c.drawString(right_x, cur_y - li * adv_line_gap, line_txt)
+                    draw_fig_right(right_item, right_x, col_w_adv, cur_y)
+
                 cur_y -= pair_height
         
         # 重新绘制答案页
@@ -475,22 +577,35 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False):
             
             c.setFont(fn_sun, 9)
             ans_line_h = 6 * mm
-            per_line = 8
-            
+            ans_sep = "    "
+
             ans_texts = []
             for i, ans in enumerate(all_answers):
                 ans_str = _safe_fmt_answer(ans)
                 ans_texts.append(f"{i + 1}. {ans_str}")
-            
-            for i in range(0, len(ans_texts), per_line):
-                group = ans_texts[i:i + per_line]
-                line = "    ".join(group)
+
+            cur_line = ""
+            for txt in ans_texts:
+                test = cur_line + (ans_sep + txt if cur_line else txt)
+                if c.stringWidth(test, fn_sun, 9) <= uw:
+                    cur_line = test
+                else:
+                    if cur_line:
+                        if cur_y < bm + ans_line_h:
+                            c.showPage()
+                            current_page[0] += 1
+                            draw_header()
+                            c.setFont(fn_sun, 9)
+                        c.drawString(lm, cur_y, cur_line)
+                        cur_y -= ans_line_h
+                    cur_line = txt
+            if cur_line:
                 if cur_y < bm + ans_line_h:
                     c.showPage()
                     current_page[0] += 1
                     draw_header()
                     c.setFont(fn_sun, 9)
-                c.drawString(lm, cur_y, line)
+                c.drawString(lm, cur_y, cur_line)
                 cur_y -= ans_line_h
         
         c.save()

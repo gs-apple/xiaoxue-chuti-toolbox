@@ -184,60 +184,57 @@ class ZiTieTabWidget:
         content_row = tk.Frame(self.content_widget, bg=BG)
         content_row.pack(fill=tk.X, pady=1)
         self._content_var = tk.StringVar()
-        self.rb_shengzi = tk.Radiobutton(content_row, text="生字",
+        self.rb_shengzi = ttk.Radiobutton(content_row, text="生字",
                                           variable=self._content_var, value="shengzi",
-                                          command=self.on_content_radio_changed,
-                                          font=("Microsoft YaHei", 10))
+                                          command=self.on_content_radio_changed)
         self.rb_shengzi.pack(side=tk.LEFT)
-        self.rb_ciyu = tk.Radiobutton(content_row, text="词语",
+        self.rb_ciyu = ttk.Radiobutton(content_row, text="词语",
                                        variable=self._content_var, value="ciyu",
-                                       command=self.on_content_radio_changed,
-                                       font=("Microsoft YaHei", 10))
+                                       command=self.on_content_radio_changed)
         self.rb_ciyu.pack(side=tk.LEFT, padx=(8, 0))
 
         # 内容扩展 (诗词/文言文)
         self.content_ext_widget = tk.Frame(left_frame, bg=BG)
         ext_row = tk.Frame(self.content_ext_widget, bg=BG)
         ext_row.pack(fill=tk.X, pady=1)
-        self.rb_gushi = tk.Radiobutton(ext_row, text="诗词",
+        self.rb_gushi = ttk.Radiobutton(ext_row, text="诗词",
                                         variable=self._content_var, value="gushi",
-                                        command=self.on_content_radio_changed,
-                                        font=("Microsoft YaHei", 10))
+                                        command=self.on_content_radio_changed)
         self.rb_gushi.pack(side=tk.LEFT)
-        self.rb_wenyan = tk.Radiobutton(ext_row, text="文言文",
+        self.rb_wenyan = ttk.Radiobutton(ext_row, text="文言文",
                                          variable=self._content_var, value="wenyan",
-                                         command=self.on_content_radio_changed,
-                                         font=("Microsoft YaHei", 10))
+                                         command=self.on_content_radio_changed)
         self.rb_wenyan.pack(side=tk.LEFT, padx=(8, 0))
 
         # 其他 (数字/拼音)
         self.other_widget = tk.Frame(left_frame, bg=BG)
         other_row = tk.Frame(self.other_widget, bg=BG)
         other_row.pack(fill=tk.X, pady=1)
-        self.rb_shuzi = tk.Radiobutton(other_row, text="数字",
+        self.rb_shuzi = ttk.Radiobutton(other_row, text="数字",
                                         variable=self._content_var, value="shuzi",
-                                        command=self.on_content_radio_changed,
-                                        font=("Microsoft YaHei", 10))
+                                        command=self.on_content_radio_changed)
         self.rb_shuzi.pack(side=tk.LEFT)
-        self.rb_pinyin_text = tk.Radiobutton(other_row, text="拼音",
+        self.rb_pinyin_text = ttk.Radiobutton(other_row, text="拼音",
                                               variable=self._content_var, value="pinyin_text",
-                                              command=self.on_content_radio_changed,
-                                              font=("Microsoft YaHei", 10))
+                                              command=self.on_content_radio_changed)
         self.rb_pinyin_text.pack(side=tk.LEFT, padx=(8, 0))
 
         # 大楷/待定
         self.dakai_widget = tk.Frame(left_frame, bg=BG)
         dakai_row = tk.Frame(self.dakai_widget, bg=BG)
         dakai_row.pack(fill=tk.X, pady=1)
-        self.rb_gaiding = tk.Radiobutton(dakai_row, text="大楷",
+        self.rb_gaiding = ttk.Radiobutton(dakai_row, text="大楷",
                                           variable=self._content_var, value="gaiding",
-                                          command=self.on_content_radio_changed,
-                                          font=("Microsoft YaHei", 10))
+                                          command=self.on_content_radio_changed)
         self.rb_gaiding.pack(side=tk.LEFT)
-        self.rb_ding = tk.Radiobutton(dakai_row, text="待定",
-                                       state="disabled",
-                                       font=("Microsoft YaHei", 10))
+        self.rb_ding = ttk.Radiobutton(dakai_row, text="待定",
+                                       state="disabled")
         self.rb_ding.pack(side=tk.LEFT, padx=(8, 0))
+
+        # 使用 winnative 主题让单选按钮在未选中时显示空心圆
+        style = ttk.Style()
+        style.theme_use("winnative")
+        style.configure("TRadiobutton", font=("Microsoft YaHei", 10))
 
         # 一键导入
         self.import_widget = tk.Frame(left_frame, bg=BG)
