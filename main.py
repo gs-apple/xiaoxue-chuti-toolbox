@@ -1,13 +1,12 @@
 # main.py — 小学出题工具箱 (tkinter 版)
 import tkinter as tk
 from tkinter import ttk
-import sys
 
-from widgets import GradientButton
 from shuxue_ui import ShuxueTabWidget
 from zi_tie_ui import ZiTieTabWidget
 from zuowen_ui import ZuowenTabWidget
 from zhenti_ui import ZhentiTabWidget
+from constants import BG_COLOR
 
 
 class MathGeneratorApp:
@@ -30,41 +29,41 @@ class MathGeneratorApp:
         self.root.geometry(f"700x700+{x}+{y}")
 
     def _init_ui(self):
-        style = ttk.Style()
-        style.theme_use("default")
-        BG = "#f0f0f0"
-        self.root.configure(bg=BG)
-        style.configure("TFrame", background=BG)
-        style.configure("TLabelframe", background=BG)
-        style.configure("TLabelframe.Label", background=BG, font=("Microsoft YaHei", 10, "bold"))
-        style.configure("TNotebook", borderwidth=0, background=BG)
-        # 现代风选项卡
-        style.configure("TNotebook.Tab",
-                         font=("Microsoft YaHei", 11, "bold"),
-                         padding=[16, 6],
-                         background="#e2e8f0", foreground="#475569")
-        style.map("TNotebook.Tab",
-                   background=[("selected", "#2563eb"), ("active", "#cbd5e1")],
-                   foreground=[("selected", "#ffffff"), ("active", "#1e293b")])
+        self.root.configure(bg=BG_COLOR)
 
+        # 配置选项卡样式
+        style = ttk.Style()
+        style.configure("TNotebook",
+                        background=BG_COLOR,
+                        borderwidth=0)
+        style.configure("TNotebook.Tab",
+                        font=("Microsoft YaHei", 12),
+                        padding=[14, 3],
+                        background="#93c5fd",
+                        foreground="#000000")
+        style.map("TNotebook.Tab",
+                  background=[("selected", "#3b82f6"), ("active", "#60a5fa")],
+                  foreground=[("selected", "#000000"), ("active", "#000000")])
+
+        # 使用 ttk.Notebook
         notebook = ttk.Notebook(self.root)
-        notebook.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
+        notebook.pack(fill=tk.BOTH, expand=True, padx=6, pady=6)
 
         # 数学标签页
         self.math_tab = ShuxueTabWidget(notebook)
-        notebook.add(self.math_tab.frame, text="  数学  ")
+        notebook.add(self.math_tab.frame, text=" 数 学 ")
 
         # 字帖标签页
         self.zitie_tab = ZiTieTabWidget(notebook)
-        notebook.add(self.zitie_tab.frame, text="  字帖  ")
+        notebook.add(self.zitie_tab.frame, text=" 字 帖 ")
 
         # 作文标签页
         self.zuowen_tab = ZuowenTabWidget(notebook)
-        notebook.add(self.zuowen_tab.frame, text="  作文  ")
+        notebook.add(self.zuowen_tab.frame, text=" 作 文 ")
 
         # 真题下载标签页
         self.zhenti_tab = ZhentiTabWidget(notebook)
-        notebook.add(self.zhenti_tab.frame, text="  真题下载  ")
+        notebook.add(self.zhenti_tab.frame, text=" 真 题 ")
 
     def run(self):
         self.root.mainloop()

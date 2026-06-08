@@ -78,6 +78,44 @@ def _make_frac(den_min=2, den_max=12):
     num = random.randint(1, den - 1)
     return Fraction(num, den)
 
+def _safe_eval(expr: str):
+    """安全计算数学表达式，替代 eval()"""
+    import ast
+
+    # 只允许数字、运算符、括号、小数点、空格
+    allowed_chars = set('0123456789+-*/(). ')
+    if not all(c in allowed_chars for c in expr):
+        raise ValueError(f"表达式包含非法字符: {expr}")
+
+    # 使用 ast.literal_eval 无法处理表达式，使用 compile + exec
+    # 但限制只能使用数学运算
+    try:
+        # 编译表达式
+        code = compile(expr, '<string>', 'eval')
+        # 检查是否只包含数字和运算符
+        for node in ast.walk(code):
+            if isinstance(node, ast.Expression):
+                continue
+            elif isinstance(node, ast.BinOp):
+                if not isinstance(node.op, (ast.Add, ast.Sub, ast.Mult, ast.Div)):
+                    raise ValueError(f"不支持的运算符: {type(node.op).__name__}")
+            elif isinstance(node, ast.UnaryOp):
+                if not isinstance(node.op, (ast.UAdd, ast.USub)):
+                    raise ValueError(f"不支持的运算符: {type(node.op).__name__}")
+            elif isinstance(node, ast.Constant):
+                if not isinstance(node.value, (int, float)):
+                    raise ValueError(f"不支持的常量类型: {type(node.value).__name__}")
+            elif isinstance(node, ast.Num):  # Python 3.7 兼容
+                pass
+            else:
+                raise ValueError(f"不支持的语法: {type(node).__name__}")
+
+        # 安全执行
+        result = eval(code, {"__builtins__": {}}, {})
+        return result
+    except Exception as e:
+        raise ValueError(f"表达式计算失败: {expr}, 错误: {e}")
+
 FRAC_RE = re.compile(r'FRAC\[(\d+),(\d+)\]')
 
 # ══════════════════════════════════════════════════════════
@@ -95,7 +133,7 @@ CATEGORY_NAMES = {
     "cb_mix_addsub": "连加连减", "cb_mix_addmul": "加减乘", "cb_mix_addmulsub": "加减乘除",
     "cb_mix_dec": "小数混合", "cb_mix_frac": "分数混合",
     "cb_find_rule": "找规律填数", "cb_arithmetic": "等差数列", "cb_simple_calc": "简便运算",
-    "cb_frac_skill": "分数巧算", "cb_new_op": "定义新运算",
+    "cb_frac_skill": "分数运用", "cb_new_op": "比例应用",
     "cb_sum_diff": "和差倍", "cb_age": "年龄问题", "cb_tree": "植树问题",
     "cb_chicken_rabbit": "鸡兔同笼", "cb_duck": "盈亏问题",
     "cb_project": "工程问题", "cb_form": "行程问题", "cb_concentration": "浓度问题",
@@ -105,6 +143,7 @@ CATEGORY_NAMES = {
     "cb_prime": "质/合问题", "cb_gcd_lcm": "公约数/倍数",
     "cb_logic": "推理问题", "cb_arrange": "统筹问题", "cb_best": "最优化",
     "cb_draw": "抽屉问题", "cb_container": "容斥问题",
+    "cb_assign": "分配问题", "cb_measure": "测量计算",
 }
 
 ADVANCE_TYPES = {
@@ -114,6 +153,7 @@ ADVANCE_TYPES = {
     "cb_graph_count", "cb_graph_split", "cb_perimeter", "cb_3d_graph", "cb_equal_area",
     "cb_odd_even", "cb_whole_div", "cb_remainder", "cb_prime", "cb_gcd_lcm",
     "cb_logic", "cb_arrange", "cb_best", "cb_draw", "cb_container",
+    "cb_assign", "cb_measure",
 }
 
 # ══════════════════════════════════════════════════════════
@@ -573,9 +613,9 @@ class MathProblemGenerator:
                 else:
                     expr = f"{nums[0]} {ops[0]} {nums[1]} {ops[1]} {nums[2]} {ops[2]} {nums[3]} ="
 
-                # 使用 Python eval 计算答案（标准运算优先级）
+                # 使用安全的数学表达式计算（标准运算优先级）
                 eval_str = expr.rstrip(' =').replace('×', '*').replace('÷', '/')
-                ans = eval(eval_str)
+                ans = _safe_eval(eval_str)
 
                 # 结果检查
                 if ans is None or ans < 0 or ans > 9999:
@@ -628,7 +668,7 @@ class MathProblemGenerator:
                 temp = self._calc(a_val, op1, b_val)
                 ans = self._calc(temp, op2, c_val)
                 return expr, round(ans, 2)
-            except:
+            except Exception:
                 continue
         return "1.2+2.3=", 3.5
 
@@ -646,7 +686,7 @@ class MathProblemGenerator:
                 temp = (a_frac + b_frac) if op1 == '+' else (a_frac - b_frac)
                 ans = temp * c_frac
                 return expr, ans
-            except:
+            except Exception:
                 continue
         return f"{_frac(Fraction(1, 2))} + {_frac(Fraction(1, 2))} =", Fraction(1, 1)
 
@@ -730,59 +770,9 @@ class MathProblemGenerator:
             a = random.randint(2, 20)
             return f"{a}×50 =", a * 50
 
-    def gen_frac_skill(self):
-        v = random.randint(1, 4)
-        if v == 1:
-            n = random.randint(2, 8)
-            return f"1/{n} + 1/{n + 1} =", Fraction(1, n) + Fraction(1, n + 1)
-        elif v == 2:
-            den = random.randint(2, 6)
-            a = random.randint(1, den - 1)
-            b = den - a
-            return f"{_frac(Fraction(a, den))} + {_frac(Fraction(b, den))} = ____（用最简分数表示）", Fraction(1, 1)
-        elif v == 3:
-            a = random.randint(2, 8)
-            b = random.choice([4, 8, 12, 25])
-            return f"{a} × {Fraction(1, b)} + {a} × {Fraction(1, b)} =", a * Fraction(1, b) + a * Fraction(1, b)
-        else:
-            n = random.randint(2, 6)
-            total = Fraction(0)
-            parts = []
-            for i in range(1, n + 1):
-                total += Fraction(1, i)
-                parts.append(f"1/{i}")
-            return f"{' + '.join(parts)} = ____（用最简分数表示）", total
-
-    def gen_new_op(self):
-        v = random.randint(1, 6)
-        if v == 1:
-            a, b = random.randint(2, 9), random.randint(2, 9)
-            return f"定义 a △ b = a×b + a，求 {a} △ {b}", a * b + a
-        elif v == 2:
-            a, b = random.randint(2, 15), random.randint(2, 15)
-            if a > b:
-                return f"定义 a △ b = a+b（当a>b时），a×b（当a≤b时），求 {a} △ {b}", a + b
-            else:
-                return f"定义 a △ b = a+b（当a>b时），a×b（当a≤b时），求 {a} △ {b}", a * b
-        elif v == 3:
-            a = random.randint(1, 10)
-            b = random.randint(2, 6)
-            ans = b * a + b * (b - 1) // 2
-            return f"定义 a ★ b = a+(a+1)+…+(a+b-1)，求 {a} ★ {b}", ans
-        elif v == 4:
-            a = random.randint(2, 5)
-            b = random.randint(2, 3)
-            return f"定义 a ◆ b = a的b次方，求 {a} ◆ {b}", a ** b
-        elif v == 5:
-            a = random.randint(10, 999)
-            b = random.randint(1, 9)
-            digit_sum = sum(int(d) for d in str(a))
-            return f"定义 a ☆ b = a的各位数字之和 + b，求 {a} ☆ {b}", digit_sum + b
-        else:
-            a, b = random.randint(2, 9), random.randint(2, 9)
-            return f"定义 a ▲ b = a×b - a，求 {a} ▲ {b}", a * b - a
-
     def gen_sum_diff(self):
+        if random.random() < 0.35:
+            return self._gen_sum_diff_diff_multiple()
         v = random.randint(1, 3)
         if v == 1:
             total = random.randint(20, 200)
@@ -803,20 +793,55 @@ class MathProblemGenerator:
             big = small * ratio
             return f"甲乙两数之差是{diff}，甲是乙的{ratio}倍，求甲乙各是多少？", f"甲{big}，乙{small}"
 
+    def _gen_sum_diff_diff_multiple(self):
+        """差倍问题变种：确保差值能被(倍数-1)整除"""
+        v = random.randint(1, 5)
+        if v == 1:
+            ratio = random.randint(2, 6)
+            small = random.randint(5, 80)
+            big = small * ratio
+            diff = big - small
+            return f"两个数的差是{diff}，大数是小数的{ratio}倍，求这两个数。", f"{big}和{small}"
+        elif v == 2:
+            ratio = random.randint(2, 5)
+            small = random.randint(10, 100)
+            big = small * ratio
+            diff = big - small
+            return f"高年级比低年级多植{diff}棵树，且高年级植树数是低年级的{ratio}倍，求高低年级各植多少棵？", f"高年级{big}棵，低年级{small}棵"
+        elif v == 3:
+            ratio = random.randint(2, 4)
+            small = random.randint(5, 50)
+            big = small * ratio
+            diff = big - small
+            return f"哥哥比弟弟多{diff}元，哥哥的钱是弟弟的{ratio}倍，兄弟各有多少钱？", f"哥哥{big}元，弟弟{small}元"
+        elif v == 4:
+            ratio = random.randint(2, 5)
+            small = random.randint(10, 60)
+            big = small * ratio
+            diff = big - small
+            return f"甲仓比乙仓多存{diff}吨粮食，甲仓存粮是乙仓的{ratio}倍，两仓各存粮多少吨？", f"甲仓{big}吨，乙仓{small}吨"
+        else:
+            ratio = random.randint(2, 4)
+            small = random.randint(3, 30)
+            big = small * ratio
+            diff = big - small
+            return f"长方形的长比宽多{diff}厘米，长是宽的{ratio}倍，长和宽各是多少厘米？", f"长{big}厘米，宽{small}厘米"
+
     def gen_age(self):
+        if random.random() < 0.4:
+            return self._gen_age_future_multiple()
         v = random.randint(1, 4)
         if v == 1:
-            child = random.randint(5, 12)
-            years = random.randint(5, 15)
-            father_now = random.randint(28, 45)
-            child_then = child
-            father_then = father_now - years
-            ratio = father_then // child_then if child_then > 0 else 2
-            target_child = child_then
-            target_father = target_child * ratio
-            actual_father = father_now
-            real_ratio = (actual_father - years) / (child) if child > 0 else 2
-            return f"小明今年{child}岁，爸爸今年{father_now}岁，{years}年前爸爸的年龄是小明的几倍？", (father_now - years) // child
+            for _ in range(50):
+                child = random.randint(8, 14)
+                years = random.randint(2, child - 2)
+                father_now = child + random.randint(22, 35)
+                child_then = child - years
+                father_then = father_now - years
+                if child_then > 0 and father_then > 0 and father_then % child_then == 0:
+                    ratio = father_then // child_then
+                    return f"小明今年{child}岁，爸爸今年{father_now}岁，{years}年前爸爸的年龄是小明的几倍？", ratio
+            return "小明今年10岁，爸爸今年34岁，8年前爸爸的年龄是小明的几倍？", 13
         elif v == 2:
             child = random.randint(5, 12)
             father = child + random.randint(22, 35)
@@ -832,6 +857,60 @@ class MathProblemGenerator:
             diff = random.randint(22, 35)
             father = child + diff
             return f"爸爸比小明大{diff}岁，爸爸今年{father}岁，小明今年几岁？", child
+
+    def _gen_age_future_multiple(self):
+        """几年后倍数问题"""
+        v = random.randint(1, 5)
+        if v == 1:
+            for _ in range(100):
+                child = random.randint(5, 12)
+                father = child + random.randint(22, 30)
+                target = random.randint(2, 4)
+                num = father - target * child
+                den = target - 1
+                if den > 0 and num > 0 and num % den == 0:
+                    years = num // den
+                    if 0 < years <= 20:
+                        return f"小明今年{child}岁，爸爸今年{father}岁，几年后爸爸的年龄是小明的{target}倍？", years
+            return "小明今年8岁，爸爸今年36岁，几年后爸爸的年龄是小明的3倍？", 5
+        elif v == 2:
+            for _ in range(100):
+                a = random.randint(6, 14)
+                b = a + random.randint(2, 8)
+                target = random.randint(2, 3)
+                num = b - target * a
+                den = target - 1
+                if den > 0 and num > 0 and num % den == 0:
+                    years = num // den
+                    if 0 < years <= 15:
+                        return f"姐姐今年{b}岁，妹妹今年{a}岁，几年后姐姐的年龄是妹妹的{target}倍？", years
+            return "姐姐今年15岁，妹妹今年10岁，几年后姐姐的年龄是妹妹的2倍？", 5
+        elif v == 3:
+            for _ in range(100):
+                child = random.randint(6, 12)
+                father = child + random.randint(24, 32)
+                target = random.randint(2, 4)
+                num = target * child - father
+                den = target - 1
+                if den > 0 and num > 0 and num % den == 0:
+                    years = num // den
+                    if 0 < years < child:
+                        return f"小明今年{child}岁，爸爸今年{father}岁，几年前爸爸的年龄是小明的{target}倍？", years
+            return "小明今年10岁，爸爸今年34岁，几年前爸爸的年龄是小明的3倍？", 2
+        elif v == 4:
+            a = random.randint(3, 8)
+            b = a + random.randint(20, 30)
+            for t in random.sample(range(3, 7), 4):
+                y = (b - t * a) // (t - 1)
+                if y > 0 and y <= 20 and (b - t * a) % (t - 1) == 0:
+                    return f"儿子今年{a}岁，妈妈今年{b}岁，{y}年后妈妈的年龄是儿子的几倍？", t
+            return f"儿子今年5岁，妈妈今年25岁，5年后妈妈的年龄是儿子的几倍？", 3
+        else:
+            a = random.randint(8, 15)
+            b = a + random.randint(1, 5)
+            years = random.randint(3, 10)
+            target = (a + years) + (b + years)
+            return f"哥哥今年{a}岁，弟弟今年{b}岁，几年后两人年龄之和是{target}岁？", years
 
     def gen_tree(self):
         v = random.randint(1, 4)
@@ -894,6 +973,11 @@ class MathProblemGenerator:
             return f"笼中有鸡和兔共{heads}只，脚共{legs}只，兔有多少只？", rabbits
 
     def gen_duck(self):
+        r = random.random()
+        if r < 0.3:
+            return self._gen_profit_variant()
+        elif r < 0.55:
+            return self._gen_shopping_variant()
         v = random.randint(1, 6)
         if v == 1:
             people = random.randint(3, 15)
@@ -1516,6 +1600,351 @@ class MathProblemGenerator:
             both = a + b - total
             return f"一个班有{total}人，{a}人参加了美术组，{b}人参加了音乐组，两组都参加的至少有多少人？", both
 
+    # ==================== 分数运用（水桶加水类） ====================
+    def _find_frac_pair(self, a, b):
+        """为分数运用题找到合适的 n, m 对（n > m，结果为正且在合理范围内）"""
+        pairs = []
+        for n in range(2, 8):
+            for m in range(1, n):
+                num = b * m - a * n
+                den = n - m
+                if den > 0 and num > 0 and num % den == 0:
+                    ans = num // den
+                    if 1 <= ans <= 50:
+                        pairs.append((n, m))
+        if pairs:
+            return random.choice(pairs)
+        return None
+
+    def gen_frac_apply(self):
+        v = random.randint(1, 6)
+        if v == 1:
+            for _ in range(100):
+                a = random.randint(4, 20)
+                b = a + random.randint(4, 20)
+                pair = self._find_frac_pair(a, b)
+                if pair:
+                    n, m = pair
+                    ans = (b * m - a * n) // (n - m)
+                    return f"小桶装了{a}升水，大桶装了{b}升水，往两桶各增加同样多的水后，小桶的水是大桶的{n}分之{m}，各加了多少升水？", ans
+        elif v == 2:
+            for _ in range(100):
+                a = random.randint(5, 20)
+                b = a + random.randint(5, 25)
+                pair = self._find_frac_pair(a, b)
+                if pair:
+                    n, m = pair
+                    ans = (b * m - a * n) // (n - m)
+                    return f"甲瓶有果汁{a}毫升，乙瓶有果汁{b}毫升，两瓶各倒入同样多的果汁后，乙瓶是甲瓶的{n}分之{m}，各倒入了多少毫升？", ans
+        elif v == 3:
+            for _ in range(100):
+                a = random.randint(10, 30)
+                b = a + random.randint(10, 40)
+                pair = self._find_frac_pair(a, b)
+                if pair:
+                    n, m = pair
+                    ans = (b * m - a * n) // (n - m)
+                    return f"甲箱有苹果{a}个，乙箱有苹果{b}个，两箱各放入同样多的苹果后，乙箱是甲箱的{n}分之{m}，各放了多少个？", ans
+        elif v == 4:
+            for _ in range(100):
+                a = random.randint(8, 25)
+                b = a + random.randint(5, 20)
+                pair = self._find_frac_pair(a, b)
+                if pair:
+                    n, m = pair
+                    ans = (b * m - a * n) // (n - m)
+                    return f"书架上层有书{a}本，下层有书{b}本，从下层拿同样多的书到上层后，上层是下层的{n}分之{m}，拿了多少本？", ans
+        elif v == 5:
+            for _ in range(100):
+                a = random.randint(50, 150)
+                b = a + random.randint(20, 80)
+                pair = self._find_frac_pair(a, b)
+                if pair:
+                    n, m = pair
+                    ans = (b * m - a * n) // (n - m)
+                    return f"甲停车场有车{a}辆，乙停车场有车{b}辆，两停车场各增加同样多的车后，乙是甲的{n}分之{m}，各增加了多少辆？", ans
+        else:
+            for _ in range(100):
+                a = random.randint(20, 50)
+                b = a + random.randint(10, 30)
+                pair = self._find_frac_pair(a, b)
+                if pair:
+                    n, m = pair
+                    ans = (b * m - a * n) // (n - m)
+                    return f"一班有学生{a}人，二班有学生{b}人，两班各转来同样多的学生后，二班人数是一班的{n}分之{m}，各转来多少人？", ans
+        # 保底
+        return "小桶装了8升水，大桶装了14升水，往两桶各增加同样多的水后，小桶的水是大桶的7分之5，各加了多少升水？", 6
+
+    # ==================== 比例应用（图书馆比例类） ====================
+    def _find_ratio_add(self, init_m, init_f):
+        """找到合适的 fa:fb 和 ans，使得加入 ans 名女生后男女比变为 fa:fb"""
+        from math import gcd as _gcd
+        clean_ratios = [(1,2),(1,3),(1,4),(1,5),(2,3),(2,5),(3,4),(3,5),(3,7),(4,5),(4,7)]
+        random.shuffle(clean_ratios)
+        for fa, fb in clean_ratios:
+            # init_m / (init_f + ans) = fa / fb
+            # ans = (init_m * fb - init_f * fa) / fa
+            num = init_m * fb - init_f * fa
+            if num > 0 and num % fa == 0:
+                ans = num // fa
+                if 2 <= ans <= 30:
+                    return fa, fb, ans
+        return None
+
+    def gen_ratio_apply(self):
+        from math import gcd as _gcd
+        v = random.randint(1, 6)
+        if v == 1:
+            for _ in range(100):
+                total = random.randint(27, 54)
+                a, b = 4, 5
+                while total % (a + b) != 0:
+                    total += 1
+                init_m = total * a // (a + b)
+                init_f = total - init_m
+                result = self._find_ratio_add(init_m, init_f)
+                if result:
+                    fa, fb, ans = result
+                    return f"图书馆有{total}人看书，男女之比是{a}:{b}，后来又来了一些女生，男女之比变为{fa}:{fb}，来了多少女生？", ans
+        elif v == 2:
+            for _ in range(100):
+                total = random.randint(20, 50)
+                a, b = 3, 5
+                while total % (a + b) != 0:
+                    total += 1
+                init_m = total * a // (a + b)
+                init_f = total - init_m
+                result = self._find_ratio_add(init_m, init_f)
+                if result:
+                    fa, fb, ans = result
+                    return f"阅览室有{total}人，男女之比是{a}:{b}，又来了一些女生后男女之比变为{fa}:{fb}，来了多少女生？", ans
+        elif v == 3:
+            for _ in range(100):
+                total = random.randint(24, 60)
+                a, b = 2, 4
+                while total % (a + b) != 0:
+                    total += 1
+                init_m = total * a // (a + b)
+                init_f = total - init_m
+                result = self._find_ratio_add(init_m, init_f)
+                if result:
+                    fa, fb, ans = result
+                    return f"兴趣小组有{total}人，男女之比是{a}:{b}，又加入一些女生后男女之比变为{fa}:{fb}，加入多少女生？", ans
+        elif v == 4:
+            for _ in range(100):
+                init_m = random.randint(10, 25)
+                init_f = random.randint(10, 25)
+                result = self._find_ratio_add(init_m, init_f)
+                if result:
+                    fa, fb, ans = result
+                    return f"阅览室有男{init_m}人女{init_f}人，又来了一些女生后男女之比变为{fa}:{fb}，来了多少女生？", ans
+        elif v == 5:
+            for _ in range(100):
+                init_m = random.randint(12, 30)
+                init_f = random.randint(12, 30)
+                leave_m = random.randint(1, max(1, init_m // 3))
+                final_m = init_m - leave_m
+                final_f = init_f
+                if final_m > 0 and final_f > 0:
+                    g = _gcd(final_m, final_f)
+                    fa, fb = final_m // g, final_f // g
+                    return f"教室里有男{init_m}人女{init_f}人，走了几名男生后男女之比变为{fa}:{fb}，走了多少男生？", leave_m
+        else:
+            for _ in range(100):
+                init_m = random.randint(10, 25)
+                init_f = random.randint(10, 25)
+                result = self._find_ratio_add(init_m, init_f)
+                if result:
+                    fa, fb, ans = result
+                    return f"班里有男生{init_m}人，女生{init_f}人，又来了一些女生后男女之比变为{fa}:{fb}，来了多少女生？", ans
+        # 保底
+        return "图书馆有36人看书，男女之比是5:4，后来又来了一些女生，男女之比变为1:3，来了多少女生？", 9
+
+    # ==================== 分配问题 ====================
+    def gen_assign(self):
+        v = random.randint(1, 5)
+        if v == 1:
+            total = random.randint(30, 99)
+            give = random.randint(5, total - 6)
+            n = random.randint(2, 6)
+            remain = total - give
+            while remain % n != 0:
+                give = random.randint(5, total - 6)
+                remain = total - give
+            ans = remain // n
+            names = [("小明", "小红"), ("小华", "小丽"), ("哥哥", "弟弟"), ("姐姐", "妹妹")]
+            a, b = random.choice(names)
+            items = ["故事书", "漫画书", "笔记本", "彩笔", "贴纸"]
+            item = random.choice(items)
+            return f"{a}有{total}本{item}，借给{b}{give}本后，剩下的平均分给{n}个小朋友，每个小朋友得到多少本？", ans
+        elif v == 2:
+            total = random.randint(50, 200)
+            give = random.randint(10, total - 10)
+            n = random.randint(2, 5)
+            remain = total - give
+            while remain % n != 0:
+                give = random.randint(10, total - 10)
+                remain = total - give
+            ans = remain // n
+            items = [("苹果", "个"), ("糖果", "颗"), ("饼干", "块"), ("橘子", "个")]
+            item, unit = random.choice(items)
+            return f"妈妈买了{total}{unit}{item}，送给邻居{give}{unit}后，剩下的平均分给{n}个孩子，每人分到多少{unit}？", ans
+        elif v == 3:
+            a = random.randint(20, 80)
+            b = random.randint(20, 80)
+            n = random.randint(2, 5)
+            total = a + b
+            while total % n != 0:
+                b = random.randint(20, 80)
+                total = a + b
+            ans = total // n
+            return f"两个书架共有{total}本书，第一个书架有{a}本，第二个书架有{b}本。平均分给{n}个班级，每班分到多少本？", ans
+        elif v == 4:
+            per = random.randint(5, 15)
+            n = random.randint(3, 8)
+            total = per * n + random.randint(1, n - 1)
+            q, r = divmod(total, n)
+            return f"把{total}个苹果平均分给{n}个小朋友，每人分几个？还剩几个？", f"{q}个剩{r}个"
+        else:
+            total = random.randint(100, 500)
+            n = random.randint(4, 8)
+            while total % n != 0:
+                total += 1
+            ans = total // n
+            return f"学校买了{total}本作业本，平均分给{n}个班，每班分到多少本？", ans
+
+    # ==================== 测量计算 ====================
+    def gen_measure(self):
+        v = random.randint(1, 5)
+        if v == 1:
+            total = round(random.uniform(3, 15), 2)
+            mud = round(random.uniform(0.1, 2), 2)
+            air = round(random.uniform(0.5, 3), 2)
+            water = round(total - mud - air, 2)
+            while water <= 0:
+                mud = round(random.uniform(0.1, 1), 2)
+                air = round(random.uniform(0.3, 2), 2)
+                water = round(total - mud - air, 2)
+            return f"把{total}米长的竹竿插入水池中，竹竿入泥部分是{mud}米，露出水面部分是{air}米，水池中水深多少米？", water
+        elif v == 2:
+            total = round(random.uniform(1, 5), 2)
+            a = round(random.uniform(0.1, total / 2), 2)
+            b = round(total - a - round(random.uniform(0.1, total / 3), 2), 2)
+            c = round(total - a - b, 2)
+            while c <= 0:
+                a = round(random.uniform(0.1, total / 3), 2)
+                b = round(random.uniform(0.1, total / 3), 2)
+                c = round(total - a - b, 2)
+            return f"一根绳子长{total}米，第一次用去{a}米，第二次用去{b}米，还剩多少米？", c
+        elif v == 3:
+            a = round(random.uniform(10, 50), 2)
+            b = round(random.uniform(10, 50), 2)
+            return f"一桶油重{a}千克，用去{b}千克后，桶和油共重多少千克？（桶重2.5千克）", round(a - b + 2.5, 2)
+        elif v == 4:
+            length = round(random.uniform(50, 200), 1)
+            width = round(random.uniform(20, 80), 1)
+            return f"一块长方形菜地长{length}米，宽{width}米，周长是多少米？", round(2 * (length + width), 1)
+        else:
+            a = round(random.uniform(1, 10), 2)
+            b = round(random.uniform(1, 10), 2)
+            c = round(random.uniform(0.5, 5), 2)
+            ans = round(a + b + c, 2)
+            return f"三根铁丝分别长{a}米、{b}米、{c}米，接在一起共长多少米？", ans
+
+    # ==================== 盈亏计算（内部变种） ====================
+    def _gen_profit_variant(self):
+        v = random.randint(1, 5)
+        if v == 1:
+            total = random.randint(30, 100)
+            cost = random.randint(50, 150)
+            sell = cost + random.randint(10, 50)
+            sold1 = random.randint(total // 3, total * 2 // 3)
+            sell2 = cost - random.randint(5, 30)
+            sold2 = total - sold1
+            income = sold1 * sell + sold2 * sell2
+            expense = total * cost
+            profit = income - expense
+            result = "盈利" if profit > 0 else "亏损" if profit < 0 else "不亏不赚"
+            return f"某商店购进{total}件衣服，每件进价{cost}元。实际销售时每件售价{sell}元，卖出{sold1}件后降到{sell2}元销售，结果全部售出。该商店是盈利了还是亏损了？盈亏多少元？", f"{result}{abs(profit)}元"
+        elif v == 2:
+            cost = random.randint(5, 30)
+            sell = cost + random.randint(2, 10)
+            n = random.randint(10, 50)
+            profit = (sell - cost) * n
+            return f"某商店每支笔进价{cost}元，售价{sell}元，卖出{n}支后盈利多少元？", f"{profit}元"
+        elif v == 3:
+            cost = random.randint(20, 100)
+            sell = cost - random.randint(2, 15)
+            n = random.randint(10, 30)
+            loss = (cost - sell) * n
+            return f"某商店每件商品进价{cost}元，清仓价{sell}元，卖出{n}件后亏损多少元？", f"{loss}元"
+        elif v == 4:
+            cost1 = random.randint(30, 80)
+            sell1 = cost1 + random.randint(5, 20)
+            n1 = random.randint(10, 30)
+            cost2 = random.randint(30, 80)
+            sell2 = cost2 - random.randint(5, 15)
+            n2 = random.randint(10, 30)
+            profit1 = (sell1 - cost1) * n1
+            profit2 = (sell2 - cost2) * n2
+            total_profit = profit1 + profit2
+            result = "盈利" if total_profit > 0 else "亏损" if total_profit < 0 else "不亏不赚"
+            return f"商店卖出A商品{n1}件，每件进价{cost1}元售价{sell1}元；卖出B商品{n2}件，每件进价{cost2}元售价{sell2}元。总的是盈利还是亏损？", f"{result}{abs(total_profit)}元"
+        else:
+            cost = random.randint(50, 200)
+            profit_total = random.randint(100, 500)
+            sell = random.randint(cost + 5, cost + 30)
+            n = profit_total // (sell - cost)
+            while n <= 0 or (sell - cost) * n != profit_total:
+                sell = cost + random.randint(5, 20)
+                n = profit_total // (sell - cost) if sell > cost else 0
+            return f"某商品进价{cost}元，售价{sell}元，要盈利{profit_total}元需卖出多少件？", n
+
+    # ==================== 购物计算（内部变种） ====================
+    def _gen_shopping_variant(self):
+        v = random.randint(1, 5)
+        if v == 1:
+            n = random.randint(50, 200)
+            p1 = random.randint(5, 15)
+            p2 = random.randint(5, 15)
+            while p2 == p1:
+                p2 = random.randint(5, 15)
+            total = n * p1 + n * p2
+            names = [("《儿童文学》", "《当代小学生》"), ("《数学报》", "《语文报》"),
+                     ("铅笔", "橡皮"), ("笔记本", "文具盒"), ("苹果", "香蕉")]
+            a, b = random.choice(names)
+            return f"学校要购进{a}和{b}各{n}本，{a}每本{p1}元，{b}每本{p2}元。一共需要花多少元？", total
+        elif v == 2:
+            n1 = random.randint(10, 50)
+            p1 = random.randint(5, 30)
+            n2 = random.randint(10, 50)
+            p2 = random.randint(5, 30)
+            total = n1 * p1 + n2 * p2
+            return f"商店卖出苹果{n1}千克，每千克{p1}元；卖出香蕉{n2}千克，每千克{p2}元。共收入多少元？", total
+        elif v == 3:
+            n = random.randint(5, 20)
+            p = random.randint(10, 100)
+            pay = random.randint(p * n, p * n + 200)
+            total = n * p
+            change = pay - total
+            return f"买{n}个单价{p}元的商品，付{pay}元应找回多少元？", change
+        elif v == 4:
+            n = random.randint(2, 8)
+            p = random.randint(10, 50)
+            total = n * p
+            discount = random.choice([8, 9])
+            actual = total * discount // 10
+            return f"买{n}个单价{p}元的商品，打{discount}折后需付多少元？", actual
+        else:
+            p1 = random.randint(5, 20)
+            p2 = random.randint(5, 20)
+            n1 = random.randint(5, 20)
+            n2 = random.randint(5, 20)
+            total1 = n1 * p1
+            total2 = n2 * p2
+            diff = abs(total1 - total2)
+            return f"甲买了{n1}本单价{p1}元的书，乙买了{n2}本单价{p2}元的书，甲比乙多花多少元？", diff
+
 
 # ══════════════════════════════════════════════════════════
 #  题型 → 生成方法映射
@@ -1533,7 +1962,7 @@ _GENERATOR_MAP = {
     "cb_mix_addmulsub": "gen_mix_addmulsub", "cb_mix_dec": "gen_mix_decimal",
     "cb_mix_frac": "gen_mix_fraction",
     "cb_find_rule": "gen_find_rule", "cb_arithmetic": "gen_arithmetic",
-    "cb_simple_calc": "gen_simple_calc", "cb_frac_skill": "gen_frac_skill", "cb_new_op": "gen_new_op",
+    "cb_simple_calc": "gen_simple_calc", "cb_frac_skill": "gen_frac_apply", "cb_new_op": "gen_ratio_apply",
     "cb_sum_diff": "gen_sum_diff", "cb_age": "gen_age", "cb_tree": "gen_tree",
     "cb_chicken_rabbit": "gen_chicken_rabbit", "cb_duck": "gen_duck",
     "cb_project": "gen_project", "cb_form": "gen_form", "cb_concentration": "gen_concentration",
@@ -1543,6 +1972,7 @@ _GENERATOR_MAP = {
     "cb_prime": "gen_prime", "cb_gcd_lcm": "gen_gcd_lcm",
     "cb_logic": "gen_logic", "cb_arrange": "gen_arrange", "cb_best": "gen_best",
     "cb_draw": "gen_draw", "cb_container": "gen_container",
+    "cb_assign": "gen_assign", "cb_measure": "gen_measure",
 }
 
 _BRACKET_TYPES = {"cb_mix_addsub", "cb_mix_addmul", "cb_mix_addmulsub", "cb_mix_dec", "cb_mix_frac"}
@@ -1567,7 +1997,7 @@ def generate_questions(selections, use_bracket=False, grade=None, use_spider=Tru
     spider_questions = []
     if use_spider and grade and grade in range(1, 7):
         try:
-            from spider.integration import get_spider_questions
+            from zhenti_core import get_spider_questions
             advance_types = [t for t in selections.keys() if t in ADVANCE_TYPES]
             spider_count = int(sum(selections.get(t, 0) for t in advance_types) * spider_ratio)
             if spider_count > 0:
@@ -1644,30 +2074,32 @@ GRADE_CONFIG = {
     ],
     "三年级": [
         # 基础60%
-        ("cb_100in", 5), ("cb_mul_2x1", 5), ("cb_div_1digit", 4), ("cb_mix_addmulsub", 4),
-        # 提升40%
-        ("cb_find_rule", 4), ("cb_tree", 3), ("cb_arithmetic", 3), ("cb_odd_even", 2),
+        ("cb_100in", 4), ("cb_mul_2x1", 4), ("cb_div_1digit", 3), ("cb_mix_addmulsub", 4),
+        # 提升40%：和差倍(含差倍变种)
+        ("cb_sum_diff", 4), ("cb_find_rule", 2), ("cb_tree", 2),
+        ("cb_arithmetic", 2), ("cb_odd_even", 1), ("cb_age", 2),
     ],
     "四年级": [
         # 基础60%
-        ("cb_10000in", 4), ("cb_mul_2x2", 4), ("cb_div_2digit", 4),
+        ("cb_10000in", 4), ("cb_mul_2x2", 4), ("cb_div_2digit", 3),
         ("cb_mix_addmulsub", 3), ("cb_simple_calc", 3),
-        # 提升40%
-        ("cb_sum_diff", 4), ("cb_perimeter", 3), ("cb_chicken_rabbit", 3), ("cb_age", 2),
+        # 提升40%：年龄问题(含几年后倍数) + 盈亏(含购物) + 应用题
+        ("cb_age", 3), ("cb_sum_diff", 2), ("cb_chicken_rabbit", 2),
+        ("cb_duck", 3), ("cb_assign", 2), ("cb_measure", 2),
     ],
     "五年级": [
         # 基础60%
         ("cb_dec_addsub", 4), ("cb_mul_dec", 4), ("cb_div_dec", 3),
         ("cb_frac_addsub", 3), ("cb_mix_dec", 4),
         # 提升40%
-        ("cb_project", 3), ("cb_form", 3), ("cb_concentration", 3), ("cb_3d_graph", 3),
+        ("cb_project", 3), ("cb_form", 3), ("cb_frac_skill", 2), ("cb_3d_graph", 3),
     ],
     "六年级": [
         # 基础60%
         ("cb_frac_addsub", 4), ("cb_mix_frac", 3), ("cb_simple_calc", 4),
         ("cb_mul_frac", 4), ("cb_div_frac", 3),
         # 提升40%
-        ("cb_frac_skill", 3), ("cb_new_op", 3), ("cb_gcd_lcm", 3), ("cb_best", 3),
+        ("cb_new_op", 3), ("cb_gcd_lcm", 3), ("cb_best", 3), ("cb_container", 3),
     ],
 }
 def generate_quick_questions(grade, count):
@@ -1712,3 +2144,960 @@ def _fmt_answer(ans) -> str:
         return _frac(frac)
     else:
         return str(ans)
+
+
+# ══════════════════════════════════════════════════════════
+#  几何题图形绘制模块 (原 shuxue_drawings.py)
+# ══════════════════════════════════════════════════════════
+
+from dataclasses import dataclass
+from typing import Optional
+
+@dataclass
+class DrawingSpec:
+    shape_type: str
+    params: dict
+    figure_height_mm: float
+
+GEOMETRY_QUESTION_TYPES = {
+    "cb_perimeter", "cb_3d_graph", "cb_equal_area",
+    "cb_graph_count", "cb_graph_split",
+}
+
+FIGURE_HEIGHTS = {
+    "rectangle": 16, "square": 16, "triangle": 16, "circle": 16,
+    "cube": 18, "prism": 18,
+    "eq_tri_para": 17, "eq_tri_trap": 17, "eq_para_rect": 17,
+    "points_circle": 18, "line_grid": 16, "rect_grid": 16,
+    "line_segment": 12, "circle_lines": 17, "cell_grid": 16,
+}
+
+def _extract_perimeter(text: str) -> Optional[DrawingSpec]:
+    m = re.search(r'长方形长(\d+)厘米宽(\d+)厘米', text)
+    if m:
+        return DrawingSpec("rectangle", {"l": int(m.group(1)), "w": int(m.group(2))}, 25)
+    m = re.search(r'正方形边长(\d+)厘米', text)
+    if m:
+        return DrawingSpec("square", {"s": int(m.group(1))}, 25)
+    m = re.search(r'三角形底(\d+)厘米[，,]高(\d+)厘米', text)
+    if m:
+        return DrawingSpec("triangle", {"b": int(m.group(1)), "h": int(m.group(2))}, 25)
+    m = re.search(r'圆的半径是(\d+)厘米', text)
+    if m:
+        return DrawingSpec("circle", {"r": int(m.group(1))}, 25)
+    return None
+
+def _extract_3d(text: str) -> Optional[DrawingSpec]:
+    m = re.search(r'棱长(\d+)厘米的正方体', text)
+    if m:
+        return DrawingSpec("cube", {"a": int(m.group(1))}, 30)
+    m = re.search(r'长方体长(\d+)厘米[、,]宽(\d+)厘米[、,]高(\d+)厘米', text)
+    if m:
+        return DrawingSpec("prism", {"l": int(m.group(1)), "w": int(m.group(2)), "h": int(m.group(3))}, 30)
+    return None
+
+def _extract_equal_area(text: str) -> Optional[DrawingSpec]:
+    if '三角形' in text and '平行四边形' in text:
+        return DrawingSpec("eq_tri_para", {"text": text}, 28)
+    if '三角形' in text and '梯形' in text:
+        return DrawingSpec("eq_tri_trap", {"text": text}, 28)
+    if '平行四边形' in text and '长方形' in text:
+        return DrawingSpec("eq_para_rect", {"text": text}, 28)
+    return None
+
+def _extract_graph_count(text: str) -> Optional[DrawingSpec]:
+    m = re.search(r'(\d+)个点两两连线', text)
+    if m:
+        return DrawingSpec("points_circle", {"n": int(m.group(1))}, 30)
+    m = re.search(r'(\d+)条横线和(\d+)条竖线', text)
+    if m:
+        return DrawingSpec("line_grid", {"h": int(m.group(1)), "v": int(m.group(2))}, 25)
+    m = re.search(r'(\d+)行(\d+)列的方格网', text)
+    if m:
+        return DrawingSpec("rect_grid", {"rows": int(m.group(1)), "cols": int(m.group(2))}, 25)
+    return None
+
+def _extract_graph_split(text: str) -> Optional[DrawingSpec]:
+    m = re.search(r'一条线段[，,](\d+)个点', text)
+    if m:
+        return DrawingSpec("line_segment", {"n": int(m.group(1))}, 18)
+    m = re.search(r'圆内画(\d+)条直线', text)
+    if m:
+        return DrawingSpec("circle_lines", {"n": int(m.group(1))}, 28)
+    m = re.search(r'(\d+)行(\d+)列的方格图', text)
+    if m:
+        return DrawingSpec("cell_grid", {"rows": int(m.group(1)), "cols": int(m.group(2))}, 25)
+    return None
+
+_EXTRACTORS = {
+    "cb_perimeter": _extract_perimeter,
+    "cb_3d_graph": _extract_3d,
+    "cb_equal_area": _extract_equal_area,
+    "cb_graph_count": _extract_graph_count,
+    "cb_graph_split": _extract_graph_split,
+}
+
+def extract_drawing_spec(q_type: str, question_text: str) -> Optional[DrawingSpec]:
+    extractor = _EXTRACTORS.get(q_type)
+    if extractor:
+        return extractor(question_text)
+    return None
+
+def _dim_label(c, x, y, text, font, size=8):
+    c.setFont(font, size)
+    c.drawCentredString(x, y, text)
+
+def _dashed_line(c, x1, y1, x2, y2):
+    c.saveState()
+    c.setDash([2, 2])
+    c.setLineWidth(0.3)
+    c.line(x1, y1, x2, y2)
+    c.restoreState()
+
+def draw_rectangle(c, x, y, w, h, params):
+    l, wd = params["l"], params["w"]
+    fn = c._fontname if hasattr(c, '_fontname') else 'SimSun'
+    avail_w = w - 4
+    avail_h = h - 14
+    scale = min(avail_w / l, avail_h / wd)
+    rw, rh = l * scale, wd * scale
+    rx = x + (w - rw) / 2
+    ry = y + 8
+    c.setLineWidth(0.6)
+    c.rect(rx, ry, rw, rh)
+    _dim_label(c, rx + rw / 2, ry - 10, f"{l}cm", fn, 8)
+    c.saveState()
+    c.translate(rx - 4, ry + rh / 2)
+    c.rotate(90)
+    _dim_label(c, 0, 0, f"{wd}cm", fn, 8)
+    c.restoreState()
+
+def draw_square(c, x, y, w, h, params):
+    s = params["s"]
+    fn = c._fontname if hasattr(c, '_fontname') else 'SimSun'
+    avail = min(w - 4, h - 14)
+    ss = min(avail, s * (avail / max(s, 1)))
+    rx = x + (w - ss) / 2
+    ry = y + 8
+    c.setLineWidth(0.6)
+    c.rect(rx, ry, ss, ss)
+    _dim_label(c, rx + ss / 2, ry - 10, f"{s}cm", fn, 8)
+
+def draw_triangle(c, x, y, w, h, params):
+    b, ht = params["b"], params["h"]
+    fn = c._fontname if hasattr(c, '_fontname') else 'SimSun'
+    avail_w = w - 4
+    avail_h = h - 14
+    scale = min(avail_w / b, avail_h / ht)
+    sb, sh = b * scale, ht * scale
+    cx = x + w / 2
+    by = y + 8
+    pts = [(cx - sb / 2, by), (cx + sb / 2, by), (cx, by + sh)]
+    p = c.beginPath()
+    p.moveTo(*pts[0])
+    p.lineTo(*pts[1])
+    p.lineTo(*pts[2])
+    p.close()
+    c.drawPath(p, stroke=1, fill=0)
+    _dashed_line(c, cx, by + sh, cx, by)
+    _dim_label(c, cx, by - 10, f"{b}cm", fn, 8)
+    c.saveState()
+    c.translate(cx + 3, by + sh / 2)
+    c.rotate(90)
+    _dim_label(c, 0, 0, f"{ht}cm", fn, 8)
+    c.restoreState()
+
+def draw_circle(c, x, y, w, h, params):
+    r = params["r"]
+    fn = c._fontname if hasattr(c, '_fontname') else 'SimSun'
+    avail = min(w - 4, h - 16) / 2
+    sr = min(avail, r * (avail / max(r, 1)))
+    cx = x + w / 2
+    cy = y + 8 + sr
+    c.setLineWidth(0.6)
+    c.circle(cx, cy, sr)
+    c.line(cx, cy, cx + sr, cy)
+    _dim_label(c, cx + sr / 2, cy + 4, f"r={r}cm", fn, 8)
+
+def draw_cube(c, x, y, w, h, params):
+    a = params["a"]
+    fn = c._fontname if hasattr(c, '_fontname') else 'SimSun'
+    avail_w = w - 6
+    avail_h = h - 14
+    max_a = min(avail_w / 1.35, avail_h)
+    sa = min(max_a, a * (max_a / max(a, 1)))
+    ox = sa * 0.35
+    oy = sa * 0.35
+    bx = x + (w - sa - ox) / 2
+    by = y + 8
+    c.setLineWidth(0.6)
+    c.rect(bx, by, sa, sa)
+    c.rect(bx + ox, by + oy, sa, sa)
+    c.line(bx, by, bx + ox, by + oy)
+    c.line(bx + sa, by, bx + sa + ox, by + oy)
+    c.line(bx, by + sa, bx + ox, by + sa + oy)
+    c.line(bx + sa, by + sa, bx + sa + ox, by + sa + oy)
+    _dim_label(c, bx + sa / 2, by - 10, f"{a}cm", fn, 8)
+
+def draw_prism(c, x, y, w, h, params):
+    l, wd, ht = params["l"], params["w"], params["h"]
+    fn = c._fontname if hasattr(c, '_fontname') else 'SimSun'
+    avail_w = w - 6
+    avail_h = h - 14
+    max_dim = min(avail_w / 1.4, avail_h)
+    scale = max_dim / max(l, wd, ht, 1)
+    sl, sw, sh = l * scale, wd * scale, ht * scale
+    ox, oy = sw * 0.4, sw * 0.3
+    bx = x + (w - sl - ox) / 2
+    by = y + 8
+    c.setLineWidth(0.6)
+    c.rect(bx, by, sl, sh)
+    c.rect(bx + ox, by + oy, sl, sh)
+    c.line(bx, by, bx + ox, by + oy)
+    c.line(bx + sl, by, bx + sl + ox, by + oy)
+    c.line(bx, by + sh, bx + ox, by + sh + oy)
+    c.line(bx + sl, by + sh, bx + sl + ox, by + sh + oy)
+    _dim_label(c, bx + sl / 2, by - 10, f"{l}cm", fn, 8)
+
+def draw_eq_tri_para(c, x, y, w, h, params):
+    fn = c._fontname if hasattr(c, '_fontname') else 'SimSun'
+    c.setLineWidth(0.6)
+    half_w = w / 2 - 2
+    tx = x + 1
+    ty = y + 6
+    tw, th = half_w - 2, h - 14
+    p = c.beginPath()
+    p.moveTo(tx, ty)
+    p.lineTo(tx + tw, ty)
+    p.lineTo(tx + tw / 2, ty + th)
+    p.close()
+    c.drawPath(p, stroke=1, fill=0)
+    _dim_label(c, tx + tw / 2, ty + th + 4, "S", fn, 9)
+    px = x + half_w + 4
+    pw, ph = half_w - 2, th * 0.65
+    skew = tw * 0.2
+    p2 = c.beginPath()
+    p2.moveTo(px + skew, ty + ph)
+    p2.lineTo(px + skew + pw, ty + ph)
+    p2.lineTo(px + pw, ty)
+    p2.lineTo(px, ty)
+    p2.close()
+    c.drawPath(p2, stroke=1, fill=0)
+    _dim_label(c, px + pw / 2 + skew / 2, ty + ph + 4, "S", fn, 9)
+    c.saveState()
+    c.setDash([2, 2])
+    c.line(x + w / 2 - 2, ty + th + 10, x + w / 2 - 2, ty - 2)
+    c.restoreState()
+
+def draw_eq_tri_trap(c, x, y, w, h, params):
+    fn = c._fontname if hasattr(c, '_fontname') else 'SimSun'
+    c.setLineWidth(0.6)
+    half_w = w / 2 - 2
+    tx, ty = x + 1, y + 6
+    tw, th = half_w - 2, h - 14
+    p = c.beginPath()
+    p.moveTo(tx, ty)
+    p.lineTo(tx + tw, ty)
+    p.lineTo(tx + tw / 2, ty + th)
+    p.close()
+    c.drawPath(p, stroke=1, fill=0)
+    _dim_label(c, tx + tw / 2, ty + th + 4, "S", fn, 9)
+    px = x + half_w + 4
+    pw, ph = half_w - 2, th * 0.7
+    p2 = c.beginPath()
+    p2.moveTo(px, ty)
+    p2.lineTo(px + pw, ty)
+    p2.lineTo(px + pw * 0.7, ty + ph)
+    p2.lineTo(px + pw * 0.3, ty + ph)
+    p2.close()
+    c.drawPath(p2, stroke=1, fill=0)
+    _dim_label(c, px + pw / 2, ty + ph + 4, "S", fn, 9)
+
+def draw_eq_para_rect(c, x, y, w, h, params):
+    fn = c._fontname if hasattr(c, '_fontname') else 'SimSun'
+    c.setLineWidth(0.6)
+    half_w = w / 2 - 2
+    tx, ty = x + 1, y + 6
+    tw, th = half_w - 2, h - 14
+    skew = tw * 0.2
+    p = c.beginPath()
+    p.moveTo(tx + skew, ty + th)
+    p.lineTo(tx + skew + tw, ty + th)
+    p.lineTo(tx + tw, ty)
+    p.lineTo(tx, ty)
+    p.close()
+    c.drawPath(p, stroke=1, fill=0)
+    _dim_label(c, tx + tw / 2 + skew / 2, ty + th + 4, "S", fn, 9)
+    px = x + half_w + 4
+    pw, ph = half_w - 2, th
+    c.rect(px, ty, pw, ph)
+    _dim_label(c, px + pw / 2, ty + ph + 4, "S", fn, 9)
+
+def draw_points_circle(c, x, y, w, h, params):
+    n = min(params["n"], 8)
+    cx = x + w / 2
+    cy = y + h / 2
+    r = min(w - 8, h - 16) / 2
+    c.setLineWidth(0.3)
+    for i in range(n):
+        a1 = 2 * math.pi * i / n
+        for j in range(i + 1, n):
+            a2 = 2 * math.pi * j / n
+            c.line(cx + r * math.cos(a1), cy + r * math.sin(a1),
+                   cx + r * math.cos(a2), cy + r * math.sin(a2))
+    c.setLineWidth(0.6)
+    for i in range(n):
+        a = 2 * math.pi * i / n
+        c.circle(cx + r * math.cos(a), cy + r * math.sin(a), 2, stroke=1, fill=1)
+
+def draw_line_grid(c, x, y, w, h, params):
+    hv, vv = params["h"], params["v"]
+    pad = 4
+    gw, gh = w - 2 * pad, h - 2 * pad - 6
+    c.setLineWidth(0.5)
+    for i in range(hv):
+        yy = y + pad + gh * i / max(hv - 1, 1)
+        c.line(x + pad, yy, x + pad + gw, yy)
+    for j in range(vv):
+        xx = x + pad + gw * j / max(vv - 1, 1)
+        c.line(xx, y + pad, xx, y + pad + gh)
+
+def draw_rect_grid(c, x, y, w, h, params):
+    rows, cols = params["rows"], params["cols"]
+    pad = 4
+    gw, gh = w - 2 * pad, h - 2 * pad - 6
+    cw, ch = gw / cols, gh / rows
+    c.setLineWidth(0.5)
+    for i in range(rows + 1):
+        c.line(x + pad, y + pad + ch * i, x + pad + gw, y + pad + ch * i)
+    for j in range(cols + 1):
+        c.line(x + pad + cw * j, y + pad, x + pad + cw * j, y + pad + gh)
+
+def draw_line_segment(c, x, y, w, h, params):
+    n = params["n"]
+    pad = 6
+    sx, ex = x + pad, x + w - pad
+    sy = y + h / 2
+    c.setLineWidth(0.6)
+    c.line(sx, sy, ex, sy)
+    c.circle(sx, sy, 2.5, stroke=1, fill=1)
+    c.circle(ex, sy, 2.5, stroke=1, fill=1)
+    c.setLineWidth(0.5)
+    for i in range(1, n + 1):
+        px = sx + (ex - sx) * i / (n + 1)
+        c.circle(px, sy, 2, stroke=1, fill=1)
+
+def draw_circle_lines(c, x, y, w, h, params):
+    n = min(params["n"], 6)
+    cx = x + w / 2
+    cy = y + h / 2
+    r = min(w - 8, h - 16) / 2
+    c.setLineWidth(0.5)
+    c.circle(cx, cy, r)
+    for i in range(n):
+        angle = math.pi * i / n + 0.1
+        dx = r * math.cos(angle)
+        dy = r * math.sin(angle)
+        c.line(cx - dx, cy - dy, cx + dx, cy + dy)
+
+def draw_cell_grid(c, x, y, w, h, params):
+    draw_rect_grid(c, x, y, w, h, params)
+
+_DRAW_FUNCS = {
+    "rectangle": draw_rectangle,
+    "square": draw_square,
+    "triangle": draw_triangle,
+    "circle": draw_circle,
+    "cube": draw_cube,
+    "prism": draw_prism,
+    "eq_tri_para": draw_eq_tri_para,
+    "eq_tri_trap": draw_eq_tri_trap,
+    "eq_para_rect": draw_eq_para_rect,
+    "points_circle": draw_points_circle,
+    "line_grid": draw_line_grid,
+    "rect_grid": draw_rect_grid,
+    "line_segment": draw_line_segment,
+    "circle_lines": draw_circle_lines,
+    "cell_grid": draw_cell_grid,
+}
+
+def draw_figure(c, x, y, width, height, spec: DrawingSpec):
+    c.saveState()
+    c._fontname = 'SimSun'
+    func = _DRAW_FUNCS.get(spec.shape_type)
+    if func:
+        func(c, x, y, width, height, spec.params)
+    c.restoreState()
+
+
+# ══════════════════════════════════════════════════════════
+#  数学题目PDF导出模块 (原 shuxue_export.py)
+# ══════════════════════════════════════════════════════════
+
+from datetime import datetime
+
+def _get_export_dir():
+    return os.path.dirname(os.path.abspath(__file__))
+
+def _build_filename(questions_data):
+    cat_names = []
+    seen = set()
+    for item in questions_data.get("basic", []):
+        if len(item) >= 1:
+            cat = item[0]
+            name = CATEGORY_NAMES.get(cat, cat)
+            if name not in seen:
+                seen.add(name)
+                cat_names.append(name)
+    for item in questions_data.get("advance", []):
+        if len(item) >= 1:
+            cat = item[0]
+            name = CATEGORY_NAMES.get(cat, cat)
+            if name not in seen:
+                seen.add(name)
+                cat_names.append(name)
+    date_str = datetime.now().strftime("%Y%m%d")
+    safe_names = []
+    for name in cat_names[:3]:
+        safe_name = re.sub(r'[\\/:*?"<>|]', '_', name)
+        safe_names.append(safe_name)
+    names_part = "_".join(safe_names)
+    if not names_part:
+        names_part = "练习"
+    return f"数学_{names_part}_{date_str}.pdf"
+
+def _frac_to_text_export(s):
+    return FRAC_RE.sub(lambda m: f"{m.group(1)}/{m.group(2)}", s)
+
+def _split_frac_parts(s):
+    parts = []
+    last = 0
+    for m in FRAC_RE.finditer(s):
+        if m.start() > last:
+            parts.append(('text', s[last:m.start()]))
+        parts.append(('frac', m.group(1), m.group(2)))
+        last = m.end()
+    if last < len(s):
+        parts.append(('text', s[last:]))
+    return parts
+
+def _draw_mixed(c, x, y, parts, font_name, font_size, frac_font_size=None):
+    if frac_font_size is None:
+        frac_font_size = font_size
+    cur_x = x
+    line_y_offset = frac_font_size * 0.28
+    for p in parts:
+        if p[0] == 'text':
+            c.setFont(font_name, font_size)
+            c.drawString(cur_x, y, p[1])
+            cur_x += c.stringWidth(p[1], font_name, font_size)
+        else:
+            num_str, den_str = p[1], p[2]
+            nw = c.stringWidth(num_str, font_name, frac_font_size)
+            dw = c.stringWidth(den_str, font_name, frac_font_size)
+            box_w = max(nw, dw) + 4
+            c.setFont(font_name, frac_font_size)
+            c.drawCentredString(cur_x + box_w / 2,
+                                y + line_y_offset + frac_font_size * 0.15,
+                                num_str)
+            c.setLineWidth(0.6)
+            c.line(cur_x, y + line_y_offset, cur_x + box_w, y + line_y_offset)
+            c.drawCentredString(cur_x + box_w / 2,
+                                y + line_y_offset - frac_font_size * 1.0,
+                                den_str)
+            cur_x += box_w + 2
+    c.setFont(font_name, font_size)
+    return cur_x
+
+def _safe_fmt_answer(ans):
+    if ans is None:
+        return "略"
+    if isinstance(ans, tuple):
+        if len(ans) == 2:
+            return f"{ans[0]}余{ans[1]}"
+        else:
+            return str(ans)
+    elif isinstance(ans, Fraction):
+        if ans.denominator == 1:
+            return str(ans.numerator)
+        return f"{ans.numerator}/{ans.denominator}"
+    elif isinstance(ans, float):
+        ans = round(ans, 4)
+        if ans.is_integer():
+            return str(int(ans))
+        return f"{ans:g}"
+    else:
+        return str(ans)
+
+def _register_fonts():
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    for fp in ['simsun.ttc', r'C:\Windows\Fonts\simsun.ttc']:
+        try:
+            pdfmetrics.registerFont(TTFont('SimSun', fp))
+            return
+        except Exception:
+            pass
+    for fp in ['msyh.ttf', r'C:\Windows\Fonts\msyh.ttf']:
+        try:
+            pdfmetrics.registerFont(TTFont('SimSun', fp))
+            return
+        except Exception:
+            pass
+
+_font_cache_export = None
+def _get_font():
+    global _font_cache_export
+    if _font_cache_export:
+        return _font_cache_export
+    try:
+        from reportlab.pdfbase import pdfmetrics
+        pdfmetrics.getFont('SimSun')
+        _font_cache_export = 'SimSun'
+    except Exception:
+        _font_cache_export = 'Helvetica'
+    return _font_cache_export
+
+def _draw_bold(c, x, y, text, font_name, font_size):
+    c.drawString(x, y, text)
+    c.drawString(x + 0.3, y, text)
+
+def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles=False):
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.units import mm
+    from reportlab.pdfgen import canvas
+    from reportlab.lib import colors
+
+    _register_fonts()
+    fn_sun = _get_font()
+
+    basic_qs = questions_data.get("basic", [])
+    advance_qs = questions_data.get("advance", [])
+    total_count = len(basic_qs) + len(advance_qs)
+
+    basic_answers = []
+    for item in basic_qs:
+        if len(item) >= 3:
+            basic_answers.append(item[2])
+        else:
+            basic_answers.append("略")
+    advance_answers = []
+    for item in advance_qs:
+        if len(item) >= 3:
+            advance_answers.append(item[2])
+        else:
+            advance_answers.append("略")
+    all_answers = basic_answers + advance_answers
+
+    export_dir = _get_export_dir()
+    filename = _build_filename(questions_data)
+    filepath = os.path.join(export_dir, filename)
+
+    pw, ph = A4
+    lm = 15 * mm
+    rm = 15 * mm
+    tm = 28 * mm
+    bm = 18 * mm
+    uw = pw - lm - rm
+
+    reg_row_h = 8 * mm if not use_vertical else 32 * mm
+    adv_row_h = 35 * mm
+
+    MIXED_TYPES = {"cb_mix_addsub", "cb_mix_addmul", "cb_mix_addmulsub", "cb_mix_dec", "cb_mix_frac"}
+
+    regular = []
+    for i, item in enumerate(basic_qs):
+        if len(item) >= 2:
+            regular.append((i, item[0], item[1]))
+    advanced = []
+    for i, item in enumerate(advance_qs):
+        if len(item) >= 2:
+            advanced.append((i + len(basic_qs), item[1], item[0]))
+
+    total_pages = [1]
+    c = canvas.Canvas(filepath, pagesize=A4)
+    c.setTitle("数学练习题")
+
+    header_y = ph - tm + 12 * mm
+    header_line_y = header_y - 2 * mm
+    first_page_start_y = header_line_y - 6 * mm
+    other_page_start_y = header_line_y - 6 * mm
+
+    current_page = [1]
+    cur_y = first_page_start_y
+
+    def draw_header():
+        c.setFont(fn_sun, 10)
+        c.drawString(lm, header_y, "日期:_____年_____月_____日")
+        c.drawRightString(pw - rm, header_y, f"共{total_count}题")
+        c.setLineWidth(0.3)
+        c.line(lm, header_line_y, pw - rm, header_line_y)
+        c.setFont(fn_sun, 9)
+        c.drawRightString(pw - rm, bm * 0.5, f"{current_page[0]}/{total_pages[0]}")
+        c.setFont(fn_sun, 10)
+
+    def new_page():
+        c.showPage()
+        current_page[0] += 1
+        draw_header()
+        return other_page_start_y
+
+    draw_header()
+    page_started = True
+
+    if regular:
+        renumbered = [(seq, q, t) for seq, (i, t, q) in enumerate(regular, 1)]
+        regular_normal = [(seq, q, t) for seq, q, t in renumbered if t not in MIXED_TYPES]
+        regular_mixed = [(seq, q, t) for seq, q, t in renumbered if t in MIXED_TYPES]
+
+        if show_titles:
+            c.setFont(fn_sun, 12)
+            _draw_bold(c, lm, cur_y, f"基础计算（{len(regular)}题）", fn_sun, 12)
+            cur_y -= reg_row_h
+
+        col_w = uw / 4
+        for idx, (seq, question, _qtype) in enumerate(regular_normal):
+            col = idx % 4
+            if col == 0 and idx > 0:
+                cur_y -= reg_row_h
+                if cur_y < bm + reg_row_h:
+                    cur_y = new_page()
+            x = lm + col * col_w
+            label = f"{seq:>3}. "
+            question = question.replace(" + ", "+").replace(" - ", "-").replace(" × ", "×").replace(" ÷ ", "÷")
+            parts = _split_frac_parts(question)
+            c.setFont(fn_sun, 11.5)
+            lw = c.stringWidth(label, fn_sun, 11)
+            c.drawString(x, cur_y, label)
+            _draw_mixed(c, x + lw, cur_y, parts, fn_sun, 11)
+
+        if regular_normal:
+            last_col = len(regular_normal) % 4
+            if last_col != 0:
+                cur_y -= reg_row_h
+
+        if regular_mixed:
+            col_w_m = uw / 3
+            for idx, (seq, question, _qtype) in enumerate(regular_mixed):
+                col = idx % 3
+                if col == 0 and idx > 0:
+                    cur_y -= reg_row_h
+                    if cur_y < bm + reg_row_h:
+                        cur_y = new_page()
+                x = lm + col * col_w_m
+                label = f"{seq:>3}. "
+                parts = _split_frac_parts(question)
+                c.setFont(fn_sun, 11.5)
+                lw = c.stringWidth(label, fn_sun, 11)
+                c.drawString(x, cur_y, label)
+                _draw_mixed(c, x + lw, cur_y, parts, fn_sun, 11)
+
+    if advanced:
+        adv_font_size = 10.5
+        adv_line_gap = 5.5 * mm
+        adv_work_gap = 20 * mm
+
+        def wrap_text_adv(text, max_w, fn, fs):
+            lines_out = []
+            cur_line = ""
+            plain = _frac_to_text_export(text)
+            for ch in list(plain):
+                test = cur_line + ch
+                if c.stringWidth(test, fn, fs) <= max_w:
+                    cur_line = test
+                else:
+                    if cur_line:
+                        lines_out.append(cur_line)
+                    cur_line = ch
+            if cur_line:
+                lines_out.append(cur_line)
+            return lines_out if lines_out else [""]
+
+        if regular:
+            cur_y -= reg_row_h + 4 * mm
+            if cur_y < bm + adv_line_gap + adv_work_gap:
+                cur_y = new_page()
+        else:
+            cur_y = first_page_start_y
+
+        if show_titles:
+            c.setFont(fn_sun, 12)
+            _draw_bold(c, lm, cur_y, f"运用题（{len(advanced)}题）", fn_sun, 12)
+            cur_y -= reg_row_h
+
+        FIGURE_SIZE_MM = 30
+
+        def is_geometry(item):
+            if not item or len(item) < 3:
+                return False
+            return item[2] in GEOMETRY_QUESTION_TYPES
+
+        def draw_fig_right(item, col_x, col_w, top_y):
+            if not is_geometry(item):
+                return 0
+            spec = extract_drawing_spec(item[2], item[1])
+            if not spec:
+                return 0
+            fig_size_pt = FIGURE_SIZE_MM * mm
+            fig_x = col_x + col_w - fig_size_pt
+            fig_y = top_y - fig_size_pt
+            draw_figure(c, fig_x, fig_y, fig_size_pt, fig_size_pt, spec)
+            return fig_size_pt
+
+        col_gap = 6 * mm
+        col_w_adv = (uw - col_gap) / 2
+        left_x = lm
+        right_x = lm + col_w_adv + col_gap
+        text_w_adv = col_w_adv - FIGURE_SIZE_MM * mm - 2 * mm
+
+        pairs = []
+        for i in range(0, len(advanced), 2):
+            left_item = advanced[i]
+            right_item = advanced[i + 1] if i + 1 < len(advanced) else None
+            pairs.append((left_item, right_item))
+
+        for left_item, right_item in pairs:
+            left_label = f"{left_item[0] + 1}. "
+            left_qtext = _frac_to_text_export(left_item[1])
+            left_geo = is_geometry(left_item)
+            left_w = text_w_adv if left_geo else col_w_adv
+
+            right_label = f"{right_item[0] + 1}. " if right_item else ""
+            right_qtext = _frac_to_text_export(right_item[1]) if right_item else ""
+            right_geo = is_geometry(right_item) if right_item else False
+            right_w = text_w_adv if right_geo else col_w_adv
+
+            c.setFont(fn_sun, adv_font_size)
+            left_lines = wrap_text_adv(left_label + left_qtext, left_w, fn_sun, adv_font_size) if left_qtext else []
+            right_lines = wrap_text_adv(right_label + right_qtext, right_w, fn_sun, adv_font_size) if right_qtext else []
+            max_lines = max(len(left_lines), len(right_lines))
+            pair_height = max_lines * adv_line_gap + adv_work_gap
+
+            if cur_y - pair_height < bm:
+                cur_y = new_page()
+
+            c.setFont(fn_sun, adv_font_size)
+            for li, line_txt in enumerate(left_lines):
+                c.drawString(left_x, cur_y - li * adv_line_gap, line_txt)
+            draw_fig_right(left_item, left_x, col_w_adv, cur_y)
+
+            if right_item:
+                c.setFont(fn_sun, adv_font_size)
+                for li, line_txt in enumerate(right_lines):
+                    c.drawString(right_x, cur_y - li * adv_line_gap, line_txt)
+                draw_fig_right(right_item, right_x, col_w_adv, cur_y)
+
+            cur_y -= pair_height
+
+    if use_answer and all_answers:
+        c.showPage()
+        current_page[0] += 1
+        draw_header()
+        cur_y = other_page_start_y
+
+        c.setFont(fn_sun, 14)
+        c.drawCentredString(pw / 2, cur_y - 3 * mm, "参 考 答 案")
+        cur_y -= 10 * mm + 3 * mm
+
+        c.setFont(fn_sun, 9)
+        ans_line_h = 6 * mm
+        ans_sep = "    "
+        ans_texts = []
+        for i, ans in enumerate(all_answers):
+            ans_str = _safe_fmt_answer(ans)
+            ans_texts.append(f"{i + 1}. {ans_str}")
+
+        cur_line = ""
+        for txt in ans_texts:
+            test = cur_line + (ans_sep + txt if cur_line else txt)
+            if c.stringWidth(test, fn_sun, 9) <= uw:
+                cur_line = test
+            else:
+                if cur_line:
+                    if cur_y < bm + ans_line_h:
+                        cur_y = new_page()
+                        c.setFont(fn_sun, 9)
+                    c.drawString(lm, cur_y, cur_line)
+                    cur_y -= ans_line_h
+                cur_line = txt
+        if cur_line:
+            if cur_y < bm + ans_line_h:
+                cur_y = new_page()
+                c.setFont(fn_sun, 9)
+            c.drawString(lm, cur_y, cur_line)
+            cur_y -= ans_line_h
+
+    c.save()
+
+    if current_page[0] != total_pages[0]:
+        total_pages[0] = current_page[0]
+        current_page[0] = 1
+        c = canvas.Canvas(filepath, pagesize=A4)
+        c.setTitle("数学练习题")
+        cur_y = first_page_start_y
+        page_started = True
+        draw_header()
+
+        if regular:
+            renumbered2 = [(seq, q, t) for seq, (i, t, q) in enumerate(regular, 1)]
+            regular_normal = [(seq, q, t) for seq, q, t in renumbered2 if t not in MIXED_TYPES]
+            regular_mixed = [(seq, q, t) for seq, q, t in renumbered2 if t in MIXED_TYPES]
+
+            if show_titles:
+                c.setFont(fn_sun, 12)
+                _draw_bold(c, lm, cur_y, f"基础计算（{len(regular)}题）", fn_sun, 12)
+                cur_y -= reg_row_h
+
+            col_w = uw / 4
+            for idx, (seq, question, _qtype) in enumerate(regular_normal):
+                col = idx % 4
+                if col == 0 and idx > 0:
+                    cur_y -= reg_row_h
+                    if cur_y < bm + reg_row_h:
+                        c.showPage()
+                        current_page[0] += 1
+                        draw_header()
+                        cur_y = other_page_start_y
+                x = lm + col * col_w
+                label = f"{seq:>3}. "
+                question = question.replace(" + ", "+").replace(" - ", "-").replace(" × ", "×").replace(" ÷ ", "÷")
+                parts = _split_frac_parts(question)
+                c.setFont(fn_sun, 11.5)
+                lw = c.stringWidth(label, fn_sun, 11)
+                c.drawString(x, cur_y, label)
+                _draw_mixed(c, x + lw, cur_y, parts, fn_sun, 11)
+
+            if regular_normal:
+                last_col = len(regular_normal) % 4
+                if last_col != 0:
+                    cur_y -= reg_row_h
+
+            if regular_mixed:
+                col_w_m = uw / 3
+                for idx, (seq, question, _qtype) in enumerate(regular_mixed):
+                    col = idx % 3
+                    if col == 0 and idx > 0:
+                        cur_y -= reg_row_h
+                        if cur_y < bm + reg_row_h:
+                            c.showPage()
+                            current_page[0] += 1
+                            draw_header()
+                            cur_y = other_page_start_y
+                    x = lm + col * col_w_m
+                    label = f"{seq:>3}. "
+                    parts = _split_frac_parts(question)
+                    c.setFont(fn_sun, 11.5)
+                    lw = c.stringWidth(label, fn_sun, 11)
+                    c.drawString(x, cur_y, label)
+                    _draw_mixed(c, x + lw, cur_y, parts, fn_sun, 11)
+
+        if advanced:
+            adv_font_size = 10.5
+            adv_line_gap = 5.5 * mm
+            adv_work_gap = 20 * mm
+
+            if regular:
+                cur_y -= reg_row_h + 4 * mm
+                if cur_y < bm + adv_line_gap + adv_work_gap:
+                    c.showPage()
+                    current_page[0] += 1
+                    draw_header()
+                    cur_y = other_page_start_y
+            else:
+                cur_y = first_page_start_y
+
+            if show_titles:
+                c.setFont(fn_sun, 12)
+                _draw_bold(c, lm, cur_y, f"运用题（{len(advanced)}题）", fn_sun, 12)
+                cur_y -= reg_row_h
+
+            col_gap = 6 * mm
+            col_w_adv = (uw - col_gap) / 2
+            left_x = lm
+            right_x = lm + col_w_adv + col_gap
+            text_w_adv = col_w_adv - FIGURE_SIZE_MM * mm - 2 * mm
+
+            pairs = []
+            for i in range(0, len(advanced), 2):
+                left_item = advanced[i]
+                right_item = advanced[i + 1] if i + 1 < len(advanced) else None
+                pairs.append((left_item, right_item))
+
+            for left_item, right_item in pairs:
+                left_label = f"{left_item[0] + 1}. "
+                left_qtext = _frac_to_text_export(left_item[1])
+                left_geo = is_geometry(left_item)
+                left_w = text_w_adv if left_geo else col_w_adv
+
+                right_label = f"{right_item[0] + 1}. " if right_item else ""
+                right_qtext = _frac_to_text_export(right_item[1]) if right_item else ""
+                right_geo = is_geometry(right_item) if right_item else False
+                right_w = text_w_adv if right_geo else col_w_adv
+
+                c.setFont(fn_sun, adv_font_size)
+                left_lines = wrap_text_adv(left_label + left_qtext, left_w, fn_sun, adv_font_size) if left_qtext else []
+                right_lines = wrap_text_adv(right_label + right_qtext, right_w, fn_sun, adv_font_size) if right_qtext else []
+                max_lines = max(len(left_lines), len(right_lines))
+                pair_height = max_lines * adv_line_gap + adv_work_gap
+
+                if cur_y - pair_height < bm:
+                    c.showPage()
+                    current_page[0] += 1
+                    draw_header()
+                    cur_y = other_page_start_y
+
+                c.setFont(fn_sun, adv_font_size)
+                for li, line_txt in enumerate(left_lines):
+                    c.drawString(left_x, cur_y - li * adv_line_gap, line_txt)
+                draw_fig_right(left_item, left_x, col_w_adv, cur_y)
+
+                if right_item:
+                    c.setFont(fn_sun, adv_font_size)
+                    for li, line_txt in enumerate(right_lines):
+                        c.drawString(right_x, cur_y - li * adv_line_gap, line_txt)
+                    draw_fig_right(right_item, right_x, col_w_adv, cur_y)
+
+                cur_y -= pair_height
+
+        if use_answer and all_answers:
+            c.showPage()
+            current_page[0] += 1
+            draw_header()
+            cur_y = other_page_start_y
+            c.setFont(fn_sun, 14)
+            c.drawCentredString(pw / 2, cur_y - 3 * mm, "参 考 答 案")
+            cur_y -= 10 * mm + 3 * mm
+            c.setFont(fn_sun, 9)
+            ans_line_h = 6 * mm
+            ans_sep = "    "
+            ans_texts = []
+            for i, ans in enumerate(all_answers):
+                ans_str = _safe_fmt_answer(ans)
+                ans_texts.append(f"{i + 1}. {ans_str}")
+            cur_line = ""
+            for txt in ans_texts:
+                test = cur_line + (ans_sep + txt if cur_line else txt)
+                if c.stringWidth(test, fn_sun, 9) <= uw:
+                    cur_line = test
+                else:
+                    if cur_line:
+                        if cur_y < bm + ans_line_h:
+                            c.showPage()
+                            current_page[0] += 1
+                            draw_header()
+                            c.setFont(fn_sun, 9)
+                        c.drawString(lm, cur_y, cur_line)
+                        cur_y -= ans_line_h
+                    cur_line = txt
+            if cur_line:
+                if cur_y < bm + ans_line_h:
+                    c.showPage()
+                    current_page[0] += 1
+                    draw_header()
+                    c.setFont(fn_sun, 9)
+                c.drawString(lm, cur_y, cur_line)
+                cur_y -= ans_line_h
+
+        c.save()
+
+    return filepath

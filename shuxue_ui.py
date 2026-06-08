@@ -6,7 +6,7 @@ import threading
 from widgets import GradientButton
 import queue
 
-from shuxue_core import generate_questions, generate_quick_questions, compute_answers, ADVANCE_TYPES
+from shuxue_core import generate_questions, generate_quick_questions, compute_answers, export_pdf
 
 BG = "#f0f0f0"
 MODERN_BTN = dict(bg="#2563eb", fg="white", font=("Microsoft YaHei", 10, "bold"),
@@ -34,7 +34,7 @@ class ShuxueTabWidget:
         "连加连减": "cb_mix_addsub", "加减乘": "cb_mix_addmul",
         "加减乘除": "cb_mix_addmulsub", "小数混合": "cb_mix_dec", "分数混合": "cb_mix_frac",
         "找规律填数": "cb_find_rule", "等差数列": "cb_arithmetic", "简便运算": "cb_simple_calc",
-        "分数巧算": "cb_frac_skill", "定义新运算": "cb_new_op",
+        "分数运用": "cb_frac_skill", "比例应用": "cb_new_op",
         "和差倍": "cb_sum_diff", "年龄问题": "cb_age", "植树问题": "cb_tree",
         "鸡兔同笼": "cb_chicken_rabbit", "盈亏问题": "cb_duck",
         "工程问题": "cb_project", "行程问题": "cb_form", "浓度问题": "cb_concentration",
@@ -44,6 +44,7 @@ class ShuxueTabWidget:
         "质/合问题": "cb_prime", "公约数/倍数": "cb_gcd_lcm",
         "推理问题": "cb_logic", "统筹问题": "cb_arrange", "最优化": "cb_best",
         "抽屉问题": "cb_draw", "容斥问题": "cb_container",
+        "分配问题": "cb_assign", "测量计算": "cb_measure",
     }
 
     def __init__(self, parent):
@@ -149,8 +150,8 @@ class ShuxueTabWidget:
         self.cb_find_rule = self._cb_spin(calc_adv, "找规律填数")
         self.cb_arithmetic = self._cb_spin(calc_adv, "等差数列")
         self.cb_simple_calc = self._cb_spin(calc_adv, "简便运算")
-        self.cb_frac_skill = self._cb_spin(calc_adv, "分数巧算")
-        self.cb_new_op = self._cb_spin(calc_adv, "定义新运算")
+        self.cb_frac_skill = self._cb_spin(calc_adv, "分数运用")
+        self.cb_new_op = self._cb_spin(calc_adv, "比例应用")
 
         app = ttk.LabelFrame(adv_grid, text="应用类")
         app.grid(row=0, column=1, padx=1, pady=0, sticky="nsew")
@@ -162,6 +163,8 @@ class ShuxueTabWidget:
         self.cb_project = self._cb_spin(app, "工程问题")
         self.cb_form = self._cb_spin(app, "行程问题")
         self.cb_concentration = self._cb_spin(app, "浓度问题")
+        self.cb_assign = self._cb_spin(app, "分配问题")
+        self.cb_measure = self._cb_spin(app, "测量计算")
 
         geo = ttk.LabelFrame(adv_grid, text="几何类")
         geo.grid(row=0, column=2, padx=1, pady=0, sticky="nsew")
@@ -362,7 +365,6 @@ class ShuxueTabWidget:
             self.preview_text.insert("1.0", "请先生成题目！")
             return
         try:
-            from shuxue_export import export_pdf
             use_vertical = self._vertical_var.get()
             use_answer = self._answer_var.get()
             filepath = export_pdf(self._questions_data, use_vertical, use_answer, show_titles=self._is_onekey)
