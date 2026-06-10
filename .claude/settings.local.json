@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat \"C:/Users/Administrator/.claude.json\" | grep -A 20 \"plugins\" 2>/dev/null || echo \"No plugins section found\")",
+      "Read(//c/Users/Administrator/**)",
+      "Bash(mkdir -p \"C:/Users/Administrator/.claude/skills/frontend-design\" \"C:/Users/Administrator/.claude/skills/claude-mem\" \"C:/Users/Administrator/.claude/skills/superpowers\")",
+      "Bash(cp \"C:/Users/Administrator/.claude/plugins/marketplaces/claude-plugins-official/plugins/frontend-design/skills/frontend-design/SKILL.md\" \"C:/Users/Administrator/.claude/skills/frontend-design/SKILL.md\")",
+      "Bash(ls -la \"F:/临时目录/superpowers/skills/\")",
+      "Read(//f/临时目录/superpowers/skills/**)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(mkdir -p \"C:/Users/Administrator/.claude/skills/planning-with-files\")",
+      "Bash('E:/Program Files \\(x86\\)/Python/python.exe' -c ' *)",
+      "Bash(mkdir -p ~/.claude/skills)",
+      "Bash(python -c \"import zuowen_data; import zuowen_core; import zuowen_export; print\\('All imports OK'\\)\")",
+      "Bash(python -c \"import zi_tie_ui; print\\('Import OK'\\)\")"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\Administrator\\.claude\\skills",
+      "C:\\Users\\Administrator\\.claude\\plugins\\marketplaces\\claude-plugins-official\\plugins\\frontend-design\\skills\\frontend-design",
+      "C:\\Users\\Administrator\\.claude"
+    ]
+  }
+}

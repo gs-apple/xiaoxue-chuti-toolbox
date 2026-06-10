@@ -6,13 +6,55 @@ from zitie_core import ZitieGenerator, ZitieConfig, add_custom_font, register_bu
 from zitie_data import GRADE_CHARACTERS, PINYIN_DATA, NUMBER_DATA, GRADES, VERSIONS
 from datetime import datetime
 import os
+import json
 import opencc
 
+# 中文字体名称→标准英文名称 映射表
+FONT_NAME_MAP = {
+    # Windows系统常用字体
+    "楷体": "kaiti_gb2312",
+    "楷体_GB2312": "kaiti_gb2312",
+    "宋体": "SimSun",
+    "新宋体": "NSimSun",
+    "微软雅黑": "Microsoft YaHei",
+    "仿宋": "FangSong",
+    "仿宋_GB2312": "FangSong_GB2312",
+    "黑体": "SimHei",
+    "隶书": "LiSu",
+    "幼圆": "YouYuan",
+    "华文行楷": "STXingkai",
+    "华文楷体": "STKaiti",
+    "华文宋体": "STSong",
+    "华文仿宋": "STFangsong",
+    "华文黑体": "STHeiti",
+    "方正舒体": "FZShuTi",
+    "方正姚体": "FZYaoti",
+    # Mac系统常用字体
+    "苹方": "PingFang SC",
+    "冬青黑体": "Hiragino Sans GB",
+    # Linux系统常用字体
+    "文泉驿微米黑": "WenQuanYi Micro Hei",
+    # 内置书法字体（中文名→拼音文件名）
+    "荆霄鹏": "jingxiaopeng",
+    "田英章": "tianyingzhang",
+    "欧阳询": "ouyangxun",
+    "欧阳询书法字体": "ouyangxun",
+    # 繁体字体
+    "汉仪楷体繁": "hanyi_kaiti_fan",
+    "繁体楷书": "fantikaishu",
+    "钟齐陈伟勋硬笔行楷繁": "chenweixun_xingkai",
+    "方正楷体拼音字库": "fzhz_pinyin",
+    # 常见别名
+    "楷": "kaiti_gb2312",
+    "黑": "SimHei",
+    "宋": "SimSun",
+    "雅黑": "Microsoft YaHei",
+    "行书": "jingxiaopeng",
+    "行楷": "tianyingzhang",
+    "大楷": "ouyangxun",
+}
+
 BG = "#f0f0f0"
-MODERN_BTN = dict(bg="#2563eb", fg="white", font=("Microsoft YaHei", 10, "bold"),
-                   bd=0, relief="flat", activebackground="#1d4ed8",
-                   activeforeground="white", width=10, height=1,
-                   cursor="hand2")
 
 # 内容类型禁用规则表（人教版 · 主模块驱动附加模块1+2）
 # style_disabled: 禁用的样式索引 (0=田字格,1=方格,2=米字格,3=数学格,4=生字格,5=拼音格,6=作文本,7=教案格,8=大楷本)
@@ -43,11 +85,15 @@ _TYPE_TEXT_TO_VALUE = {
 
 
 class ZiTieTabWidget:
+    # 自定义数据文件路径
+    _CUSTOM_DATA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'zitie_custom_data.json')
+
     def __init__(self, parent):
         self.frame = tk.Frame(parent, bg=BG)
         self.generated_pages = []
         self.last_generated_path = ""
         self.builtin_fonts = register_builtin_fonts()
+        self._custom_data = self._load_custom_data()
         self._init_ui()
 
     def _init_ui(self):
@@ -135,9 +181,6 @@ class ZiTieTabWidget:
         # 左侧控件
         left_frame = tk.Frame(content_inner, bg=BG)
         left_frame.pack(side=tk.LEFT, fill=tk.Y)
-
-        label_width = 40
-        combo_width = 8
 
         # 年级
         row1 = tk.Frame(left_frame, bg=BG)
@@ -365,15 +408,19 @@ class ZiTieTabWidget:
         self.btn_generate = GradientButton(func_inner, text="生成", width=100, height=32,
                                             command=self.generate_zitie)
 
+        self.btn_save = GradientButton(func_inner, text="保存", width=100, height=32,
+                                        command=self.save_custom_content)
+
         self.btn_export_pdf = GradientButton(func_inner, text="导出PDF", width=100, height=32,
                                               command=self.export_pdf)
 
         func_inner.columnconfigure(0, weight=1)
-        func_inner.columnconfigure(4, weight=1)
+        func_inner.columnconfigure(5, weight=1)
         self.btn_clear.grid(row=0, column=1, padx=3)
         self.btn_generate.grid(row=0, column=2, padx=3)
         self.btn_generate.grid_remove()
-        self.btn_export_pdf.grid(row=0, column=3, padx=3)
+        self.btn_save.grid(row=0, column=3, padx=3)
+        self.btn_export_pdf.grid(row=0, column=4, padx=3)
 
         # 初始化：设置默认版本状态（与原版 PyQt5 一致）
         self.on_version_changed("人教版")
@@ -384,6 +431,89 @@ class ZiTieTabWidget:
             if not self._content_var.get():
                 self.update_grid_type_enabled()
             self.text_content.edit_modified(False)
+
+    # ========== 自定义数据保存/加载 ==========
+
+    def _load_custom_data(self):
+        """从 JSON 文件加载自定义数据"""
+        try:
+            if os.path.exists(self._CUSTOM_DATA_FILE):
+                with open(self._CUSTOM_DATA_FILE, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+        except Exception:
+            pass
+        return {}
+
+    def _save_custom_data_to_file(self):
+        """将自定义数据写入 JSON 文件"""
+        try:
+            with open(self._CUSTOM_DATA_FILE, 'w', encoding='utf-8') as f:
+                json.dump(self._custom_data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            messagebox.showerror("保存失败", f"写入文件失败：{str(e)}")
+
+    def _get_custom_data_key(self):
+        """根据当前选中状态生成自定义数据的唯一 key"""
+        val = self._content_var.get()
+        if not val:
+            return None
+
+        # 数字和拼音
+        if val == "shuzi":
+            return "number"
+        if val == "pinyin_text":
+            return "pinyin"
+
+        # 古书
+        if val == "gushu":
+            classic = self.classic_combo.get()
+            return f"classic_{classic}"
+
+        # 大楷
+        if val == "gaiding":
+            return "gaiding"
+
+        # 年级内容：version_grade_semester(s)_content_type
+        version = self.version_combo.get()
+        version_key = VERSIONS.get(version, "renjiao")
+        grade = self.grade_combo.get()
+        grade_key = GRADES.get(grade, "1")
+
+        sem_parts = []
+        if self._first_sem_var.get():
+            sem_parts.append("first")
+        if self._second_sem_var.get():
+            sem_parts.append("second")
+        sem_key = "+".join(sem_parts) if sem_parts else "none"
+
+        content_map = {
+            "shengzi": "shengzi", "ciyu": "ciyu",
+            "gushi": "gushi", "wenyan": "wenyan"
+        }
+        content_key = content_map.get(val, val)
+
+        return f"{version_key}_{grade_key}_{sem_key}_{content_key}"
+
+    def save_custom_content(self):
+        """保存编辑框内容到自定义数据"""
+        key = self._get_custom_data_key()
+        if not key:
+            messagebox.showwarning("提示", "请先选择内容类型再保存！")
+            return
+
+        content = self.text_content.get("1.0", tk.END).strip()
+        if not content:
+            # 内容为空时，删除该 key（恢复默认）
+            self._custom_data.pop(key, None)
+        else:
+            self._custom_data[key] = content
+
+        self._save_custom_data_to_file()
+        messagebox.showinfo("保存成功", "保存成功")
+
+    def _get_custom_content(self, key):
+        """获取自定义数据，不存在返回 None"""
+        return self._custom_data.get(key)
 
     def _on_type_changed(self):
         """类型切换时，动态控制生字格的可用性"""
@@ -530,6 +660,11 @@ class ZiTieTabWidget:
             self._type_var.set("wenzhang_wz")
             # 默认选中竖行样式
             self._style_var.set(9)
+            # 默认选中千字文并导入内容
+            self.classic_combo.set("千字文")
+            from zitie_data import CLASSIC_DATA
+            data = CLASSIC_DATA.get("千字文", "")
+            self.text_content.insert("1.0", data)
         else:
             self.text_content.delete("1.0", tk.END)
             # 隐藏国学著作选择框
@@ -539,6 +674,13 @@ class ZiTieTabWidget:
 
         # 根据内容类型（主模块）驱动附加模块1（样式）和附加模块2（类型）的禁用状态
         self._apply_content_disable_rules(val)
+
+        # 上下册控制：数字/拼音/大楷/古书 禁用，生字/词语/诗词/文言文 启用
+        # 放在最后，避免被 _set_content_widgets_state 覆盖
+        need_semester = val in ("shengzi", "ciyu", "gushi", "wenyan")
+        sem_state = "normal" if need_semester else "disabled"
+        self.cb_first_semester.config(state=sem_state)
+        self.cb_second_semester.config(state=sem_state)
 
     def _set_content_widgets_state(self, state):
         """设置文字内容区域控件的状态（古书模式下禁用其他内容，但保留古书单选框）"""
@@ -676,13 +818,26 @@ class ZiTieTabWidget:
 
     def on_content_type_changed(self):
         val = self._content_var.get()
+
+        # 优先检查自定义数据
+        custom_key = self._get_custom_data_key()
+        if custom_key:
+            custom_data = self._get_custom_content(custom_key)
+            if custom_data is not None:
+                self.text_content.delete("1.0", tk.END)
+                self.text_content.insert("1.0", custom_data)
+                self.update_grid_type_enabled()
+                return
+
         if val == "shuzi":
             self.text_content.delete("1.0", tk.END)
             self.text_content.insert("1.0", NUMBER_DATA)
+            self.update_grid_type_enabled()
             return
         if val == "pinyin_text":
             self.text_content.delete("1.0", tk.END)
             self.text_content.insert("1.0", PINYIN_DATA)
+            self.update_grid_type_enabled()
             return
 
         # 古书模式：从国学著作选择框中获取内容
@@ -768,12 +923,25 @@ class ZiTieTabWidget:
         self.update_grid_type_enabled()
 
     def on_import_content(self):
-        # 古书模式下，导入国学著作内容
         val = self._content_var.get()
+
+        # 需要上下册的内容类型，未选择时提示
+        if val in ("shengzi", "ciyu", "gushi", "wenyan"):
+            if not self._first_sem_var.get() and not self._second_sem_var.get():
+                messagebox.showwarning("提示", "请选择上册或下册！")
+                return
+
+        # 古书模式下，导入国学著作内容
         if val == "gushu":
             classic = self.classic_combo.get()
-            from zitie_data import CLASSIC_DATA
-            data = CLASSIC_DATA.get(classic, "")
+            # 优先检查自定义数据
+            custom_key = f"classic_{classic}"
+            custom_data = self._get_custom_content(custom_key)
+            if custom_data is not None:
+                data = custom_data
+            else:
+                from zitie_data import CLASSIC_DATA
+                data = CLASSIC_DATA.get(classic, "")
             # 确保文本编辑框可用
             self.text_content.config(state="normal")
             self.text_content.delete("1.0", tk.END)
@@ -915,19 +1083,59 @@ class ZiTieTabWidget:
 
         try:
             grid_name = self.get_grid_type()
-            content_name = self.get_content_name()
-            time_str = datetime.now().strftime("%H%M%S")
 
             if self._mode_var.get() == 1:
+                # 空白模板：格子名+数量
                 file_name = f"{grid_name}_{config.page_count}页.pdf"
             else:
                 char_type = self.get_char_type()
-                file_name = f"{grid_name}{content_name}_{char_type}_{time_str}.pdf"
+                content_type = self._content_var.get()
 
-            file_path = os.path.join(os.getcwd(), file_name)
+                if content_type == "gushu":
+                    # 古书模式：经典名+格子名+类型
+                    classic_name = self.classic_combo.get()
+                    if self._huizi_var.get():
+                        file_name = f"{classic_name}_{grid_name}_灰字.pdf"
+                    else:
+                        file_name = f"{classic_name}_{grid_name}.pdf"
+                else:
+                    # 字帖生成模式：年级+内容+上册+格子名+灰字+类型
+                    parts = []
+                    grade = self.grade_combo.get()
+                    if grade:
+                        parts.append(grade)
+                    content_name = self.get_content_name()
+                    if content_name:
+                        parts.append(content_name)
+                    # 学期
+                    semesters = []
+                    if self._first_sem_var.get():
+                        semesters.append("上册")
+                    if self._second_sem_var.get():
+                        semesters.append("下册")
+                    if semesters:
+                        parts.append("+".join(semesters))
+                    parts.append(grid_name)
+                    if self._huizi_var.get():
+                        parts.append("灰字")
+                    base_type = self._type_var.get()
+                    type_map = {
+                        "duozi": "单字", "wenzhang": "整行", "bishun": "笔顺",
+                        "duoju": "带拼音", "wenzhang_wz": "文章",
+                        "duozi1": "单字+1行", "wenzhang1": "整行+1行",
+                        "bishun1": "笔顺+1行", "duoju1": "带拼音+1行",
+                    }
+                    type_name = type_map.get(base_type, "")
+                    if type_name:
+                        parts.append(type_name)
+                    file_name = "_".join(parts) + ".pdf"
+
+            file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), file_name)
             success = generator.save_pdf(file_path)
             if not success:
                 messagebox.showerror("导出失败", "保存PDF文件失败！")
+            else:
+                messagebox.showinfo("导出成功", "导出成功")
         except Exception as e:
             messagebox.showerror("导出错误", f"导出过程中发生错误：{str(e)}")
 
@@ -939,37 +1147,47 @@ class ZiTieTabWidget:
         if not is_custom:
             self.edit_custom_font.delete(0, tk.END)
 
+    def _normalize_font_name(self, font_name):
+        """标准化字体名称：中文名→reportlab注册名"""
+        if not font_name:
+            return "kaiti_gb2312"
+        font_name = font_name.strip()
+        # 精确匹配映射表
+        if font_name in FONT_NAME_MAP:
+            return FONT_NAME_MAP[font_name]
+        # 大小写不敏感匹配
+        lower = font_name.lower()
+        for cn, en in FONT_NAME_MAP.items():
+            if lower == cn.lower() or lower == en.lower():
+                return en
+        return font_name
+
     def get_font_name(self):
         if self._content_var.get() == "pinyin_text":
             return "pinyin-me"
 
-        # 大楷模式使用欧阳询书法字体
-        if self._content_var.get() == "gaiding":
-            return "欧阳询书法字体"
-
-        # 古书模式使用行楷（田英章）
-        if self._content_var.get() == "gushu":
-            return "田英章"
-
         font_val = self._font_var.get()
-        # 自定义字体优先级最高
+
+        # 用户主动选择了字体（非默认），优先使用用户选择
         if font_val == 4:
             custom_font = self.edit_custom_font.get().strip()
             if custom_font:
-                return custom_font
-            else:
-                return "楷体_GB2312"  # 如果没有输入自定义字体，使用默认楷体
-        elif font_val == 0:
-            # 默认字体：数字模式使用楷体，其他模式也使用楷体
-            return "楷体_GB2312"
+                return self._normalize_font_name(custom_font)
+            # 自定义为空，走下面的默认逻辑
         elif font_val == 1:
-            return "楷体_GB2312"
+            return "kaiti_gb2312"
         elif font_val == 2:
-            return "荆霄鹏"
+            return "jingxiaopeng"
         elif font_val == 3:
-            return "田英章"
-        else:
-            return "楷体_GB2312"
+            return "tianyingzhang"
+
+        # 用户选的是"默认"（font_val == 0）或自定义为空，按模式决定默认字体
+        content_type = self._content_var.get()
+        if content_type == "gaiding":
+            return "ouyangxun"
+        if content_type == "gushu":
+            return "tianyingzhang"
+        return "kaiti_gb2312"
 
     def on_select_font(self):
         font_path = filedialog.askopenfilename(

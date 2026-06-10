@@ -162,11 +162,11 @@ class StrokeRenderer:
                     current_x, current_y = ex, ey
             elif cmd == 'S':
                 for i in range(0, len(coords), 2):
-                    ex, ey = coords[i]
+                    c2x, c2y = coords[i]
                     if i + 1 < len(coords):
-                        c2x, c2y = coords[i+1]
+                        ex, ey = coords[i+1]
                     else:
-                        c2x, c2y = ex, ey
+                        ex, ey = c2x, c2y
                     c1x = 2 * current_x - last_ctrl_x
                     c1y = 2 * current_y - last_ctrl_y
                     steps = steps_per_segment * 6
@@ -243,7 +243,7 @@ class StrokeRenderer:
         if cache_key in self._font_cache:
             return self._font_cache[cache_key]
         font_candidates = [
-            os.path.join(os.path.dirname(__file__), 'fonts', '楷体_GB2312.ttf'),
+            os.path.join(os.path.dirname(__file__), 'fonts', 'kaiti_gb2312.ttf'),
             os.path.join(os.path.dirname(__file__), 'fonts', 'simkai.ttf'),
             'C:/Windows/Fonts/simkai.ttf',
             'C:/Windows/Fonts/simhei.ttf',
@@ -612,12 +612,12 @@ def load_fonts_from_folder():
     return {'loaded': loaded_fonts, 'failed': failed_fonts}
 
 def register_builtin_fonts():
-    """注册内置字体（荆霄鹏-行书、田英章-行楷、欧阳询书法字体-大楷）"""
+    """注册内置字体（jingxiaopeng-行书、tianyingzhang-行楷、ouyangxun-大楷）"""
     fonts_dir = os.path.join(os.path.dirname(__file__), 'fonts')
     builtin = [
-        ("荆霄鹏", "荆霄鹏.ttf"),
-        ("田英章", "田英章.TTF"),
-        ("欧阳询书法字体", "欧阳询书法字体.ttf"),
+        ("jingxiaopeng", "jingxiaopeng.ttf"),
+        ("tianyingzhang", "tianyingzhang.ttf"),
+        ("ouyangxun", "ouyangxun.ttf"),
     ]
     registered = []
     for font_name, filename in builtin:
@@ -722,7 +722,7 @@ class ZitieConfig:
         self.chars = ""
         self.char_type = "单字"
         self.grid_type = "田字格"
-        self.font_name = "KaiTi"
+        self.font_name = "kaiti_gb2312"
         self.font_size = 30
         self.cols = 13
         self.rows = 17
@@ -1007,15 +1007,16 @@ class ZitieGenerator:
                             x = start_x + col * cell_width
                             y = start_y - row * (cell_size + row_spacing)
                             self._draw_grid(c, grid_type, x, y, cell_width, cell_size)
-                    
-                    if grid_type == "生字格" and row < rows - 1:
-                        dashed_y = start_y - (row + 1) * (cell_size + row_spacing) + row_spacing / 2
-                        c.setLineWidth(0.3)
-                        c.setStrokeColor(gray)
-                        c.setDash([2, 2])
-                        c.line(margin_x, dashed_y, A4[0] - margin_x, dashed_y)
-                        c.setDash([])
-                        c.setLineWidth(1.0)
+
+                    if grid_type == "生字格":
+                        for row in range(rows - 1):
+                            dashed_y = start_y - (row + 1) * (cell_size + row_spacing) + row_spacing / 2
+                            c.setLineWidth(0.3)
+                            c.setStrokeColor(gray)
+                            c.setDash([2, 2])
+                            c.line(margin_x, dashed_y, A4[0] - margin_x, dashed_y)
+                            c.setDash([])
+                            c.setLineWidth(1.0)
             
             if grid_type != "作文本" and grid_type != "大楷本" and grid_type != "数学格" and grid_type != "竖行":
                 self._draw_page_header(c, margin_x, margin_y)
@@ -1064,10 +1065,10 @@ class ZitieGenerator:
             offset = {"dx": config["dx"], "dy": config["dy"]}
             
             is_dakai_mode = grid_type == "大楷本"
-            # 大楷模式下，如果用户没有选择自定义字体，则使用默认的欧阳询书法字体
+            # 大楷模式下，如果用户没有选择自定义字体，则使用默认的ouyangxun字体
             # 如果用户选择了自定义字体，则使用用户选择的字体
-            if is_dakai_mode and font_name == "楷体_GB2312":
-                font_name = "欧阳询书法字体"
+            if is_dakai_mode and font_name == "kaiti_gb2312":
+                font_name = "ouyangxun"
 
             enable_empty_line = "+1行" in hanzi_type
             is_huizi_mode = hanzi_type.startswith("灰字") or hanzi_type.startswith("描红")
@@ -1116,7 +1117,7 @@ class ZitieGenerator:
             is_article_mode = (base_type == "文章" or base_type.startswith("文章")) and not is_dakai_mode
             is_poem_mode = content_type in ("诗词", "文言文") and not is_dakai_mode
             is_wenyan_mode = content_type == "文言文"
-            is_guoxue_mode = content_type in ("千字文", "道德经", "三字经", "弟子规", "百家姓")
+            is_guoxue_mode = content_type in ("千字文", "道德经", "三字经", "弟子规", "百家姓", "阴符经", "金刚经", "心经")
             is_shuzi_mode = content_type == "数字" and not is_dakai_mode
             is_pinyin_mode = content_type == "拼音" and not is_dakai_mode
             is_dai_pinyin_mode = base_type.startswith("带拼音") and not is_dakai_mode
@@ -1509,7 +1510,10 @@ class ZitieGenerator:
                 else:
                     chars_per_page = cols * rows_per_page
                     total_chars = len(processed_words)
-                    total_pages = (total_chars + chars_per_page - 1) // chars_per_page
+                    if enable_empty_line:
+                        total_pages = (total_chars * 2 + rows_per_page - 1) // rows_per_page
+                    else:
+                        total_pages = (total_chars + chars_per_page - 1) // chars_per_page
             elif is_dai_pinyin_mode:
                 if is_poem_mode and processed_words and isinstance(processed_words[0], dict) and 'poem' in processed_words[0]:
                     if grid_type == "教案格":
@@ -1554,10 +1558,6 @@ class ZitieGenerator:
                                 current_row = 0
                             current_row += 1
                             i += 1
-                            total_pages += 1
-                            current_row = 0
-                        current_row += 1
-                        i += 1
                 else:
                     total_chars = len(processed_words)
                     if enable_empty_line:
@@ -1952,7 +1952,6 @@ class ZitieGenerator:
                         raw_lines = words.replace('\r\n', '\n').split('\n')
 
                         # 去掉标点符号
-                        import re
                         punctuation_pattern = r'[，。！？、；：""''（）《》【】　、。「」『』【】〔〕〖〗〘〙〚〛〜〝〞〟〠〡〢〣〤〥〦〧〨〩〪〭〮〯〫〬〰〱〲〳〴〵〶〷〸〹〺〻〼〽〾〿぀ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖ゗゘゙゚゛゜ゝゞゟ゠ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶヷヸヹヺ・ーヽヾヿ]'
 
                         # 构建内容结构：每行是一个独立的单元，换行会导致换列

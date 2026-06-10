@@ -94,7 +94,7 @@ WINDOWS_FONTS = [
 
 # 项目内置字体
 BUILTIN_FONTS = [
-    os.path.join(FONTS_DIR, '楷体_GB2312.ttf'),
+    os.path.join(FONTS_DIR, 'kaiti_gb2312.ttf'),
     os.path.join(FONTS_DIR, 'simkai.ttf'),
 ]
 

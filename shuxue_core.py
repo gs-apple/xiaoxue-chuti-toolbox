@@ -16,24 +16,33 @@ class _DedupCache:
     """文件级题目去重缓存，最多保留最近500条"""
     _MAX = 500
     _path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".question_cache.json")
+    _cache = None
+    _dirty = False
 
     @classmethod
     def _load(cls):
+        if cls._cache is not None:
+            return cls._cache
         if os.path.exists(cls._path):
             try:
                 with open(cls._path, "r", encoding="utf-8") as f:
                     data = json.load(f)
                 if isinstance(data, list):
-                    return data[-cls._MAX:]
+                    cls._cache = data[-cls._MAX:]
+                    return cls._cache
             except Exception:
                 pass
-        return []
+        cls._cache = []
+        return cls._cache
 
     @classmethod
-    def _save(cls, items):
+    def _save(cls, items=None):
+        if items is None:
+            items = cls._cache or []
         try:
             with open(cls._path, "w", encoding="utf-8") as f:
                 json.dump(items[-cls._MAX:], f, ensure_ascii=False)
+            cls._dirty = False
         except Exception:
             pass
 
@@ -59,7 +68,13 @@ class _DedupCache:
         cache = cls._load()
         if norm not in cache:
             cache.append(norm)
-            cls._save(cache)
+            cls._dirty = True
+
+    @classmethod
+    def flush(cls):
+        """将缓存写入文件"""
+        if cls._dirty:
+            cls._save()
 
     @classmethod
     def clear(cls):
@@ -2059,6 +2074,8 @@ def generate_questions(selections, use_bracket=False, grade=None, use_spider=Tru
     random.shuffle(basic_normal)
     basic = basic_normal + basic_mixed
     random.shuffle(advance)
+    # 保存去重缓存
+    _DedupCache.flush()
     return {"basic": basic, "advance": advance}
 
 
@@ -2539,32 +2556,54 @@ from datetime import datetime
 def _get_export_dir():
     return os.path.dirname(os.path.abspath(__file__))
 
-def _build_filename(questions_data):
-    cat_names = []
-    seen = set()
-    for item in questions_data.get("basic", []):
-        if len(item) >= 1:
-            cat = item[0]
-            name = CATEGORY_NAMES.get(cat, cat)
-            if name not in seen:
-                seen.add(name)
-                cat_names.append(name)
-    for item in questions_data.get("advance", []):
-        if len(item) >= 1:
-            cat = item[0]
-            name = CATEGORY_NAMES.get(cat, cat)
-            if name not in seen:
-                seen.add(name)
-                cat_names.append(name)
-    date_str = datetime.now().strftime("%Y%m%d")
-    safe_names = []
-    for name in cat_names[:3]:
-        safe_name = re.sub(r'[\\/:*?"<>|]', '_', name)
-        safe_names.append(safe_name)
-    names_part = "_".join(safe_names)
-    if not names_part:
-        names_part = "练习"
-    return f"数学_{names_part}_{date_str}.pdf"
+def _build_filename(questions_data, mode="export", grade="", use_bracket=False, use_vertical=False, use_answer=True):
+    total_count = len(questions_data.get("basic", [])) + len(questions_data.get("advance", []))
+
+    if mode == "onekey":
+        # 一键出题模式：年级+出题数量
+        parts = [grade, f"{total_count}题"]
+    else:
+        # 导出模式：知识点+数量
+        cat_names = []
+        seen = set()
+        for item in questions_data.get("basic", []):
+            if len(item) >= 1:
+                cat = item[0]
+                name = CATEGORY_NAMES.get(cat, cat)
+                if name not in seen:
+                    seen.add(name)
+                    cat_names.append(name)
+        for item in questions_data.get("advance", []):
+            if len(item) >= 1:
+                cat = item[0]
+                name = CATEGORY_NAMES.get(cat, cat)
+                if name not in seen:
+                    seen.add(name)
+                    cat_names.append(name)
+        # 如果知识点名称超过10个字符，使用每个知识点前2个字
+        if cat_names:
+            combined = "".join(cat_names)
+            if len(combined) > 10:
+                short_names = [name[:2] for name in cat_names]
+                names_part = "".join(short_names)
+            else:
+                names_part = "_".join(cat_names)
+        else:
+            names_part = "练习"
+        parts = [names_part, f"{total_count}题"]
+
+    # 附加功能
+    extras = []
+    if use_bracket:
+        extras.append("带括号")
+    if use_vertical:
+        extras.append("竖式")
+    if not use_answer:
+        extras.append("无答案")
+    if extras:
+        parts.extend(extras)
+
+    return "_".join(parts) + ".pdf"
 
 def _frac_to_text_export(s):
     return FRAC_RE.sub(lambda m: f"{m.group(1)}/{m.group(2)}", s)
@@ -2662,7 +2701,7 @@ def _draw_bold(c, x, y, text, font_name, font_size):
     c.drawString(x, y, text)
     c.drawString(x + 0.3, y, text)
 
-def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles=False):
+def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles=False, mode="export", grade="", use_bracket=False):
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.units import mm
     from reportlab.pdfgen import canvas
@@ -2690,7 +2729,7 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles
     all_answers = basic_answers + advance_answers
 
     export_dir = _get_export_dir()
-    filename = _build_filename(questions_data)
+    filename = _build_filename(questions_data, mode=mode, grade=grade, use_bracket=use_bracket, use_vertical=use_vertical, use_answer=use_answer)
     filepath = os.path.join(export_dir, filename)
 
     pw, ph = A4
