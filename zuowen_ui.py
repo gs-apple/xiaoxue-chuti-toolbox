@@ -27,12 +27,21 @@ class ZuowenTabWidget:
         main = tk.Frame(self.frame, bg=BG)
         main.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
 
-        # ========== 功能区（先 pack 到底部，确保始终可见）==========
+        # ========== 功能区 ==========
         func_group = ttk.LabelFrame(main, text="功能区")
         func_group.pack(side=tk.BOTTOM, fill=tk.X, pady=(6, 0))
         func_inner = tk.Frame(func_group, bg=BG)
         func_inner.pack(padx=5, pady=3)
 
+        # 固定列宽，防止切换模式时按钮移位
+        func_inner.columnconfigure(0, weight=1)
+        func_inner.columnconfigure(1, minsize=100)
+        func_inner.columnconfigure(2, minsize=100)
+        func_inner.columnconfigure(3, minsize=100)
+        func_inner.columnconfigure(4, minsize=100)
+        func_inner.columnconfigure(5, weight=1)
+
+        # 三个蓝色按钮，位置固定
         self.btn_export_pdf = GradientButton(func_inner, text="导出PDF", width=100, height=32,
                                              command=self._on_export_pdf)
         self.btn_save = GradientButton(func_inner, text="保存例文", width=100, height=32,
@@ -40,11 +49,16 @@ class ZuowenTabWidget:
         self.btn_clear = GradientButton(func_inner, text="清空", width=100, height=32,
                                         command=self._on_clear)
 
-        func_inner.columnconfigure(0, weight=1)
-        func_inner.columnconfigure(4, weight=1)
         self.btn_export_pdf.grid(row=0, column=1, padx=3)
         self.btn_save.grid(row=0, column=2, padx=3)
         self.btn_clear.grid(row=0, column=3, padx=3)
+
+        # 添加按钮，默认隐藏
+        self.btn_add = GradientButton(func_inner, text="添加", width=100, height=32,
+                                      color_top="#d97706", color_mid="#b45309", color_bot="#92400e",
+                                      command=self._on_add_exam)
+        self.btn_add.grid(row=0, column=4, padx=3)
+        self.btn_add.grid_remove()
 
         # ========== 顶部：模式选择分组 + 搜索 ==========
         top_group = ttk.LabelFrame(main, text="作文模式")
@@ -190,17 +204,19 @@ class ZuowenTabWidget:
             self.sem_combo.config(values=self._original_semesters, state="readonly")
             self.sem_var.set("下学期")
             self.filter_label.config(text="")
+            self.btn_add.grid_remove()  # 隐藏
             self._load_textbook()
         elif mode == "中高考作文":
-            # 切换为中考/高考 + 年份
+            # 切换为小升初/中考/高考 + 年份
             self.grade_label.config(text="类型:")
-            self.grade_combo.config(values=["中考作文", "高考作文"], state="readonly")
-            self.grade_var.set("中考作文")
+            self.grade_combo.config(values=["小升初", "中考作文", "高考作文"], state="readonly")
+            self.grade_var.set("小升初")
             self.sem_label.config(text="年份:")
-            years = [str(y) for y in self.engine.get_exam_years()]
+            years = [str(y) for y in range(2020, 2027)]
             self.sem_combo.config(values=years, state="readonly")
-            self.sem_var.set("2026")
+            self.sem_var.set("2025")
             self.filter_label.config(text="")
+            self.btn_add.grid()  # 显示
             self._load_custom()
 
     def _on_grade_changed(self):
@@ -326,10 +342,19 @@ class ZuowenTabWidget:
         self.req_text.insert("1.0", item.get("requires", ""))
         self.req_text.config(state="disabled")
         self.content_text.delete("1.0", tk.END)
-        self.content_text.insert("1.0", "（暂无例文，可使用AI写作生成）")
-        self._current_data = {"title": item["title"], "grade": exam_type,
-                              "type": item.get("paper", ""),
-                              "requires": item.get("requires", "")}
+        # 加载例文（如果存在）
+        example = self.engine.get_example_essay(item["title"])
+        if example and example.get("content"):
+            self.content_text.insert("1.0", example["content"])
+            self._current_data = {"title": item["title"], "grade": exam_type,
+                                  "type": item.get("paper", ""),
+                                  "requires": item.get("requires", ""),
+                                  "content": example["content"]}
+        else:
+            self.content_text.insert("1.0", "（暂无例文，可使用AI写作生成）")
+            self._current_data = {"title": item["title"], "grade": exam_type,
+                                  "type": item.get("paper", ""),
+                                  "requires": item.get("requires", "")}
 
     def _clear_detail(self):
         self.detail_title.config(text="请从左侧选择")
@@ -372,42 +397,195 @@ class ZuowenTabWidget:
             messagebox.showerror("保存失败", f"保存时出错：{e}")
 
     def _save_to_data_file(self, title, new_content):
-        """将修改后的内容保存到 zuowen_data.py"""
+        """将修改后的例文保存到 zuowen_data.json（原子写入）"""
+        import json
         import os
-        data_file = os.path.join(os.path.dirname(__file__), "zuowen_data.py")
+        import tempfile
 
-        # 读取现有文件内容
-        with open(data_file, 'r', encoding='utf-8') as f:
-            file_content = f.read()
+        data_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "zuowen_data.json")
 
-        # 查找并替换例文内容
-        # 使用正则表达式匹配 EXAMPLE_ESSAYS 中对应标题的 content 字段
-        import re
+        # 1. 读取现有数据（文件不存在则初始化空字典）
+        try:
+            with open(data_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            data = {}
+        except json.JSONDecodeError:
+            raise Exception("zuowen_data.json 格式损坏，请手动修复")
 
-        # 构建匹配模式：找到标题对应的条目，然后替换 content 字段
-        # 匹配 "标题": {..., "content": "...", ...}
-        pattern = r'("' + re.escape(title) + r'":\s*\{[^}]*"content":\s*")(.*?)(",[^}]*\})'
+        # 2. 字段合法性校验
+        if "EXAMPLE_ESSAYS" not in data:
+            data["EXAMPLE_ESSAYS"] = {}
+        essays = data["EXAMPLE_ESSAYS"]
+        # 不存在则自动创建
+        if title not in essays:
+            essays[title] = {"content": "", "word_count": ""}
+        if not isinstance(new_content, str):
+            raise Exception("例文内容必须是字符串")
 
-        def replace_content(match):
-            prefix = match.group(1)
-            suffix = match.group(3)
-            # 转义新内容中的特殊字符
-            escaped_content = new_content.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
-            return prefix + escaped_content + suffix
+        # 3. 更新数据
+        essays[title]["content"] = new_content
+        data["EXAMPLE_ESSAYS"] = essays
 
-        new_file_content, count = re.subn(pattern, replace_content, file_content, flags=re.DOTALL)
+        # 4. 原子写入：先写临时文件，成功后替换原文件
+        dir_name = os.path.dirname(data_file)
+        fd, tmp_path = tempfile.mkstemp(suffix=".tmp", dir=dir_name)
+        try:
+            with os.fdopen(fd, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            os.replace(tmp_path, data_file)  # 原子替换
+        except Exception:
+            # 写入失败，清理临时文件
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+            raise
 
-        if count == 0:
-            raise Exception(f"未找到标题为《{title}》的例文数据")
-
-        # 写入文件
-        with open(data_file, 'w', encoding='utf-8') as f:
-            f.write(new_file_content)
-
-        # 更新内存中的数据
+        # 5. 同步更新内存中的数据
         from zuowen_data import EXAMPLE_ESSAYS
-        if title in EXAMPLE_ESSAYS:
-            EXAMPLE_ESSAYS[title]["content"] = new_content
+        if title not in EXAMPLE_ESSAYS:
+            EXAMPLE_ESSAYS[title] = {"content": "", "word_count": ""}
+        EXAMPLE_ESSAYS[title]["content"] = new_content
+
+    def _on_add_exam(self):
+        """弹窗录入中高考作文题目，确认后保存到 zuowen_data.json"""
+        import json
+        import os
+        import tempfile
+
+        # 预填当前选择
+        exam_type = self.grade_var.get()
+        year = self.sem_var.get()
+
+        # 弹窗
+        dialog = tk.Toplevel(self.frame)
+        dialog.title("添加中高考作文题目")
+        dialog.geometry("420x380")
+        dialog.resizable(False, False)
+        dialog.transient(self.frame)
+        dialog.grab_set()
+        dialog.update_idletasks()
+        x = (dialog.winfo_screenwidth() - 420) // 2
+        y = (dialog.winfo_screenheight() - 380) // 2
+        dialog.geometry(f"420x380+{x}+{y}")
+
+        # 类型 + 年份
+        row0 = tk.Frame(dialog, bg=BG)
+        row0.pack(fill=tk.X, padx=15, pady=(15, 5))
+        tk.Label(row0, text="类型:", font=FONT, bg=BG).pack(side=tk.LEFT)
+        type_var = tk.StringVar(value=exam_type)
+        ttk.Combobox(row0, textvariable=type_var, values=["小升初", "中考作文", "高考作文"],
+                     state="readonly", width=10, font=FONT).pack(side=tk.LEFT, padx=(4, 15))
+        tk.Label(row0, text="年份:", font=FONT, bg=BG).pack(side=tk.LEFT)
+        year_var = tk.StringVar(value=year)
+        ttk.Combobox(row0, textvariable=year_var,
+                     values=[str(y) for y in range(2020, 2027)],
+                     state="readonly", width=6, font=FONT).pack(side=tk.LEFT, padx=4)
+
+        # 试卷名称（高考用）
+        row1 = tk.Frame(dialog, bg=BG)
+        row1.pack(fill=tk.X, padx=15, pady=5)
+        tk.Label(row1, text="试卷:", font=FONT, bg=BG).pack(side=tk.LEFT)
+        paper_var = tk.StringVar(value="")
+        tk.Entry(row1, textvariable=paper_var, font=FONT, width=30).pack(side=tk.LEFT, padx=4, fill=tk.X, expand=True)
+
+        # 标题
+        row2 = tk.Frame(dialog, bg=BG)
+        row2.pack(fill=tk.X, padx=15, pady=5)
+        tk.Label(row2, text="标题:", font=FONT, bg=BG).pack(side=tk.LEFT)
+        title_var = tk.StringVar(value="")
+        tk.Entry(row2, textvariable=title_var, font=FONT, width=30).pack(side=tk.LEFT, padx=4, fill=tk.X, expand=True)
+
+        # 作文要求
+        tk.Label(dialog, text="作文要求:", font=FONT, bg=BG, anchor="w").pack(fill=tk.X, padx=15, pady=(5, 0))
+        req_frame = tk.Frame(dialog, bg="white", relief=tk.SUNKEN, bd=1)
+        req_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=(0, 5))
+        req_text = tk.Text(req_frame, bg="white", font=FONT, wrap=tk.WORD, height=6)
+        req_text.pack(fill=tk.BOTH, expand=True)
+
+        def on_confirm():
+            title = title_var.get().strip()
+            requires = req_text.get("1.0", "end-1c").strip()
+            paper = paper_var.get().strip()
+            etype = type_var.get()
+            yr = year_var.get()
+
+            if not title:
+                messagebox.showinfo("提示", "标题不能为空", parent=dialog)
+                return
+            if not requires:
+                messagebox.showinfo("提示", "作文要求不能为空", parent=dialog)
+                return
+
+            json_key = {"小升初": "XIAOSHENGCHU", "中考作文": "ZHONGKAO", "高考作文": "GAOKAO"}[etype]
+            new_topic = {"title": title, "requires": requires}
+            if json_key == "GAOKAO" and paper:
+                new_topic["paper"] = paper
+
+            # 读取 JSON
+            data_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "zuowen_data.json")
+            try:
+                with open(data_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+            except FileNotFoundError:
+                data = {}
+            except json.JSONDecodeError:
+                messagebox.showerror("错误", "zuowen_data.json 格式损坏", parent=dialog)
+                return
+
+            if json_key not in data:
+                data[json_key] = {}
+            if yr not in data[json_key]:
+                data[json_key][yr] = []
+
+            # 检查重复，二次确认
+            for t in data[json_key][yr]:
+                if t.get("title") == title:
+                    if not messagebox.askyesno("题目已存在", f"《{title}》已存在于 {etype} {yr}年，确定要重复添加吗？", parent=dialog):
+                        return
+                    break
+
+            data[json_key][yr].append(new_topic)
+
+            # 同时在 EXAMPLE_ESSAYS 中创建空例文条目
+            if "EXAMPLE_ESSAYS" not in data:
+                data["EXAMPLE_ESSAYS"] = {}
+            if title not in data["EXAMPLE_ESSAYS"]:
+                data["EXAMPLE_ESSAYS"][title] = {"content": "", "word_count": ""}
+
+            # 原子写入
+            fd, tmp_path = tempfile.mkstemp(suffix=".tmp", dir=os.path.dirname(data_file))
+            try:
+                with os.fdopen(fd, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
+                os.replace(tmp_path, data_file)
+            except Exception:
+                if os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
+                messagebox.showerror("错误", "保存失败", parent=dialog)
+                return
+
+            # 同步内存
+            from zuowen_data import XIAOSHENGCHU, ZHONGKAO, GAOKAO, EXAMPLE_ESSAYS
+            target = {"XIAOSHENGCHU": XIAOSHENGCHU, "ZHONGKAO": ZHONGKAO, "GAOKAO": GAOKAO}[json_key]
+            if yr not in target:
+                target[yr] = []
+            target[yr].append(new_topic)
+            # 同步例文内存
+            if title not in EXAMPLE_ESSAYS:
+                EXAMPLE_ESSAYS[title] = {"content": "", "word_count": ""}
+
+            messagebox.showinfo("添加成功", f"《{title}》已保存到 {etype} {yr}年", parent=dialog)
+            dialog.destroy()
+            # 刷新题目列表
+            self._load_custom()
+
+        # 按钮
+        btn_frame = tk.Frame(dialog, bg=BG)
+        btn_frame.pack(pady=(0, 15))
+        tk.Button(btn_frame, text="确定添加", font=FONT_BOLD, width=10,
+                  command=on_confirm).pack(side=tk.LEFT, padx=6)
+        tk.Button(btn_frame, text="取消", font=FONT, width=8,
+                  command=dialog.destroy).pack(side=tk.LEFT, padx=6)
 
     def _on_web_search(self):
         """用浏览器搜索搜索框中的关键词"""

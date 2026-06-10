@@ -1,0 +1,12 @@
+内置书法：荆霄鹏→jingxiaopeng、田英章→tianyingzhang、欧阳询→ouyangxun
+繁体字体：汉仪楷体繁→hanyi_kaiti_fan、繁体楷书→fantikaishu 等
+别名：行书→jingxiaopeng、行楷→tianyingzhang、大楷→ouyangxun
+
+拼音模式	content_var == "pinyin_text"	pinyin-me	pinyin-me.ttf
+大楷模式	content_var == "gaiding"	ouyangxun	ouyangxun.ttf
+古书模式	content_var == "gushu"	tianyingzhang	tianyingzhang.ttf
+默认/楷体	font_var == 0 或 1	kaiti_gb2312	kaiti_gb2312.ttf
+行书	font_var == 2	jingxiaopeng	jingxiaopeng.ttf
+行楷	font_var == 3	tianyingzhang	tianyingzhang.ttf
+自定义为空时	回退	kaiti_gb2312	kaiti_gb2312.ttf
+笔顺渲染回退	StrokeRenderer	KaiTi (系统)	simkai.ttf

@@ -4,7 +4,7 @@ import webbrowser
 import subprocess
 import platform
 from datetime import datetime
-from zuowen_data import TEXTBOOK_COMPS, PICTURE_WRITING, EXAMPLE_ESSAYS, ZHONGKAO, GAOKAO
+from zuowen_data import TEXTBOOK_COMPS, PICTURE_WRITING, EXAMPLE_ESSAYS, XIAOSHENGCHU, ZHONGKAO, GAOKAO
 
 
 class ZuowenEngine:
@@ -45,8 +45,13 @@ class ZuowenEngine:
     # ========== 中考/高考作文 ==========
 
     def get_exam_topics(self, exam_type, year):
-        """获取中考/高考作文题目列表"""
-        data = ZHONGKAO if exam_type == "中考作文" else GAOKAO
+        """获取小升初/中考/高考作文题目列表"""
+        if exam_type == "小升初":
+            data = XIAOSHENGCHU
+        elif exam_type == "中考作文":
+            data = ZHONGKAO
+        else:
+            data = GAOKAO
         return data.get(str(year), [])
 
     def get_exam_years(self):

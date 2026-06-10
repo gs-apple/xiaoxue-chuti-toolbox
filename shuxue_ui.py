@@ -9,10 +9,6 @@ import queue
 from shuxue_core import generate_questions, generate_quick_questions, compute_answers, export_pdf
 
 BG = "#f0f0f0"
-MODERN_BTN = dict(bg="#2563eb", fg="white", font=("Microsoft YaHei", 10, "bold"),
-                   bd=0, relief="flat", activebackground="#1d4ed8",
-                   activeforeground="white", width=10, height=1,
-                   cursor="hand2")
 FRAC_RE = re.compile(r'FRAC\[(\d+),(\d+)\]')
 
 
@@ -367,7 +363,11 @@ class ShuxueTabWidget:
         try:
             use_vertical = self._vertical_var.get()
             use_answer = self._answer_var.get()
-            filepath = export_pdf(self._questions_data, use_vertical, use_answer, show_titles=self._is_onekey)
-            self.preview_text.insert(tk.END, f"\nPDF导出成功：{filepath}")
+            use_bracket = self._bracket_var.get()
+            mode = "onekey" if self._is_onekey else "export"
+            grade = self.grade_combo.get() if self._is_onekey else ""
+            filepath = export_pdf(self._questions_data, use_vertical, use_answer,
+                                  show_titles=self._is_onekey, mode=mode, grade=grade, use_bracket=use_bracket)
+            messagebox.showinfo("导出成功", "导出成功")
         except Exception as e:
-            self.preview_text.insert(tk.END, f"\nPDF导出失败：{e}")
+            messagebox.showerror("导出失败", f"导出失败：{e}")

@@ -71,6 +71,9 @@ def init_database():
     finally:
         conn.close()
 
+# 初始化数据库表
+init_database()
+
 def get_db_stats():
     conn = get_connection()
     try:
@@ -156,6 +159,7 @@ GRADE_NUM_REVERSE = {v: k for k, v in GRADE_NUM.items()}
 def format_grade_for_db(grade):
     if not grade:
         return None
+    grade = str(grade)
     if "年级" in grade:
         return grade
     if grade.isdigit():
