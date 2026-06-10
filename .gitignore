@@ -1,0 +1,13 @@
+# 忽略 Claude 配置文件
+.claude/
+
+# 忽略打包产物
+build/
+dist/
+
+# 其他常见的 Python 项目忽略项
+*.log
+*.spec
+__pycache__/
+*.pyc
+venv/
