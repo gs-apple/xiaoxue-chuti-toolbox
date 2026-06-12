@@ -1,4 +1,5 @@
 # zitie_core.py - 字帖生成核心模块
+import os
 from datetime import datetime
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.pdfgen import canvas
@@ -243,8 +244,8 @@ class StrokeRenderer:
         if cache_key in self._font_cache:
             return self._font_cache[cache_key]
         font_candidates = [
-            os.path.join(os.path.dirname(__file__), 'fonts', 'kaiti_gb2312.ttf'),
-            os.path.join(os.path.dirname(__file__), 'fonts', 'simkai.ttf'),
+            os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'fonts', 'kaiti_gb2312.ttf'),
+            os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'fonts', 'simkai.ttf'),
             'C:/Windows/Fonts/simkai.ttf',
             'C:/Windows/Fonts/simhei.ttf',
             'C:/Windows/Fonts/msyh.ttc',
@@ -504,7 +505,7 @@ STROKE_DATA = {
 
 # ================= 初始化中文字体 =================
 def _register_fonts():
-    fonts_dir = os.path.join(os.path.dirname(__file__), 'fonts')
+    fonts_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'fonts')
     os.makedirs(fonts_dir, exist_ok=True)
 
     for path in ['simkai.ttf', r'C:\Windows\Fonts\simkai.ttf']:
@@ -565,7 +566,7 @@ def get_registered_fonts():
 
 def get_fonts_in_fonts_folder():
     """获取fonts文件夹中的所有字体文件"""
-    fonts_dir = os.path.join(os.path.dirname(__file__), 'fonts')
+    fonts_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'fonts')
     os.makedirs(fonts_dir, exist_ok=True)
     
     fonts = []
@@ -579,7 +580,7 @@ def get_fonts_in_fonts_folder():
 
 def load_fonts_from_folder():
     """重新加载fonts文件夹中的所有字体"""
-    fonts_dir = os.path.join(os.path.dirname(__file__), 'fonts')
+    fonts_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'fonts')
     os.makedirs(fonts_dir, exist_ok=True)
     
     loaded_fonts = []
@@ -613,7 +614,7 @@ def load_fonts_from_folder():
 
 def register_builtin_fonts():
     """注册内置字体（jingxiaopeng-行书、tianyingzhang-行楷、ouyangxun-大楷）"""
-    fonts_dir = os.path.join(os.path.dirname(__file__), 'fonts')
+    fonts_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'fonts')
     builtin = [
         ("jingxiaopeng", "jingxiaopeng.ttf"),
         ("tianyingzhang", "tianyingzhang.ttf"),
@@ -633,7 +634,7 @@ def register_builtin_fonts():
     return registered
 
 def add_custom_font(font_path):
-    fonts_dir = os.path.join(os.path.dirname(__file__), 'fonts')
+    fonts_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'fonts')
     os.makedirs(fonts_dir, exist_ok=True)
     
     if not os.path.exists(font_path):

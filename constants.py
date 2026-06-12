@@ -11,10 +11,10 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # 字体目录
-FONTS_DIR = os.path.join(BASE_DIR, 'fonts')
+FONTS_DIR = os.path.join(BASE_DIR, 'assets', 'fonts')
 
 # 数据文件
-STROKE_DATA_FILE = os.path.join(BASE_DIR, 'stroke_data.json')
+STROKE_DATA_FILE = os.path.join(BASE_DIR, 'assets', 'stroke_data.json')
 
 # 下载目录
 DOWNLOAD_DIR = os.path.join(BASE_DIR, '试卷下载')
@@ -124,10 +124,10 @@ REQUEST_TIMEOUT = 15
 # ══════════════════════════════════════════════════════════
 
 # 收藏夹文件
-FAVORITES_FILE = os.path.join(BASE_DIR, ".zhenti_favorites.json")
+FAVORITES_FILE = os.path.join(BASE_DIR, "zhenti", ".zhenti_favorites.json")
 
 # 搜索历史文件
-HISTORY_FILE = os.path.join(BASE_DIR, ".zhenti_history.json")
+HISTORY_FILE = os.path.join(BASE_DIR, "zhenti", ".zhenti_history.json")
 
 # 题目缓存文件
-QUESTION_CACHE_FILE = os.path.join(BASE_DIR, ".question_cache.json")
+QUESTION_CACHE_FILE = os.path.join(BASE_DIR, "shuxue", ".question_cache.json")

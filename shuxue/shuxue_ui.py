@@ -6,7 +6,7 @@ import threading
 from widgets import GradientButton
 import queue
 
-from shuxue_core import generate_questions, generate_quick_questions, compute_answers, export_pdf
+from shuxue.shuxue_core import generate_questions, generate_quick_questions, compute_answers, export_pdf
 
 BG = "#f0f0f0"
 FRAC_RE = re.compile(r'FRAC\[(\d+),(\d+)\]')

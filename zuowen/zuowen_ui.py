@@ -2,11 +2,11 @@
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox
-from zuowen_core import ZuowenEngine, open_ai_web, get_ai_web_urls, export_worksheet
+from zuowen.zuowen_core import ZuowenEngine, open_ai_web, get_ai_web_urls, export_worksheet
 from widgets import GradientButton
 
-# 软件目录
-_APP_DIR = os.path.dirname(os.path.abspath(__file__))
+# 软件目录（项目根目录）
+_APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 BG = "#f0f0f0"
 FONT = ("Microsoft YaHei", 10)

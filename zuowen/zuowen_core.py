@@ -4,7 +4,7 @@ import webbrowser
 import subprocess
 import platform
 from datetime import datetime
-from zuowen_data import TEXTBOOK_COMPS, PICTURE_WRITING, EXAMPLE_ESSAYS, XIAOSHENGCHU, ZHONGKAO, GAOKAO
+from zuowen.zuowen_data import TEXTBOOK_COMPS, PICTURE_WRITING, EXAMPLE_ESSAYS, XIAOSHENGCHU, ZHONGKAO, GAOKAO
 
 
 class ZuowenEngine:

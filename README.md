@@ -316,42 +316,35 @@ python main.py
 ├── constants.py            # 全局常量配置（路径、UI常量、年级映射等）
 ├── widgets.py              # 自定义UI组件（渐变按钮）
 │
-├── shuxue_core.py          # 数学题生成核心（40+种题型）
-├── shuxue_export.py        # 数学PDF导出
-├── shuxue_drawings.py      # 几何图形渲染
-├── shuxue_ui.py            # 数学模块UI
+├── shuxue/                 # 数学模块
+│   ├── shuxue_core.py      # 数学题生成核心（40+种题型）
+│   └── shuxue_ui.py        # 数学模块UI
 │
-├── zitie_core.py           # 字帖生成核心
-│   ├── StrokeRenderer      # 笔顺渲染器
-│   ├── ZitieGenerator      # 字帖生成器
-│   └── ZitieConfig         # 字帖配置
-├── zitie_data.py           # 字帖数据（1-6年级生字、诗词、国学经典）
-├── zi_tie_ui.py            # 字帖模块UI
+├── zitie/                  # 字帖模块
+│   ├── zitie_core.py       # 字帖生成核心（笔顺渲染、PDF生成）
+│   ├── zitie_data.py       # 字帖数据（1-6年级生字、诗词、国学经典）
+│   └── zi_tie_ui.py        # 字帖模块UI
 │
-├── zuowen_core.py          # 作文核心逻辑引擎
-│   ├── ZuowenEngine        # 作文数据管理
-│   ├── AI写作工具          # AI平台集成
-│   └── PDF导出            # 作文本格式导出
-├── zuowen_data.py          # 作文数据结构
-├── zuowen_data.json        # 作文扩展数据（48单元、19话题、45篇例文）
-├── zuowen_ui.py            # 作文模块UI
+├── zuowen/                 # 作文模块
+│   ├── zuowen_core.py      # 作文核心逻辑引擎
+│   ├── zuowen_data.py      # 作文数据结构
+│   ├── zuowen_data.json    # 作文扩展数据（48单元、19话题、45篇例文）
+│   └── zuowen_ui.py        # 作文模块UI
 │
-├── zhenti_core.py          # 真题搜索核心
-│   ├── 数据库模块          # SQLite题库
-│   ├── 平台配置            # 5个平台配置
-│   └── 爬虫模块            # 智能爬虫
-├── zhenti_ui.py            # 真题模块UI
+├── zhenti/                 # 真题模块
+│   ├── zhenti_core.py      # 真题搜索核心（SQLite题库、爬虫）
+│   ├── zhenti_ui.py        # 真题模块UI
+│   └── question_bank.db    # 题库数据库
 │
-├── fonts/                  # 字体文件夹
-│   ├── kaiti_gb2312.ttf    # 楷体
-│   ├── jingxiaopeng.ttf    # 行书（荆霄鹏）
-│   ├── tianyingzhang.ttf   # 行楷（田英章）
-│   ├── ouyangxun.ttf       # 大楷（欧阳询）
-│   └── 其他自定义字体...
-│
-├── stroke_data.json        # 汉字笔顺数据（24MB，SVG笔画路径）
-├── question_bank.db        # 题库数据库（1.5MB）
-├── zuowen.db               # 作文数据库
+├── assets/                 # 公共资源
+│   ├── fonts/              # 字体文件夹
+│   │   ├── kaiti_gb2312.ttf
+│   │   ├── jingxiaopeng.ttf
+│   │   ├── tianyingzhang.ttf
+│   │   ├── ouyangxun.ttf
+│   │   └── ...
+│   ├── stroke_data.json    # 汉字笔顺数据（24MB）
+│   └── favicon.ico         # 软件图标
 │
 ├── 启动.bat                # Windows启动脚本
 ├── requirements.txt        # 依赖包列表
@@ -456,18 +449,20 @@ A: 可以。内容超出单页时会自动分页，并在每页显示页码。
 
 ## 📝 更新日志
 
-### v1.5.0（当前版本）
+### V1.1.0（当前版本）
 
-- ✨ 新增中高考作文模式，支持2000-2026年真题
-- ✨ 新增AI写作助手，集成豆包、DeepSeek等平台
-- ✨ 新增真题下载模块，支持5个平台多学科搜索
-- ✨ 新增字帖古书模式，支持千字文、道德经等国学经典
-- ✨ 新增笔顺渲染功能，支持逐步展示汉字笔顺
-- ✨ 优化字帖字体管理，支持自定义字体
-- ✨ 优化数学题型，增加到40+种
-- ✨ 优化PDF导出，支持自动分页和页码
-- 🐛 修复竖式计算显示问题
-- 🐛 修复几何图形渲染问题
+- ⚡ 重大性能优化：三年级/四年级一键出题从 2.5 秒降至 0.002 秒（提升 1000 倍+）
+- ⚡ 优化混合运算生成器（缩小数值范围，减少无效循环）
+- ⚡ 优化安全表达式计算，去除 AST 解析开销
+- ⚡ 优化题目去重缓存，从 O(n) 线性搜索改为 O(1) 哈希查找
+- 🐛 修复盈亏问题（gen_duck v=3/4）随机参数导致死循环
+- 🐛 修复利润问题（_gen_profit_variant v=5）整除条件不满足时死循环
+- 🐛 修复分配问题（gen_assign v=1/2/3）余数条件不满足时死循环
+- 🐛 修复连续点击一键出题越来越卡的问题
+- 📁 所有模块导出 PDF 默认路径统一到软件目录
+- 🔤 字帖自定义字体预览默认打开 assets/fonts 文件夹
+
+
 
 ## 📄 许可证
 

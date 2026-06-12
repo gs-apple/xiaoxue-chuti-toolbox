@@ -3,6 +3,7 @@
 
 import random
 import math
+import signal
 import re
 import os
 import json
@@ -13,32 +14,34 @@ from fractions import Fraction
 #  去重缓存（文件级，跨会话持久化）
 # ══════════════════════════════════════════════════════════
 class _DedupCache:
-    """文件级题目去重缓存，最多保留最近500条"""
-    _MAX = 500
-    _path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".question_cache.json")
-    _cache = None
+    """文件级题目去重缓存，最多保留最近200条"""
+    _MAX = 200
+    _path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "shuxue", ".question_cache.json")
+    _cache_set = None  # set 用于 O(1) 去重检查
+    _cache_list = None  # list 用于持久化
     _dirty = False
 
     @classmethod
     def _load(cls):
-        if cls._cache is not None:
-            return cls._cache
+        if cls._cache_set is not None:
+            return cls._cache_set
+        cls._cache_set = set()
+        cls._cache_list = []
         if os.path.exists(cls._path):
             try:
                 with open(cls._path, "r", encoding="utf-8") as f:
                     data = json.load(f)
                 if isinstance(data, list):
-                    cls._cache = data[-cls._MAX:]
-                    return cls._cache
+                    cls._cache_list = data[-cls._MAX:]
+                    cls._cache_set = set(cls._cache_list)
             except Exception:
                 pass
-        cls._cache = []
-        return cls._cache
+        return cls._cache_set
 
     @classmethod
     def _save(cls, items=None):
         if items is None:
-            items = cls._cache or []
+            items = cls._cache_list or []
         try:
             with open(cls._path, "w", encoding="utf-8") as f:
                 json.dump(items[-cls._MAX:], f, ensure_ascii=False)
@@ -67,7 +70,8 @@ class _DedupCache:
         norm = cls.normalize(question_text)
         cache = cls._load()
         if norm not in cache:
-            cache.append(norm)
+            cache.add(norm)
+            cls._cache_list.append(norm)
             cls._dirty = True
 
     @classmethod
@@ -78,6 +82,8 @@ class _DedupCache:
 
     @classmethod
     def clear(cls):
+        cls._cache_set = set()
+        cls._cache_list = []
         cls._save([])
 
 # ══════════════════════════════════════════════════════════
@@ -100,34 +106,13 @@ def _safe_eval(expr: str):
     # 只允许数字、运算符、括号、小数点、空格
     allowed_chars = set('0123456789+-*/(). ')
     if not all(c in allowed_chars for c in expr):
-        raise ValueError(f"表达式包含非法字符: {expr}")
+        return None
 
-    # 使用 ast.literal_eval 无法处理表达式，使用 compile + exec
-    # 但限制只能使用数学运算
+    # 快速路径：纯整数四则运算，直接用 eval（已通过字符白名单校验）
     try:
-        # 编译表达式
-        code = compile(expr, '<string>', 'eval')
-        # 检查是否只包含数字和运算符
-        for node in ast.walk(code):
-            if isinstance(node, ast.Expression):
-                continue
-            elif isinstance(node, ast.BinOp):
-                if not isinstance(node.op, (ast.Add, ast.Sub, ast.Mult, ast.Div)):
-                    raise ValueError(f"不支持的运算符: {type(node.op).__name__}")
-            elif isinstance(node, ast.UnaryOp):
-                if not isinstance(node.op, (ast.UAdd, ast.USub)):
-                    raise ValueError(f"不支持的运算符: {type(node.op).__name__}")
-            elif isinstance(node, ast.Constant):
-                if not isinstance(node.value, (int, float)):
-                    raise ValueError(f"不支持的常量类型: {type(node.value).__name__}")
-            elif isinstance(node, ast.Num):  # Python 3.7 兼容
-                pass
-            else:
-                raise ValueError(f"不支持的语法: {type(node).__name__}")
-
-        # 安全执行
-        result = eval(code, {"__builtins__": {}}, {})
-        return result
+        return eval(expr, {"__builtins__": {}}, {})
+    except (ZeroDivisionError, ValueError, TypeError, SyntaxError):
+        return None
     except Exception as e:
         raise ValueError(f"表达式计算失败: {expr}, 错误: {e}")
 
@@ -549,7 +534,7 @@ class MathProblemGenerator:
 
     def gen_mix_addmul(self, use_bracket=False):
         """加减乘混合：随机安排乘法和加减法的位置，结果在万以内"""
-        for _ in range(500):
+        for _ in range(100):
             # 生成三个数，乘法因子适当控制以免过大
             a = random.randint(2, 99)
             b = random.randint(2, 99)
@@ -603,18 +588,18 @@ class MathProblemGenerator:
     def gen_mix_addmulsub(self, use_bracket=False):
         """
         加减乘除混合运算：
-        - 四个数值，范围 1~999
+        - 四个数值，范围 1~99（缩小范围提高命中率）
         - 运算符随机（+、-、×、÷），位置随机
         - 不勾选括号时无括号；勾选括号时随机加一对括号
         - 结果非负且在 9999 以内
         - 使用标准运算优先级（先乘除后加减）
         """
-        for _ in range(500):
+        for _ in range(100):
             try:
-                # 四个数值
-                nums = [random.randint(1, 999) for _ in range(4)]
-                # 三个运算符
-                ops = [random.choice(['+', '-', '×', '÷']) for _ in range(3)]
+                # 四个数值（缩小范围，提高有效组合比例）
+                nums = [random.randint(1, 99) for _ in range(4)]
+                # 三个运算符（减少除法比例，降低无效组合）
+                ops = [random.choice(['+', '-', '×', '×', '÷']) for _ in range(3)]
 
                 # 构建表达式字符串
                 if use_bracket:
@@ -650,7 +635,7 @@ class MathProblemGenerator:
                 continue
 
         # 保底题目
-        return "123+456+789+101=", 1469
+        return "12+34+56+78=", 180
 
     def _calc(self, a, op, b):
         if op == '+': return a + b
@@ -847,7 +832,7 @@ class MathProblemGenerator:
             return self._gen_age_future_multiple()
         v = random.randint(1, 4)
         if v == 1:
-            for _ in range(50):
+            for _ in range(30):
                 child = random.randint(8, 14)
                 years = random.randint(2, child - 2)
                 father_now = child + random.randint(22, 35)
@@ -1009,23 +994,25 @@ class MathProblemGenerator:
             extra = per2 * people - per1 * people - short
             return f"坐船，每条船坐{per1}人少{short}人，每条船坐{per2}人多{extra}人，有几条船？", people
         elif v == 3:
+            # 安全校验：先确定 people，再计算 surplus
             people = random.randint(3, 12)
             per1 = random.randint(3, 6)
             per2 = per1 + random.randint(1, 3)
             surplus1 = random.randint(5, 15)
             surplus2 = surplus1 - (per2 - per1) * people
-            while surplus2 <= 0:
-                people = random.randint(3, 12)
+            if surplus2 <= 0:
+                surplus1 = (per2 - per1) * people + random.randint(1, 10)
                 surplus2 = surplus1 - (per2 - per1) * people
             return f"分苹果，每人{per1}个剩{surplus1}个，每人{per2}个剩{surplus2}个，有几个人？", people
         elif v == 4:
+            # 安全校验：先确定 people，再计算 deficit
             people = random.randint(3, 12)
             per1 = random.randint(3, 6)
             per2 = per1 + random.randint(1, 3)
             deficit1 = random.randint(2, 8)
             deficit2 = deficit1 + (per1 - per2) * people
-            while deficit2 <= 0:
-                people = random.randint(3, 12)
+            if deficit2 <= 0:
+                deficit1 = (per2 - per1) * people + random.randint(1, 8)
                 deficit2 = deficit1 + (per1 - per2) * people
             return f"坐船，每条船坐{per1}人少{deficit1}人，每条船坐{per2}人少{deficit2}人，有几条船？", people
         elif v == 5:
@@ -1780,13 +1767,25 @@ class MathProblemGenerator:
         v = random.randint(1, 5)
         if v == 1:
             total = random.randint(30, 99)
-            give = random.randint(5, total - 6)
             n = random.randint(2, 6)
-            remain = total - give
-            while remain % n != 0:
-                give = random.randint(5, total - 6)
+            # 安全校验：先确定能整除的值，再反推 give
+            ans = random.randint(3, (total - 2) // n)
+            remain = ans * n
+            give = total - remain
+            if give < 1:
+                give = random.randint(1, total // 3)
                 remain = total - give
-            ans = remain // n
+                while remain % n != 0:
+                    give -= 1
+                    remain = total - give
+                    if give < 1:
+                        total = random.randint(30, 99)
+                        n = random.randint(2, 6)
+                        ans = random.randint(3, (total - 2) // n)
+                        remain = ans * n
+                        give = total - remain
+                        break
+                ans = remain // n
             names = [("小明", "小红"), ("小华", "小丽"), ("哥哥", "弟弟"), ("姐姐", "妹妹")]
             a, b = random.choice(names)
             items = ["故事书", "漫画书", "笔记本", "彩笔", "贴纸"]
@@ -1794,25 +1793,35 @@ class MathProblemGenerator:
             return f"{a}有{total}本{item}，借给{b}{give}本后，剩下的平均分给{n}个小朋友，每个小朋友得到多少本？", ans
         elif v == 2:
             total = random.randint(50, 200)
-            give = random.randint(10, total - 10)
             n = random.randint(2, 5)
-            remain = total - give
-            while remain % n != 0:
+            # 安全校验：先确定能整除的值
+            ans = random.randint(5, (total - 10) // n)
+            remain = ans * n
+            give = total - remain
+            if give < 10:
                 give = random.randint(10, total - 10)
                 remain = total - give
-            ans = remain // n
+                while remain % n != 0:
+                    give -= 1
+                    remain = total - give
+                    if give < 1:
+                        total = random.randint(50, 200)
+                        n = random.randint(2, 5)
+                        ans = random.randint(5, (total - 10) // n)
+                        remain = ans * n
+                        give = total - remain
+                        break
+                ans = remain // n
             items = [("苹果", "个"), ("糖果", "颗"), ("饼干", "块"), ("橘子", "个")]
             item, unit = random.choice(items)
             return f"妈妈买了{total}{unit}{item}，送给邻居{give}{unit}后，剩下的平均分给{n}个孩子，每人分到多少{unit}？", ans
         elif v == 3:
-            a = random.randint(20, 80)
-            b = random.randint(20, 80)
             n = random.randint(2, 5)
-            total = a + b
-            while total % n != 0:
-                b = random.randint(20, 80)
-                total = a + b
-            ans = total // n
+            # 安全校验：先确定能整除的值
+            ans = random.randint(20, 50)
+            total = ans * n
+            a = random.randint(max(1, total // 2 - 30), min(total - 1, total // 2 + 30))
+            b = total - a
             return f"两个书架共有{total}本书，第一个书架有{a}本，第二个书架有{b}本。平均分给{n}个班级，每班分到多少本？", ans
         elif v == 4:
             per = random.randint(5, 15)
@@ -1908,11 +1917,22 @@ class MathProblemGenerator:
         else:
             cost = random.randint(50, 200)
             profit_total = random.randint(100, 500)
-            sell = random.randint(cost + 5, cost + 30)
-            n = profit_total // (sell - cost)
-            while n <= 0 or (sell - cost) * n != profit_total:
+            # 安全校验：限制最大尝试次数，防止死循环
+            found = False
+            for _ in range(200):
                 sell = cost + random.randint(5, 20)
-                n = profit_total // (sell - cost) if sell > cost else 0
+                diff = sell - cost
+                if diff > 0 and profit_total % diff == 0:
+                    n = profit_total // diff
+                    if n > 0:
+                        found = True
+                        break
+            if not found:
+                # 保底：直接构造整除关系
+                diff = random.randint(5, 20)
+                n = random.randint(5, 30)
+                profit_total = diff * n
+                sell = cost + diff
             return f"某商品进价{cost}元，售价{sell}元，要盈利{profit_total}元需卖出多少件？", n
 
     # ==================== 购物计算（内部变种） ====================
@@ -2038,7 +2058,7 @@ def generate_questions(selections, use_bracket=False, grade=None, use_spider=Tru
 
         generated = 0
         attempts = 0
-        max_attempts = min(count * 50, 5000)  # 去重需要更多尝试
+        max_attempts = min(count * 20, 1000)  # 安全校验：限制最大尝试次数，避免去重碰撞时长时间卡顿
 
         # 如果是提升题且已使用爬虫题，减少生成数量
         target_count = count
@@ -2120,6 +2140,7 @@ GRADE_CONFIG = {
     ],
 }
 def generate_quick_questions(grade, count):
+    _DedupCache.clear()  # 一键出题时清除缓存，避免跨会话碰撞导致卡顿
     config = GRADE_CONFIG.get(grade, GRADE_CONFIG["三年级"])
     total_ratio = sum(c for _, c in config)
     selections = {}
@@ -2554,7 +2575,7 @@ def draw_figure(c, x, y, width, height, spec: DrawingSpec):
 from datetime import datetime
 
 def _get_export_dir():
-    return os.path.dirname(os.path.abspath(__file__))
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def _build_filename(questions_data, mode="export", grade="", use_bracket=False, use_vertical=False, use_answer=True):
     total_count = len(questions_data.get("basic", [])) + len(questions_data.get("advance", []))

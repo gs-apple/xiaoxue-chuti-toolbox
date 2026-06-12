@@ -2,21 +2,27 @@
 import tkinter as tk
 from tkinter import ttk
 
-from shuxue_ui import ShuxueTabWidget
-from zi_tie_ui import ZiTieTabWidget
-from zuowen_ui import ZuowenTabWidget
-from zhenti_ui import ZhentiTabWidget
+from shuxue.shuxue_ui import ShuxueTabWidget
+from zitie.zi_tie_ui import ZiTieTabWidget
+from zuowen.zuowen_ui import ZuowenTabWidget
+from zhenti.zhenti_ui import ZhentiTabWidget
 from constants import BG_COLOR
+
+# 版本信息（每10位进1，如 V1.0.10 -> V1.1.0）
+VERSION = "V1.1.0"
+APP_NAME = "小学出题工具箱"
 
 
 class MathGeneratorApp:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("小学出题工具箱")
+        self.root.title(f"{APP_NAME} {VERSION}")
         self.root.geometry("700x700")
         self.root.resizable(False, False)
-        self._center()
+        self.root.withdraw()  # 先隐藏，避免窗口从左上角滑入
         self._init_ui()
+        self._center()  # UI 构建完成后再居中
+        self.root.deiconify()  # 居中后再显示
 
     def _center(self):
         self.root.update_idletasks()
@@ -26,7 +32,7 @@ class MathGeneratorApp:
         sh = self.root.winfo_screenheight()
         x = (sw - w) // 2
         y = (sh - h) // 2
-        self.root.geometry(f"700x700+{x}+{y}")
+        self.root.geometry(f"+{x}+{y}")
 
     def _init_ui(self):
         self.root.configure(bg=BG_COLOR)

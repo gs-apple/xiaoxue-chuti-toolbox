@@ -2,8 +2,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from widgets import GradientButton
-from zitie_core import ZitieGenerator, ZitieConfig, add_custom_font, register_builtin_fonts
-from zitie_data import GRADE_CHARACTERS, PINYIN_DATA, NUMBER_DATA, GRADES, VERSIONS
+from zitie.zitie_core import ZitieGenerator, ZitieConfig, add_custom_font, register_builtin_fonts
+from zitie.zitie_data import GRADE_CHARACTERS, PINYIN_DATA, NUMBER_DATA, GRADES, VERSIONS
 from datetime import datetime
 import os
 import json
@@ -1130,7 +1130,7 @@ class ZiTieTabWidget:
                         parts.append(type_name)
                     file_name = "_".join(parts) + ".pdf"
 
-            file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), file_name)
+            file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), file_name)
             success = generator.save_pdf(file_path)
             if not success:
                 messagebox.showerror("导出失败", "保存PDF文件失败！")
@@ -1190,8 +1190,10 @@ class ZiTieTabWidget:
         return "kaiti_gb2312"
 
     def on_select_font(self):
+        fonts_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'assets', 'fonts')
         font_path = filedialog.askopenfilename(
             title="选择字体文件",
+            initialdir=fonts_dir,
             filetypes=[("字体文件", "*.ttf *.ttc *.otf")]
         )
         if font_path:
