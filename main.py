@@ -9,7 +9,7 @@ from zhenti.zhenti_ui import ZhentiTabWidget
 from constants import BG_COLOR
 
 # 版本信息（每10位进1，如 V1.0.10 -> V1.1.0）
-VERSION = "V1.1.0"
+VERSION = "V1.1.1"
 APP_NAME = "小学出题工具箱"
 
 

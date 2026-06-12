@@ -2,11 +2,9 @@
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox
+from constants import BASE_DIR
 from zuowen.zuowen_core import ZuowenEngine, open_ai_web, get_ai_web_urls, export_worksheet
 from widgets import GradientButton
-
-# 软件目录（项目根目录）
-_APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 BG = "#f0f0f0"
 FONT = ("Microsoft YaHei", 10)
@@ -441,7 +439,7 @@ class ZuowenTabWidget:
             raise
 
         # 5. 同步更新内存中的数据
-        from zuowen_data import EXAMPLE_ESSAYS
+        from zuowen.zuowen_data import EXAMPLE_ESSAYS
         if title not in EXAMPLE_ESSAYS:
             EXAMPLE_ESSAYS[title] = {"content": "", "word_count": ""}
         EXAMPLE_ESSAYS[title]["content"] = new_content
@@ -565,7 +563,7 @@ class ZuowenTabWidget:
                 return
 
             # 同步内存
-            from zuowen_data import XIAOSHENGCHU, ZHONGKAO, GAOKAO, EXAMPLE_ESSAYS
+            from zuowen.zuowen_data import XIAOSHENGCHU, ZHONGKAO, GAOKAO, EXAMPLE_ESSAYS
             target = {"XIAOSHENGCHU": XIAOSHENGCHU, "ZHONGKAO": ZHONGKAO, "GAOKAO": GAOKAO}[json_key]
             if yr not in target:
                 target[yr] = []
@@ -808,7 +806,7 @@ class ZuowenTabWidget:
             title = data.get("title", "作文")
             grade = data.get("grade", "")
             content = self.content_text.get("1.0", "end-1c").strip()
-            filepath = os.path.join(_APP_DIR, f"{title}.pdf")
+            filepath = os.path.join(BASE_DIR, f"{title}.pdf")
             try:
                 export_worksheet(title, content, grade, data.get("type", ""),
                                  filepath=filepath)
@@ -820,7 +818,7 @@ class ZuowenTabWidget:
             title = data.get("title", "中高考作文")
             content = self.content_text.get("1.0", "end-1c").strip()
             requirements = self.req_text.get("1.0", "end-1c").strip()
-            filepath = os.path.join(_APP_DIR, f"{title}.pdf")
+            filepath = os.path.join(BASE_DIR, f"{title}.pdf")
             try:
                 export_worksheet(title, content, data.get("grade", ""),
                                  data.get("comp_type", ""), filepath=filepath)

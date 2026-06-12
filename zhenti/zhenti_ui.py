@@ -8,7 +8,7 @@ import webbrowser
 import json
 import os
 
-from constants import BG_COLOR, GRADES, GRADE_MAP, FAVORITES_FILE, HISTORY_FILE, GRADE_KEYWORDS, SUBJECT_KEYWORDS
+from constants import BG_COLOR, GRADES, GRADE_MAP, FAVORITES_FILE, HISTORY_FILE, GRADE_KEYWORDS, SUBJECT_KEYWORDS, ZHENTI_DIR
 
 BG = BG_COLOR
 
@@ -485,7 +485,7 @@ class ZhentiTabWidget:
         self.btn_download.config(state="disabled")
 
         def download_thread():
-            from zhenti_core import _get_scraper
+            from zhenti.zhenti_core import _get_scraper
             scraper = _get_scraper()
 
             # 获取下载信息
@@ -493,7 +493,7 @@ class ZhentiTabWidget:
 
             if info["type"] == "direct":
                 # 直接下载
-                save_dir = os.path.join(os.path.dirname(__file__), "试卷下载")
+                save_dir = ZHENTI_DIR
                 result = scraper.download_file(info["url"], save_dir)
 
                 self.frame.after(0, lambda: self._on_download_complete(result))
@@ -700,7 +700,7 @@ class SearchWorker:
                 if self.is_running:
                     self._queue.put(("progress", msg))
 
-            from zhenti_core import search_papers
+            from zhenti.zhenti_core import search_papers
 
             all_results = []
 

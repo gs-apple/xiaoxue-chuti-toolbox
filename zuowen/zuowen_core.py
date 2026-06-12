@@ -1,10 +1,12 @@
 # zuowen_core.py — 作文核心逻辑引擎
 import os
+import re
 import webbrowser
 import subprocess
 import platform
 from datetime import datetime
-from zuowen.zuowen_data import TEXTBOOK_COMPS, PICTURE_WRITING, EXAMPLE_ESSAYS, XIAOSHENGCHU, ZHONGKAO, GAOKAO
+from constants import BASE_DIR
+from zuowen.zuowen_data import TEXTBOOK_COMPS, EXAMPLE_ESSAYS, XIAOSHENGCHU, ZHONGKAO, GAOKAO
 
 
 class ZuowenEngine:
@@ -19,11 +21,6 @@ class ZuowenEngine:
         """返回所有年级列表"""
         return list(TEXTBOOK_COMPS.keys())
 
-    def get_semesters(self, grade):
-        """返回指定年级的学期列表"""
-        grade_data = TEXTBOOK_COMPS.get(grade, {})
-        return list(grade_data.keys())
-
     def get_units(self, grade, semester=None):
         """返回指定年级(可选学期)的单元列表 [{title, type, requires, keywords}]"""
         grade_data = TEXTBOOK_COMPS.get(grade, {})
@@ -34,13 +31,6 @@ class ZuowenEngine:
         for sem_units in grade_data.values():
             all_units.extend(sem_units)
         return all_units
-
-    def get_unit_detail(self, grade, unit_idx, semester=None):
-        """返回指定年级指定单元的详情"""
-        units = self.get_units(grade, semester)
-        if 0 <= unit_idx < len(units):
-            return units[unit_idx]
-        return None
 
     # ========== 中考/高考作文 ==========
 
@@ -54,83 +44,11 @@ class ZuowenEngine:
             data = GAOKAO
         return data.get(str(year), [])
 
-    def get_exam_years(self):
-        """返回可用年份列表"""
-        return sorted(set(list(ZHONGKAO.keys()) + list(GAOKAO.keys())))
-
-    # ========== 看图写话 ==========
-
-    def get_picture_topics(self, grade=None):
-        """返回看图写话话题列表，可按年级筛选"""
-        if grade:
-            return [p for p in PICTURE_WRITING if p["grade"] == grade]
-        return PICTURE_WRITING
-
-    def get_picture_detail(self, topic_idx):
-        """返回指定看图写话话题详情"""
-        if 0 <= topic_idx < len(PICTURE_WRITING):
-            return PICTURE_WRITING[topic_idx]
-        return None
-
     # ========== 例文 ==========
 
     def get_example_essay(self, title):
         """根据标题获取例文"""
         return EXAMPLE_ESSAYS.get(title)
-
-    def get_all_examples(self):
-        """返回所有例文列表 [{title, grade, type, word_count}]"""
-        result = []
-        for title, data in EXAMPLE_ESSAYS.items():
-            result.append({
-                "title": title,
-                "grade": data.get("grade", ""),
-                "type": data.get("type", ""),
-                "word_count": data.get("word_count", 0),
-            })
-        return result
-
-    def search_examples(self, keyword):
-        """搜索例文（标题+内容）"""
-        keyword = keyword.lower()
-        results = []
-        for title, data in EXAMPLE_ESSAYS.items():
-            if keyword in title.lower() or keyword in data.get("content", "").lower():
-                results.append({"title": title, **data})
-        return results
-
-    # ========== 综合搜索 ==========
-
-    def search_all(self, keyword):
-        """跨所有类型搜索"""
-        return {
-            "textbook": self._search_textbook(keyword),
-            "examples": self.search_examples(keyword),
-        }
-
-    def _search_textbook(self, keyword):
-        """搜索课本作文"""
-        keyword = keyword.lower()
-        results = []
-        for grade, sems in TEXTBOOK_COMPS.items():
-            for sem_name, units in sems.items():
-                for i, unit in enumerate(units):
-                    if (keyword in unit["title"].lower()
-                            or keyword in unit["requires"].lower()
-                            or any(keyword in kw for kw in unit.get("keywords", []))):
-                        results.append({"grade": grade, "semester": sem_name, "unit_idx": i, **unit})
-        return results
-
-    def _search_picture(self, keyword):
-        """搜索看图写话"""
-        keyword = keyword.lower()
-        results = []
-        for i, p in enumerate(PICTURE_WRITING):
-            if (keyword in p["title"].lower()
-                    or keyword in p["scene"].lower()
-                    or keyword in p.get("hints", "").lower()):
-                results.append({"topic_idx": i, **p})
-        return results
 
 
 # ============================================================
@@ -164,33 +82,6 @@ def get_ai_web_urls():
     return dict(AI_WEB_URLS)
 
 
-def generate_ai_prompt(topic, tip=None, grade="", word_count=300):
-    """生成作文提示词
-
-    Args:
-        topic: 作文题目
-        tip: 写作思路（可选）
-        grade: 年级（可选）
-        word_count: 字数要求（默认300字）
-    """
-    # 根据年级调整字数要求
-    grade_word_count = {
-        "一年级": 60, "二年级": 100, "三年级": 200,
-        "四年级": 250, "五年级": 350, "六年级": 400,
-    }
-    if grade in grade_word_count:
-        word_count = grade_word_count[grade]
-
-    prompt = f'请以"{topic}"为题，写一篇适合小学生的优秀作文范文。'
-
-    if tip:
-        prompt += f'\n\n写作思路：\n{tip}'
-
-    prompt += f'\n\n要求：语言通顺，用词恰当，内容真实感人，有具体事例，结构清晰，字数{word_count}字左右。直接输出作文内容，第一行为标题，不要加额外说明。'
-
-    return prompt
-
-
 def open_ai_web(topic, service="豆包", tip=None, grade=""):
     """
     打开AI网页版并复制提示词到剪贴板
@@ -200,7 +91,16 @@ def open_ai_web(topic, service="豆包", tip=None, grade=""):
     if not url:
         return False, f"未知的AI服务: {service}"
 
-    prompt = generate_ai_prompt(topic, tip=tip, grade=grade)
+    # 根据年级调整字数要求
+    grade_word_count = {
+        "一年级": 60, "二年级": 100, "三年级": 200,
+        "四年级": 250, "五年级": 350, "六年级": 400,
+    }
+    word_count = grade_word_count.get(grade, 300)
+    prompt = f'请以"{topic}"为题，写一篇适合小学生的优秀作文范文。'
+    if tip:
+        prompt += f'\n\n写作思路：\n{tip}'
+    prompt += f'\n\n要求：语言通顺，用词恰当，内容真实感人，有具体事例，结构清晰，字数{word_count}字左右。直接输出作文内容，第一行为标题，不要加额外说明。'
 
     try:
         _copy_to_clipboard(prompt)
@@ -417,8 +317,7 @@ def export_worksheet(title, content="", grade="", comp_type="", filepath=None):
         # 清理文件名中的特殊字符
         safe_title = actual_title.replace('_', ' ').replace('\n', ' ')
         safe_title = re.sub(r'[\\/:*?"<>|]', '_', safe_title)[:30]
-        filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                f"作文_{safe_title}_{date_str}.pdf")
+        filepath = os.path.join(BASE_DIR, f"作文_{safe_title}_{date_str}.pdf")
 
     pw, ph = A4
     cell_size = 8 * mm

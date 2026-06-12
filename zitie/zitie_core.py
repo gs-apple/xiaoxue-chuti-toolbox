@@ -8,12 +8,12 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.colors import black, gray, HexColor
 from reportlab import rl_config
-import os
 import re
 import math
 import io
 import json
 from PIL import Image, ImageDraw, ImageFont
+from constants import FONTS_DIR, STROKE_DATA_FILE
 
 # 设置 reportlab 配置，允许自动生成缺少的 PostScript 名称
 rl_config.autoGenerateMissingTTFName = 1
@@ -28,7 +28,7 @@ class StrokeRenderer:
 
     def __init__(self, data_path=None):
         if data_path is None:
-            data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stroke_data.json')
+            data_path = STROKE_DATA_FILE
         self._data_path = data_path
         self._data = None
         self._cache = {}
@@ -244,8 +244,8 @@ class StrokeRenderer:
         if cache_key in self._font_cache:
             return self._font_cache[cache_key]
         font_candidates = [
-            os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'fonts', 'kaiti_gb2312.ttf'),
-            os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'fonts', 'simkai.ttf'),
+            os.path.join(FONTS_DIR, 'kaiti_gb2312.ttf'),
+            os.path.join(FONTS_DIR, 'simkai.ttf'),
             'C:/Windows/Fonts/simkai.ttf',
             'C:/Windows/Fonts/simhei.ttf',
             'C:/Windows/Fonts/msyh.ttc',
@@ -505,7 +505,7 @@ STROKE_DATA = {
 
 # ================= 初始化中文字体 =================
 def _register_fonts():
-    fonts_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'fonts')
+    fonts_dir = FONTS_DIR
     os.makedirs(fonts_dir, exist_ok=True)
 
     for path in ['simkai.ttf', r'C:\Windows\Fonts\simkai.ttf']:
@@ -566,7 +566,7 @@ def get_registered_fonts():
 
 def get_fonts_in_fonts_folder():
     """获取fonts文件夹中的所有字体文件"""
-    fonts_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'fonts')
+    fonts_dir = FONTS_DIR
     os.makedirs(fonts_dir, exist_ok=True)
     
     fonts = []
@@ -580,7 +580,7 @@ def get_fonts_in_fonts_folder():
 
 def load_fonts_from_folder():
     """重新加载fonts文件夹中的所有字体"""
-    fonts_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'fonts')
+    fonts_dir = FONTS_DIR
     os.makedirs(fonts_dir, exist_ok=True)
     
     loaded_fonts = []
@@ -614,7 +614,7 @@ def load_fonts_from_folder():
 
 def register_builtin_fonts():
     """注册内置字体（jingxiaopeng-行书、tianyingzhang-行楷、ouyangxun-大楷）"""
-    fonts_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'fonts')
+    fonts_dir = FONTS_DIR
     builtin = [
         ("jingxiaopeng", "jingxiaopeng.ttf"),
         ("tianyingzhang", "tianyingzhang.ttf"),
@@ -634,7 +634,7 @@ def register_builtin_fonts():
     return registered
 
 def add_custom_font(font_path):
-    fonts_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'fonts')
+    fonts_dir = FONTS_DIR
     os.makedirs(fonts_dir, exist_ok=True)
     
     if not os.path.exists(font_path):

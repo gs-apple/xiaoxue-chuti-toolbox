@@ -5,6 +5,11 @@
 build/
 dist/
 
+# 运行时数据文件
+.question_cache.json
+.zhenti_history.json
+.zhenti_favorites.json
+
 # 其他常见的 Python 项目忽略项
 *.log
 *.spec

@@ -1,14 +1,18 @@
 # constants.py — 公共常量定义
 # 所有模块共享的常量集中管理
 
+import sys
 import os
 
 # ══════════════════════════════════════════════════════════
 #  路径常量
 # ══════════════════════════════════════════════════════════
 
-# 项目根目录
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# 项目根目录（兼容 PyInstaller 编译：exe 所在目录即为项目根）
+if getattr(sys, 'frozen', False):
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # 字体目录
 FONTS_DIR = os.path.join(BASE_DIR, 'assets', 'fonts')
@@ -16,8 +20,8 @@ FONTS_DIR = os.path.join(BASE_DIR, 'assets', 'fonts')
 # 数据文件
 STROKE_DATA_FILE = os.path.join(BASE_DIR, 'assets', 'stroke_data.json')
 
-# 下载目录
-DOWNLOAD_DIR = os.path.join(BASE_DIR, '试卷下载')
+# 真题下载目录（保存到项目根目录）
+ZHENTI_DIR = BASE_DIR
 
 # ══════════════════════════════════════════════════════════
 #  UI 常量

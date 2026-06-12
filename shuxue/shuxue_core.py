@@ -3,11 +3,11 @@
 
 import random
 import math
-import signal
 import re
 import os
 import json
 from fractions import Fraction
+from constants import BASE_DIR, QUESTION_CACHE_FILE
 
 
 # ══════════════════════════════════════════════════════════
@@ -16,7 +16,7 @@ from fractions import Fraction
 class _DedupCache:
     """文件级题目去重缓存，最多保留最近200条"""
     _MAX = 200
-    _path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "shuxue", ".question_cache.json")
+    _path = QUESTION_CACHE_FILE
     _cache_set = None  # set 用于 O(1) 去重检查
     _cache_list = None  # list 用于持久化
     _dirty = False
@@ -2032,7 +2032,7 @@ def generate_questions(selections, use_bracket=False, grade=None, use_spider=Tru
     spider_questions = []
     if use_spider and grade and grade in range(1, 7):
         try:
-            from zhenti_core import get_spider_questions
+            from zhenti.zhenti_core import get_spider_questions
             advance_types = [t for t in selections.keys() if t in ADVANCE_TYPES]
             spider_count = int(sum(selections.get(t, 0) for t in advance_types) * spider_ratio)
             if spider_count > 0:
@@ -2574,9 +2574,6 @@ def draw_figure(c, x, y, width, height, spec: DrawingSpec):
 
 from datetime import datetime
 
-def _get_export_dir():
-    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 def _build_filename(questions_data, mode="export", grade="", use_bracket=False, use_vertical=False, use_answer=True):
     total_count = len(questions_data.get("basic", [])) + len(questions_data.get("advance", []))
 
@@ -2749,9 +2746,8 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles
             advance_answers.append("略")
     all_answers = basic_answers + advance_answers
 
-    export_dir = _get_export_dir()
     filename = _build_filename(questions_data, mode=mode, grade=grade, use_bracket=use_bracket, use_vertical=use_vertical, use_answer=use_answer)
-    filepath = os.path.join(export_dir, filename)
+    filepath = os.path.join(BASE_DIR, filename)
 
     pw, ph = A4
     lm = 15 * mm

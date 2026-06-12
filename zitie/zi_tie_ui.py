@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from widgets import GradientButton
+from constants import BASE_DIR, FONTS_DIR
 from zitie.zitie_core import ZitieGenerator, ZitieConfig, add_custom_font, register_builtin_fonts
 from zitie.zitie_data import GRADE_CHARACTERS, PINYIN_DATA, NUMBER_DATA, GRADES, VERSIONS
 from datetime import datetime
@@ -605,6 +606,18 @@ class ZiTieTabWidget:
             else:
                 widget.config(state="normal")
 
+        # 样式区域：空白模板全部启用，字帖生成按内容类型规则恢复
+        if is_blank_mode:
+            for rb in self._style_rbs:
+                rb.config(state="normal")
+        else:
+            content_type = self._content_var.get()
+            if content_type:
+                self._apply_content_disable_rules(content_type)
+            else:
+                for rb in self._style_rbs:
+                    rb.config(state="normal")
+
     def on_version_changed(self, version):
         # 版本切换时，显示/隐藏学期选择
         is_renjiao = version == "人教版"
@@ -662,7 +675,7 @@ class ZiTieTabWidget:
             self._style_var.set(9)
             # 默认选中千字文并导入内容
             self.classic_combo.set("千字文")
-            from zitie_data import CLASSIC_DATA
+            from zitie.zitie_data import CLASSIC_DATA
             data = CLASSIC_DATA.get("千字文", "")
             self.text_content.insert("1.0", data)
         else:
@@ -843,7 +856,7 @@ class ZiTieTabWidget:
         # 古书模式：从国学著作选择框中获取内容
         if val == "gushu":
             classic = self.classic_combo.get()
-            from zitie_data import CLASSIC_DATA
+            from zitie.zitie_data import CLASSIC_DATA
             data = CLASSIC_DATA.get(classic, "")
             self.text_content.delete("1.0", tk.END)
             self.text_content.insert("1.0", data)
@@ -940,7 +953,7 @@ class ZiTieTabWidget:
             if custom_data is not None:
                 data = custom_data
             else:
-                from zitie_data import CLASSIC_DATA
+                from zitie.zitie_data import CLASSIC_DATA
                 data = CLASSIC_DATA.get(classic, "")
             # 确保文本编辑框可用
             self.text_content.config(state="normal")
@@ -1130,7 +1143,7 @@ class ZiTieTabWidget:
                         parts.append(type_name)
                     file_name = "_".join(parts) + ".pdf"
 
-            file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), file_name)
+            file_path = os.path.join(BASE_DIR, file_name)
             success = generator.save_pdf(file_path)
             if not success:
                 messagebox.showerror("导出失败", "保存PDF文件失败！")
@@ -1190,7 +1203,7 @@ class ZiTieTabWidget:
         return "kaiti_gb2312"
 
     def on_select_font(self):
-        fonts_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'assets', 'fonts')
+        fonts_dir = FONTS_DIR
         font_path = filedialog.askopenfilename(
             title="选择字体文件",
             initialdir=fonts_dir,
