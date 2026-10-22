@@ -1,0 +1,831 @@
+# ══════════════════════════════════════════════════════════════
+#  陕旅版 · 六年级   （上学期 + 下学期）
+# ══════════════════════════════════════════════════════════════
+#  直接用记事本改，保存为 UTF-8；改完切回软件即生效，不需要重启。
+#
+#  [上学期] Unit 1           单元分节：学期 + 单元号
+#  .单词 / .课文 / .表达句    内容块，没内容可以整块不写
+#  team /tiːm/ 队；组         单词行：单词 /音标/ 中文意思
+#  *name /neɪm/ 名字          行首 * = 三会词
+#  Hello! || 你好！            句子行：英文 || 中文
+#
+#  加内容 = 在对应块下面加一行；加单元 = 新起一个 [学期] Unit N 分节。
+#  以 # 开头的是注释，空行会被忽略。
+# ══════════════════════════════════════════════════════════════
+
+[上学期] Unit 1
+
+.单词
+hospital  医院
+school  学校
+park  公园
+zoo  动物园
+shop  商店
+left  左边
+right  右边
+front  前面
+behind  在……后面
+near  在……附近
+far  远的
+bus  公共汽车
+
+.课文
+Unit 1
+Part A
+Let's talk
+What are you doing, Wu Chen?
+I'm having a rest.
+But it's time to learn English.
+Oh, sorry, Miss White.
+It doesn't matter.
+Take out your English book, please.
+Can I go out to play, Mom?
+I'm afraid you can't.
+It's time to play the violin.
+Can I go out to play after that?
+Of course, you can.
+Thank you, Mom.
+I'll play the voilin right now.
+Part B
+Let's learn more
+On Saturday morning, Li Shan always gets up at half past six.
+Then she brushes her teeth and washes her face.
+At seven o'clock, she usually runs with her father and she has breakfast at half past seven.
+Then it's time to do her homework.
+At nine o'clock, she watches TV.
+After that, she plays the violin at ten forty.
+She plays it for an hour, And then she has lunch and has a rest.
+At half past two in the afternoon, she goes out to play with her friends.
+Read and act
+Tom, it's time to do your homework.
+OK, Mom.
+I am coming.
+It's ten o'clock, Tom.
+It's time to go to bed.
+OK, Mom.
+I'm coming.
+Good morning, Tom.
+It's time to get up.
+Oh, Mom, I'm so tired.
+Can I get up at 7:40?
+No, you can't.
+You'll have no time to have breakfast.
+Hello, Tom.
+Your homework, please.
+Homework? Oh, dear!
+What's wrong?
+I'm OK.
+But my homework …
+
+[上学期] Unit 2
+
+.课文
+Unit 2
+Part A
+Let's talk
+You look healthy, Liu Zhaoyang.
+Yes. I always eat healthy food and I like sports.
+Really? Do you often eat fruits and vegetables?
+Yes, I do.
+I eat a lot of fruits and vegetables.
+How often do you drink milk?
+I drink milk every day.
+My mom says it's good for me.
+How often do you play sports?
+Every day.
+I run in the morning and play tennis in the afternoon.
+Part B
+Let's learn more
+Kitty is a healthy girl.
+She eats many fruits and vegetables.
+And she drinks milk every day.
+She goes to bed early and sleeps nine hours every night.
+Kitty likes sports.
+She goes skating twice a week and goes boating in the park once a month.
+Kitty's favorite sport is ping-pong.
+She plays ping-pong with her friends three times a week.
+How about her study?
+She does well in her study because she eats well, sleeps well and plays well.
+Read and act
+Hi, Mr. Tiger!
+Do you often play sports?
+No. But I often run after small animals.
+Do you eat fruits and vegetables every day?
+Oh, no!
+I don't like fruits or vegetables.
+I eat meat every day.
+Do you go to bed early every night?
+No. I sleep in the day and get up at night.
+But you look healthy.
+My mom says I should play sports, eat vegetables and go to bed early to keep healthy.
+Isn't she right?
+Sorry, I don't know.
+
+[上学期] Unit 3
+
+.课文
+Unit 3
+Part A
+Read and think
+Help! Help!
+What's the matter, little bird?
+I can't find my home.
+What should I do?
+Oh, poor little bird!
+Help! Help!
+What's the matter, little fish?
+The water is too dirty.
+I can't live here.
+Oh, poor little fish!
+Let's talk
+Some more soup, dear?
+Thanks, Mom.
+But I have no time.
+I have to clean my bike.
+Are you going to school by bike?
+Why not go in your dad's car?
+We shouldn't drive the car today.
+Why?
+Because today is World Car Free Day.
+It's time to do something for our earth.
+I see.
+I think I should go to work on foot today.
+Great, Mom!
+Thank you.
+Part B
+Let's learn more
+Care for "Mother Earth"
+We all live on the earth.
+It is our home.
+There are a lot of trees, flowers, rivers and mountains on the earth.
+There are also many animals here with us.
+Our earth is beautiful.
+But sometimes we do bad things to it.
+We cut down too many trees.
+We waste too much water and make the air dirty.
+We have only one earth.
+We should care for it.
+We should do something to make the water and the air clean again.
+We should plant more trees and help the animals.
+
+[上学期] Unit 4
+
+.课文
+Unit 4
+Part A
+Let's talk
+Are you free this Saturday, Alice?
+Yes. What's up?
+Let's go on a picnic at the foot of the mountains.
+Oh, it's too far.
+Why not have the picnic in the park?
+Good idea!
+What shall we take?
+Food and drinks.
+We also need some fruits.
+OK. Let's go shopping tomorrow.
+Shall we meet at the gate of the supermarket?
+All right.
+And when shall we meet?
+8:00 or 8:30?
+How about 8:00?
+We shall get to the supermarket early and come back early.
+OK. See you tomorrow!
+Part B
+Let's learn more
+It is Saturday morning.
+The weather is fine.
+The children would like to go on a picnic in the park.
+Alice is taking the food out of the basket.
+Li Shan and Su Nan are putting fruits into the water and washing them.
+Alice asks, "I'm a little hungry.
+Can we start?"
+"Yes," Colin answers.
+Li Shan asks, "Would you like some chicken?"
+Wu Chen says, "No, thanks.
+I'd like an apple."
+After the meal, Colin asks, "Shall we take a photo near the river?"
+"Yes!" The girls are very excited.
+Read again and answer the questions
+What are the children doing?
+Who is putting fruits into the water?
+Is Alice hungry?
+Would Wu Chen like some chicken?
+Read and act
+What nice grapes!
+How shall we pick them?
+Why not stand on my nose?
+Good idea!
+I have some grapes.
+But where shall I put them?
+Well, you can put them on my teeth.
+Great!
+Oh, we have too many grapes.
+What shall we do?
+Why not give them to our friends?
+How nice!
+Thank you, Fox.
+I love the grapes!
+Thank you, Elephant.
+
+[上学期] Unit 5
+
+.课文
+Unit 5
+Part A
+Let's talk
+What a heavy rain!
+Mom, where is my raincoat?
+It was here just now.
+Oh, it's behind the door.
+And where are my rain boots?
+They were under your bed last night.
+Look, they are still there.
+Thanks, Mom.
+I have to go now.
+Oh, where is my bike?
+It was in front of the house yesterday, but now it isn't there.
+I'm afraid it was lost.
+You have to walk to school today.
+That's too bad!
+Part B
+Let's learn more
+Dad, were you at this school thirty years ago?
+Yes, I was.
+But the school was small at that time.
+Was there a library?
+Yes, there was.
+But there weren't so many books in it.
+Were there any trees?
+Yes, there were.
+Look, they are still there, beside the playground.
+Was there a computer room thirty years ago?
+No, there wasn't.
+How many students were there at that time?
+About six hundred students.
+Now there are about two thousand.
+Yes.It's a big school now.
+
+[上学期] Unit 6
+
+.课文
+Unit 6
+Part A
+Let's talk
+Hi, Li Shan!
+What did you do last weekend?
+I did some housework.
+I cleaned the rooms, washed the clothes and cooked dinner.
+What did your parents do then?
+They were busy.
+My father had some work to do.
+He went away from home early in the morning.
+What did your mother do?
+She was in the hospital.
+My grandma was ill and my mother looked after her there.
+I'm sorry to hear that.
+It's OK.
+She is better now.
+What did you do, then?
+I went to see some friends and we had a football match.
+Sounds great.
+Part B
+Let's learn more
+What did you do last night, Wu Chen?
+I did my homework and watched TV.
+What show did you watch?
+I watched a show about a Shanxi girl.
+What happened to her?
+When she was 8 years old, her mother was ill in bed.
+She did all the housework by herself.
+At home she cooked the meals, washed the clothes, cleaned the rooms and looked after her mother for some years.
+Did she go to school?
+Yes. And she did very well in her study.
+What a good girl!
+
+[上学期] Unit 7
+
+.课文
+Unit 7
+Part A
+Let's talk
+Did you go out to play last weekend?
+No, I didn't.
+I stayed at home.
+What did you do at home?
+I learned to cook and made a big cake by myself.
+Really? You are great!
+Where did you go last weekend?
+I flew to Hainan with my family.
+What did you do there?
+I swam in the sea and played beach volleyball with my uncle and cousin.
+We also watched a nice show.
+Sounds interesting.
+Did you eat any sea food?
+Yes, of course.
+It was delicious.
+Part B
+Let's learn more
+Last summer holiday, Su Nan went to Beijing with his parents.
+They went there by train and stayed in Beijing for three days.
+On the first day, they went to Tian'anmen Square.
+It was big and great.
+There were many people.
+The next day, they visited the museum, ate delicious Beijing Duck and bought some gifts.
+The last day, they went to the Great Wall.
+They took many photos there.
+They really had a good time.
+
+[上学期] Unit 8
+
+.课文
+Unit 8
+Part A
+Let's talk
+What do you think of our party?
+It was great.
+Do you like Li Shan and Wu Chen's short play?
+Sure. They acted well.
+And what do you think of Liu Zhaoyang's joke?
+It was funny.
+Did you play games at the party?
+Yes, I did.
+And I won a gift.
+Me too.
+I think everyone had a good time.
+Part B
+Let's learn more
+Happy New Year
+Class One had a New Year's party on December 31st.
+At seven o'clock, everything was ready.
+The classroom was beautiful.
+There were many colorful lights and balloons in it.
+At the beginning, all the students sang Happy New Year together.
+Then, Li Shan and Wu Chen acted a short play about a poor girl.
+It made many students cry.
+After that, Liu Zhaoyang told a joke.
+It was funny and made everyone laugh.
+Finally, the students played some games.
+Everyone was excited.
+"It was really a great party.
+We all had a great time." said Kevin.
+Read again and tick the right pictures
+When did the party start?
+What did Wu Chen do at the party?
+Who made all the students laugh?
+Did the students play games at the party?
+NO
+YES
+
+[下学期] Unit 1
+
+.单词
+worker  工人
+doctor  医生
+nurse  护士
+driver  司机
+farmer  农民
+cook  厨师
+police  警察
+teacher  老师
+job  工作
+help  帮助
+people  人们
+world  世界
+
+.课文
+Unit 1
+Part A
+Let's talk
+Hello, may I speak to Kitty?
+Sorry, Kitty is out.
+This is Kitty's sister, Cathy.
+Can I take a message?
+Sure.
+This is Liu Zhaoyang.
+Could you please ask Kitty to call me?
+OK.
+I'll tell her when she comes back.
+Hello!
+Is that Liu Zhaoyang?
+Yes.
+This is Liu Zhaoyang speaking.
+Who is that?
+This is Kitty.
+Hi, Kitty!
+Where did you go this morning?
+Oh, I went shopping with my mom.
+She bought me a mobile phone.
+Great!
+You can play games on it.
+I won't play games.
+I will use it to make phone calls and send messages.
+Sounds good.
+I hope to have a mobile phone, too.
+Part B
+Let's learn more
+Mom, could I have a mobile phone?
+I'm afraid you can't.
+Young students shouldn't have mobile phones.
+Why?
+Mobile phones are very useful.
+My friends use them to learn English and send e-mails.
+But they also use mobile phones to go on the Internet and read e-books.
+It takes too much time and it's bad for their eyes.
+I won't use it to go on the Internet or read e-books.
+I'll only use it to make phone calls and learn English.
+OK.
+Let me think about it.
+Read and discuss
+What do you think of Tommy?
+What should he do?
+What a fine day!
+I don't want to go to school.
+I'd like to play in the park.
+Do I have to go to school?
+Let me see.
+Oh, I have an idea!
+Hello.
+May I speak to Mr. Black?
+This is Mr. Black.
+Good morning, Mr.Black.
+My little Tommy is ill.
+He can't go to school today.
+I see.
+But who is that?
+This is my father.
+
+[下学期] Unit 2
+
+.课文
+Unit 2
+Part A
+Let's talk
+Noodle House
+OPEN
+Welcome to Noodle House.
+What would you like to eat?
+We'd like two bowls of noodles.
+What kind of noodles would you like, beef noodles or tomato noodles?
+A bowl of beef noodles and a bowl of tomato noodles, please.
+OK.
+Would you like something to drink?
+May I have some juice, Mom?
+Sure.
+A glass of juice and a cup of tea, please.
+Anything else?
+No, thanks.
+OK.
+A bowl of beef noodles, a bowl of tomato noodles, a glass of juice and a cup of tea.
+Please wait a minute.
+Part B
+Let's learn more
+It is six o' clock in the evening.
+It's time for supper.
+Miss White feels hungry.
+So she takes up the phone and calls for food.
+Hello!
+This is Happy Fast Food.
+Can I help you?
+Yes.
+I'd like two hamburgers.
+Beef hamburgers or chicken hamburgers?
+Chicken hamburgers.
+Anything else?
+Yes, a bottle of juice and a bottle of milk.
+OK, two chicken hamburgers, a bottle of juice and a bottle of milk.
+Your name and address, please?
+This is Emily White, No.11 Garden Road.
+By the way, how much are they?
+Thirty-four yuan.
+OK.
+Thank you.
+Read again and answer the questions
+What does Miss White call for?
+Would Miss White like beef hamburgers or chicken hamburgers?
+
+[下学期] Unit 3
+
+.课文
+Unit 3
+Part A
+Let's talk
+Who's the young woman, Wu Chen?
+Her name is Li Ling.
+She is a teacher.
+What did she do?
+She set up a hope school for poor children.
+Who's that man?
+Which one?
+The thin man with glasses.
+He is Wang Wanqing.
+What does he do?
+He is a doctor.
+He is from Shanghai.
+But in the past, he worked on the grassland for 40 years.
+He is very helpful to the people there.
+Part B
+Let's learn more
+Little Liu Wei wanted to be a football player.
+But at the age of nine, he lost his arms.
+He had to do everything with his feet.
+He learned to swim and did it very well.
+But at the age of nineteen, he had to stop because it was bad for him.
+In 2006, he started to play the piano with his feet.
+How difficult it was!
+But he made it.
+He played seven or eight hours a day.
+Now he plays it very well.
+Read again and retell the story
+Little Liu Wei wanted to be a football player.
+But at the age of nine, he lost his arms.
+He had to do everything with his feet.
+He learned to swim and did it very well.
+But at the age of nineteen, he had to stop because it was bad for him.
+In 2006, he started to play the piano with his feet. How difficult it was! But he made it.
+He played seven or eight hours a day. Now he plays it very well.
+Choose and talk
+He is a great scientist.
+He looks a little thin.
+He helps farmers plant much good rice.
+who is he?
+Have a guess!
+I think he is …
+Yao Ming
+Yuan Longping
+Han Hong
+She is a Chinese singer.
+She wears glasses.
+She sings well and she has written many nice songs.
+He is a basketball player.
+He is very tall.
+He plays basketball very well.
+Children like him very much.
+He is a great scientist.
+He looks a little thin.
+He helps farmers plant much good rice.
+Read and think
+What do you think of Edison?
+Thomas Edison was a boy from the USA.
+When he was at school, he asked his teacher a lot of questions.
+Why does he always have so many questions?"
+His teacher said to his mother,"He is not clever and he shouldn''t stay at school."
+So his mother had to take him home and teach him herself.
+Little Edison read a lot of books and became very interested in science.
+And later he became a great scientist.
+
+[下学期] Unit 4
+
+.课文
+Unit 4
+Part A
+Let's talk
+You look tired.
+Yes.
+We had the school sports meeting yesterday.
+What sport did you take part in?
+I took part in the boys' 100-meter race and the long jump.
+Great!
+Did you win?
+Yes.
+I was the first in the 100-meter race.
+How about the long jump?
+I lost it.
+Anyway, you did well.
+Thank you.
+Part B
+Let's learn more
+Dear Ma Li,How are you?
+Last week, our school had a sports meeting.
+The weather was fine and the pupils were excited.
+Our class did very well in the sports meeting.
+Kitty won the girls' throwing.
+Liu Zhaoyang won the boys' 100-meter race.
+Li Shan was the first in the girls' high jump.
+Colin took part in the boys' 1500-meter race.
+At first, he was behind a pupil from Class Three.
+All my classmates shouted, "Come on, Colin! Come on, Class One."
+Guess who won the race finally.
+Of course Colin did!
+Can you write and tell me something about your sports meeting?
+Best wishes!
+Yours, Wu Chen
+
+[下学期] Unit 5
+
+.课文
+Unit 5
+Part A
+Let's talk
+What's your favorite subject, Kevin?
+My favorite subject is Math.
+Why do you like it?
+Because I like my Math teacher.
+Who is your Math teacher?
+Mr. Black.
+What is he like?
+He is kind to us.
+He always tries to make Math easy to understand.
+We find Math classes interesting.
+Who's your Math teacher?
+My Math teacher is Ms. May.
+What do you think of her?
+She is a little serious.
+But she teaches very well.
+Part B
+Let's learn more
+Jack got up late this morning.
+He ran to the school bus without breakfast.
+He got to the classroom at eight o'clock.
+Then he couldn't find his English book.
+His English teacher was very serious.
+What should he do?
+Then it was the English class.
+Mrs. Brown came in.
+Jack said to her, " I'm so sorry, Mrs. Brown.
+I can't find my English book."
+Mrs. Brown wasn't angry.
+She took out a book and smiled,"Is this your English book?
+I saw it on the school bus just now.
+What a hard-working boy!"
+Jack's face got red.
+Read again and finish the tasks
+Number the pictures
+Retell the story
+Today, Jack got up … He ran … He got to … at … Then he couldn't find … His English teacher was …
+
+[下学期] Unit 6
+
+.课文
+Unit 6
+Part A
+Let's talk
+There will be a sale at our school.
+Do you know?
+Really?
+When?
+On Children's Day.
+Where shall we have it?
+On our playground.
+Great!
+What will you sell?
+I will sell some magazines and color pencils.
+What about you?
+Let me see.
+A toy car, a model plane, two bottles of glue and … But will there be many pupils?
+Of course there will.
+What shall we do with the money?
+We'll give it to the poor pupils in the mountains.
+Part B
+Let's learn more
+Yingcai School has a school sale every year.
+They always give the money to the poor pupils in the mountains.
+This year, they had it on Children's Day.
+Before the sale, the pupils brought many kinds of things to the playground.
+There were toys, books, pens and so on.
+After the sale, they talked about it in class.
+Su Nan said,"My story books are interesting.
+I want more pupils to read them.
+And I can help others with the money."
+Kitty said happily, "I sold some color pencils, two notebooks and a pair of scissors.
+I got thirty yuan."
+It was the first time for me.
+I learned a lot."
+Li Shan was excited.
+Finally, Miss White said, "All of you did well.
+You had a great Children's Day!"
+Read again and complete the sentences
+Yingcai School had a school sale on Children's Day.
+The pupils brought many kinds of things to the playground.
+Su Nan wanted more pupils to read his story books.
+Kitty sold some color pencils, two notebooks and a pair of scissors.
+They would give the money to the poor pupils in the mountains.
+Make a list and say
+Next year, there will be …
+Group 1: in our school          a new library          a beautiful garden          …
+Group 2: in our city          more cars          more bikes          …
+Next year, there will be a new library in our school.
+Next year, there will be more cars in our city.
+Choose and talk in pairs
+There will be a sale in our school.
+What shall we do?
+We can use the money to …
+There will be a heavy rain.
+What will you do?
+I'll …
+There will be a party in our classroom this afternoon.
+What shall we do?
+We shall …
+take a bus
+help the poor children
+buy some balloons and colorful lights
+
+[下学期] Unit 7
+
+.课文
+Unit 7
+Part A
+Let's talk
+David and Kitty, come on.
+We're having a meeting.
+What are we going to talk about?
+About our holiday.
+Where would you like to go?
+I hope to go somewhere by the sea.
+How about Hainan?
+Oh, no!
+Hainan is in the south of China.
+It's too hot in summer.
+It's by the sea and it is not too hot.
+How about Shanghai?
+It's in the southeast.
+Great!
+There are many places of interest, and I like big cities.
+Then, shall we fly to Shanghai?
+I'd like to take a train.
+We can enjoy the beautiful places along the way.
+I think so.
+OK.
+Let's go by train.
+Part B
+Let's learn more
+June 5th
+2025-06-05 00:00:00
+Friday
+Sunny
+Today is our first day in Shanghai.
+It is a very big city in the southeast of China.
+In the morning, we visited Shanghai Science Museum.
+We saw many interesting things there.
+In the afternoon, we went to Nanjing Road.
+It was really a busy street.
+We went along the street and enjoyed everything there.
+Then we walked to the east and got to the Bund.
+The Bund was very beautiful.
+We took many photos there.
+Tomorrow, we'll go to Zhouzhuang, a famous water town on the southwest of Shanghai.
+Oh, I can't wait!
+Read again and finish the tasks
+Number the places in the order they visit
+Talk about Kitty's holiday
+Where did Kitty go on holiday?
+She went …
+What did she do on the first day?
+In the morning, she …
+In the afternoon, she …
+Then she …
+What place will Kitty visit tomorrow?
+She'll …
+It is a … on the …
+
+[下学期] Unit 8
+
+.课文
+Unit 8
+Part A
+Let's talk
+What did you talk about at your class meeting taday?
+We talked about our dreams.
+What is your dream then?
+I want to be a scientist and study the stars.
+Sounds great.
+But it's difficult to come true.
+I know.
+And I will study hard from now on.
+Did you have a dream when you were young, Dad?
+Yes.
+I wanted to be a tour guide and travel around the world.
+Did it come true?
+No.
+You see, I am a worker.
+Part B
+Let's learn more
+Lemontree
+Yesterday, we talked about our dreams at the class meeting.
+I hope to land on the moon one day.
+Would you like to talk about your dreams?
+Superplayer
+I want to be a basketball player.
+I think we need more players like Yao Ming and Lin Shuhao.
+Maybe I will join the National Team one day.
+Rainbow123
+At the age of 5, I hoped to fly like a bird.
+Now I want to be a scientist and study the birds.
+Bobo
+I want to study computer science.
+I believe: work hard and my dream will come true.
+Read again and match
+Lemontree
+Superplayer
+Rainbow123
+Bobo
+Let's guess
+Whose dream is it?
+I want to become a police officer.
+I like to help people.
+Whose dream is it?
+I know.
+It's Kitty's dream.
+Yes.
+You are right.
+I want to be a police officer.

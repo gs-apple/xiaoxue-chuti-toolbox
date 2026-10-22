@@ -1,0 +1,935 @@
+# ══════════════════════════════════════════════════════════════
+#  陕旅版 · 四年级   （上学期 + 下学期）
+# ══════════════════════════════════════════════════════════════
+#  直接用记事本改，保存为 UTF-8；改完切回软件即生效，不需要重启。
+#
+#  [上学期] Unit 1           单元分节：学期 + 单元号
+#  .单词 / .课文 / .表达句    内容块，没内容可以整块不写
+#  team /tiːm/ 队；组         单词行：单词 /音标/ 中文意思
+#  *name /neɪm/ 名字          行首 * = 三会词
+#  Hello! || 你好！            句子行：英文 || 中文
+#
+#  加内容 = 在对应块下面加一行；加单元 = 新起一个 [学期] Unit N 分节。
+#  以 # 开头的是注释，空行会被忽略。
+# ══════════════════════════════════════════════════════════════
+
+[上学期] Unit 1
+
+.单词
+our /ˈaʊə(r)/ 我们的
+classroom /ˈklɑːsruːm/ 教室
+can /kæn/ 可以；能
+help /help/ 帮助
+where /weə(r)/ 哪儿；哪里
+map /mæp/ 地图
+near /nɪə(r)/ 在…… 附近
+schoolbag /ˈskuːlbæɡ/ 书包
+excuse me /ɪkˈskjuːz miː/ 打扰一下
+under /ˈʌndə(r)/ 在…… 下面
+chair /tʃeə(r)/ 椅子
+blackboard /ˈblækbɔːd/ 黑板
+door /dɔː(r)/ 门
+window /ˈwɪndəʊ/ 窗户
+desk /desk/ 课桌
+on /ɒn/ 在…… 上面
+in /ɪn/ 在…… 里面
+welcome /ˈwelkəm/ 欢迎
+new /njuː/ 新的
+have a look /hæv ə lʊk/ 看一看
+there /ðeə(r)/ 有 (表示存在或发生)
+much /mʌtʃ/ 很；非常
+
+.课文
+Unit 1
+Let's talk Part A
+Hi, Wu Chen! Can you help me?
+Yes!
+Where is my map?
+Look! It's near your schoolbag.
+Excuse me. Where are my markers?
+Let me help you. Look! They're under your chair.
+Aha! Thank you.
+Let's talk Part B
+Welcome to our new classroom.
+Wow, it's big and nice!
+Please have a look. What's in the classroom?
+There is a teacher's desk.
+There are two big blackboards.
+There are two doors and two windows too.
+Look! And there are many desks. On the desks, there are some books.
+Do you like our classroom?
+Yes. I like it very much.
+Read and think
+Mommy! There's a giraffe in my room.
+Don't be afraid. It's an umbrella.
+Mommy! There's a lion.
+Don't be afraid. They are teddy bears.
+Mommy! There's a tiger.
+Don't be afraid. It's a dog.
+Mommy! Is Mimi in the box?
+Yes. Good night, dear!
+
+[上学期] Unit 2
+
+.单词
+house /haʊs/ 房子
+beautiful /ˈbjuːtɪfl/ 美丽的；漂亮的
+*bedroom /ˈbedruːm/ 卧室
+room /ruːm/ 房间
+living room /ˈlɪvɪŋ ruːm/ 客厅
+kitchen /ˈkɪtʃɪn/ 厨房
+*bathroom /ˈbɑːθruːm/ 浴室；洗手间
+dining room /ˈdaɪnɪŋ ruːm/ 餐厅
+study /ˈstʌdi/ 书房
+bed /bed/ 床
+clean /kliːn/ 干净的
+
+.课文
+Unit 2
+Let's talk Part A
+Hi, Colin! Look at my new house.
+Wow, it's big and beautiful!
+There are two bedrooms, a living room, a kitchen and a bathroom in it.
+Is there a big dining room in your new house?
+No, there isn't. It's small but nice.
+Is there a study in it?
+Yes, there is.
+Are there many books in the study?
+Yes, there are.
+How nice!
+Let's talk Part B
+This is our new house. The living room is big and beautiful. A small dining room is near it. The kitchen is very clean.
+There are two bedrooms in our house. The big one is for my mom and dad. The small one is for me. There is a white bed and a blue desk in my room. There are some books on the desk. My room is nice. I like it very much.
+Read and think
+5-4-3-2-1. Hide-and-seek is fun! 5-4-3-2-1. Look out! Here I come!
+Is he in the living room? No, he isn't.
+Is he in the bathroom? No, he isn't.
+Is he in the kitchen? No, he isn't.
+Where is he? Ah ... Let me see.
+Oh, here he is! He is under the bed.
+Read and color
+This is my bedroom. Look at the pink bed. It is big.
+Wow, it's very beautiful! Do you have a pet?
+Yes. I have a small white and black dog.
+Is there a doll in your bedroom?
+No, there isn't. There is a brown toy bear.
+
+[上学期] Unit 3
+
+.单词
+school /skuːl/ 学校
+on foot /ɒn fʊt/ 步行
+by /baɪ/ （表交通方式）乘；骑
+bus /bʌs/ 公交车
+by bus /baɪ bʌs/ 乘公交车
+how about /haʊ əˈbaʊt/ 怎么样
+often /ˈɒfn/ 经常
+bike /baɪk/ 自行车
+by bike /baɪ baɪk/ 骑自行车
+train /treɪn/ 火车
+by train /baɪ treɪn/ 乘火车
+go to school /ɡəʊ tuː skuːl/ 去上学
+taxi /ˈtæksi/ 出租车
+by taxi /baɪ ˈtæksi/ 乘出租车
+work /wɜːk/ 工作
+go to work /ɡəʊ tuː wɜːk/ 去上班
+home /həʊm/ 家
+go home /ɡəʊ həʊm/ 回家
+
+.课文
+Unit 3
+Let's talk Part A
+How do you come to school, Su Nan?
+I come to school on foot.
+Li Shan, do you come to school on foot too?
+No. I come to school by bus.
+How about Colin?
+He comes to school by car. What about you, Miss Li?
+I often come to school by bike.
+Let's talk Part B
+How do you go home, Mr. Zhao?
+I go home by taxi.
+How about you, Colin?
+I go home by car with my mom.
+Does your father go to work by car too?
+No, he doesn't.
+How does he go to work?
+He goes to work by bus.
+Read and think
+Let's go to the pet shop. There are many lovely pets.
+Hooray! I like cute rabbits. But how do we go there?
+Let's go there on foot.
+No. It's too far.
+Let's go there by taxi.
+How about by bike?
+No! We are too young. We can not go there by bike.
+Why not go there by bus? Green travel is nice.
+Good idea! Let's go.
+
+[上学期] Unit 4
+
+.单词
+*follow /ˈfɒləʊ/ 遵循；听从
+*rule /ruːl/ 规则；规章
+*traffic /ˈtræfɪk/ 交通
+light /laɪt/ 灯
+traffic lights /ˈtræfɪk laɪts/ 交通灯
+*cross /krɒs/ 穿过；横过
+street /striːt/ 街道
+cross the street /krɒs ðə striːt/ 过马路
+stop /stɒp/ 停止
+wait /weɪt/ 等待
+right /raɪt/ 右边
+keep /kiːp/ 保持
+keep to the right /kiːp tuː ðə raɪt/ 靠右
+take turns /teɪk tɜːnz/ 轮流；依次
+*line /laɪn/ 直线；线条
+wait in line /weɪt ɪn laɪn/ 排队等待
+all right /ɔːl raɪt/ 好的
+
+.课文
+Unit 4
+Let's talk Part A
+Li Shan, look at the traffic lights. It's red. Don't cross the street!
+Sorry, Mom!
+Please follow the traffic rules on the street. Let's stop and wait.
+OK, I see.
+The light is green. Let's go now.
+OK, Mom!
+Let's talk Part B
+The bus is coming. Please wait in line and take turns.
+OK!
+Don't cross the street here.
+Sorry, I see.
+Hi, boys! Don't play on the street.
+Oh, sorry!
+Hi! Please follow the rules and keep to the right.
+All right.
+Let's chant
+Left, left, right, right,
+Turn around. Go, go, go.
+Right, right, left, left,
+Turn around. Go, go, go.
+Left, right, left, right,
+Turn around. Go, go, go.
+Red light, red light.
+Stop. Stop. Don't go.
+Yellow light, yellow light.
+Wait. Wait. Don't go.
+Green light, green light.
+Go ahead. Go, go, go.
+Read and think
+No shouting! No pushing! Li Wei! Don't run in the classroom!
+Don't play in class. Sit down, please!
+No, Li Wei! Don't draw on the desk!
+Please wait in line and take turns!
+Sorry!
+Li Wei, please follow the school rules. I think you can do it well.
+Thank you. I will!
+
+[上学期] Unit 5
+
+.单词
+Chinese /ˌtʃaɪˈniːz/ 语文
+art /ɑːt/ 美术
+subject /ˈsʌbdʒɪkt/ 科目；学科
+science /ˈsaɪəns/ 科学
+PE (=physical education) /ˌpiː ˈiː/ 体育
+math /mæθ/ 数学
+English /ˈɪŋɡlɪʃ/ 英语
+music /ˈmjuːzɪk/ 音乐
+favorite /ˈfeɪvərɪt/ 最喜欢的
+of course /ɒv kɔːs/ 当然
+interesting /ˈɪntrəstɪŋ/ 有趣的
+
+.课文
+Unit 5
+Let's talk Part A
+Good morning, Mr. Zhao!
+Good morning, Colin! What's in your hand?
+Some markers.
+Do you have art in the morning?
+Yes, I do.
+What subjects do you have in the afternoon?
+We have science and PE.
+Oh, I see.
+Let's talk Part B
+Morning, Hu Rui! What's that?
+It's a robot.
+Do you have science in the morning?
+No, we don't. We have Chinese, math, English and music in the morning. We have science in the afternoon.
+What's your favorite subject?
+Science, of course. How about you?
+My favorite subject is Chinese. It's very interesting.
+Work in pairs
+What subjects do you have in the morning, Lanlan?
+I have ...
+What's your favorite subject?
+My favorite subject is ...
+Read and think
+What's this?
+It's a zero.
+No. It's a face.
+No. It's a ball.
+No. It's the English letter "o".
+No. It's an egg.
+Aha! You like eggs.
+You are all right. It's a zero in math, an "o" in English, a ball in PE, and a face or an egg in art.
+
+[上学期] Unit 6
+
+.单词
+day /deɪ/ 一天；一日
+today /təˈdeɪ/ 今天
+Tuesday /ˈtjuːzdeɪ/ 星期二
+Thursday /ˈθɜːzdeɪ/ 星期四
+also /ˈɔːlsəʊ/ 还；而且
+Monday /ˈmʌndeɪ/ 星期一
+Wednesday /ˈwenzdeɪ/ 星期三
+Friday /ˈfraɪdeɪ/ 星期五
+be good at /biː ɡʊd æt/ 擅长
+Saturday /ˈsætədeɪ/ 星期六
+Sunday /ˈsʌndeɪ/ 星期日
+*homework /ˈhəʊmwɜːk/ 家庭作业
+do homework /duː ˈhəʊmwɜːk/ 做作业
+sport /spɔːt/ 体育运动
+do sports /duː spɔːts/ 做体育运动
+again /əˈɡen/ 再次
+any /ˈeni/ 任何
+class /klɑːs/ 课程；班级
+*weekend /ˌwiːkˈend/ 周末
+
+.课文
+Unit 6
+Let's talk Part A
+What day is it today, Li Shan?
+It's Tuesday.
+We have science this morning.
+Is science your favorite subject?
+Yes, it is.
+We have science on Thursday afternoon too.
+I also like English.
+Do you have English today?
+No.
+We have English on Monday morning, Wednesday morning and Friday afternoon.
+Are you good at it?
+Yes, of course.
+Let's talk Part B
+Friday is a nice day.
+What do you do in the evening?
+I do my homework and read some books.
+Do you have any classes on Saturday?
+No.
+I don't have classes on weekends.
+Does your father go to work on Sunday?
+No, he doesn't.
+What does he do?
+He does sports with me.
+What does your father do on weekends?
+Discuss in groups.
+Read and think
+Miss Rabbit's
+Welcome to Miss Rabbit's.
+Miss Rabbit's
+On Monday, there are many hot dogs.
+Animals have cookies and bread happily on Tuesday.
+On Wednesday, there are sweet fruits.
+Fruits are yummy.
+There are many cakes on Thursday and Friday.
+Cakes are tasty.
+All the animals enjoy the delicious food together on the weekend.
+
+[上学期] Unit 7
+
+.单词
+time /taɪm/ 时间
+get up /ɡet ʌp/ 起床
+o'clock /əˈklɒk/ …… 点钟（表示整点）
+now /naʊ/ 现在
+out /aʊt/ 向外；出来
+go out to play /ɡəʊ aʊt tuː pleɪ/ 出去玩
+clock /klɒk/ 钟；时钟
+eleven /ɪˈlevn/ 十一
+twelve /twelv/ 十二
+twenty /ˈtwenti/ 二十
+have a class /hæv ə klɑːs/ 上课
+thirty /ˈθɜːti/ 三十
+go to bed /ɡəʊ tuː bed/ 睡觉
+wake /weɪk/ 睡醒；唤醒
+wake up /weɪk ʌp/ 醒来
+hurry /ˈhʌri/ 赶紧；匆忙
+hurry up /ˈhʌri ʌp/ 快点
+late /leɪt/ 迟的；晚的
+forty /ˈfɔːti/ 四十
+close /kləʊz/ 关；关闭
+
+.课文
+Unit 7
+Let's talk Part A
+What time is it?
+It's eight o'clock.
+Let's go to the classroom.
+All right.
+Hi, Liu Zhaoyang!
+What time is it now?
+It's ten o'clock.
+Let's go out to play.
+OK!
+May I come in?
+Come in, please.
+Look at the clock, Su Nan.
+Oh, it's eleven twelve!
+I'm so sorry, Miss Li.
+Let's play
+It's twelve forty. Let's go out to play.
+Let's go!
+Look at the clock. It's seven o'clock. Please get up.
+OK!
+What time is it?
+It's eleven twenty. Let's have a class.
+What time is it, Mom?
+It's nine o'clock. Please go to bed.
+Let's talk Part B
+Wake up, Colin!
+Mom, is it seven o'clock?
+Yes.
+It's time to get up.
+Hurry up!
+It's time to have a class.
+Is it eight o'clock?
+No.
+It's eight twenty.
+It's time to have a Chinese class.
+Oh, it's nine forty!
+It's too late.
+Close the door and go to bed, Colin.
+OK, Mom!
+It's eight twenty.
+It's time to have a Chinese class.
+Read and think
+Hi, Ann!
+How are you in London?
+Very well, thank you.
+It's time to get up, dear!
+OK, Mom!
+Huh?
+Time to get up?
+What time is it now?
+It's 7:30 a.m.
+Haha!
+Your clock doesn't work.
+No.
+It's 7:30 a.m. in London.
+Oh, I see.
+It's 3:30 p.m. in China.
+
+[上学期] Unit 8
+
+.单词
+early /ˈɜːli/ 早
+*rise /raɪz/ 起床，起身
+breakfast /ˈbrekfəst/ 早餐
+have breakfast /hæv ˈbrekfəst/ 吃早餐
+when /wen/ 什么时候
+at /æt/ 在…… 时刻
+about /əˈbaʊt/ 大约
+fifteen /ˌfɪfˈtiːn/ 十五
+lunch /lʌntʃ/ 午餐
+have lunch /hæv lʌntʃ/ 吃午餐
+half /hɑːf/ 半；一半
+*past /pɑːst/ 超过；超出
+half past six /hɑːf pɑːst sɪks/ 六点半
+dinner /ˈdɪnə(r)/ 晚餐；正餐
+have dinner /hæv ˈdɪnə(r)/ 吃晚餐
+*rest /rest/ 休息
+have a rest /hæv ə rest/ 休息一会儿
+game /ɡeɪm/ 游戏
+play games /pleɪ ɡeɪmz/ 玩游戏
+then /ðen/ 然后
+fifty /ˈfɪfti/ 五十
+
+.课文
+Unit 8
+Let's talk Part A
+Su Nan, please get up!
+It's seven o'clock.
+OK, Grandma!
+Hurry up, and have breakfast.
+We have milk and bread.
+Thank you, Grandma!
+Wow, they do sports so early!
+When do you often do sports, Grandpa?
+I often do sports at about seven twenty.
+Oh, that's early too!
+When do you often go to bed?
+I often go to bed at nine thirty.
+Early to bed and early to rise!
+Oh, I see.
+Let's play
+When do you often have lunch?
+I often have lunch at half past twelve.
+Go to bed, go to bed. It's time to go to bed.
+Let's talk Part B
+In the morning, Li Shan gets up early.
+She often has breakfast at seven fifteen, and goes to school on foot at half past seven.
+She has four classes in the morning.
+At twelve o'clock, she has lunch at school.
+Then she has a rest.
+In the afternoon, she often plays games at four forty.
+At about six fifty, she has dinner.
+Then she does her homework.
+At nine o'clock, she goes to bed.
+This is her busy day.
+Read again, underline the key words and complete Li Shan's timeline.
+7:15
+goes to school
+12:00
+has dinner
+Read and think
+It's too late, Kitty.
+It's time to go to bed.
+OK, Mom.
+Breakfast is ready.
+It's too late.
+Please get up!
+Yes, Mom.
+Kitty!
+You look tired.
+When do you often go to bed?
+I often go to bed at eleven.
+That's too late.
+Early to bed and early to rise!
+Yes, I see.
+
+[下学期] Unit 1
+
+.课文
+Unit 1
+Let's talk Part A
+Who's that woman?
+Is she your mother?
+Yes, she is.
+What does your mother do?
+She is a Chinese teacher in a school.
+Where does your father work?
+He works in a hospital.
+What does he do?
+He is a doctor.
+He is very busy.
+Wow, they are great!
+Let's talk Part B
+This woman is my aunt.
+She is a farmer.
+She works on a farm.
+She loves her job.
+Now she has a cute kid.
+Look at this man.
+He is my uncle.
+He works in a police station.
+He is a great police officer.
+He gets up very early and comes home late.
+He works very hard.
+He loves his job too.
+What does your uncle / aunt do?
+Where do they work?
+Read and think
+Boys and girls, today is our Dream Day.
+I like farms.
+I love animals.
+I want to be a farmer.
+Great!
+I like cars, buses, trains and planes.
+I want to be a driver.
+Wonderful!
+I want to be a teacher like Miss Li.
+She is kind.
+I love her.
+Excellent!
+Thank you.
+Why does Su Nan want to be a driver?
+What do you want to be?
+
+[下学期] Unit 2
+
+.课文
+Unit 2
+Let's talk Part A
+Welcome to my uncle's farm.
+Thanks.
+It's so big!
+What are these?
+They're horses.
+They look strong!
+Are those horses too?
+No, they aren't.
+They are cows.
+Great!
+They give us milk.
+Wow, how many pigs?
+Eighteen.
+Let's talk Part B
+My Uncle and His Farm
+My uncle is a farmer.
+He has a farm.
+It's big and beautiful.
+The grass is green.
+There are many animals on the farm.
+Look!
+Here are some ducks.
+One, two, three ... fourteen.
+Oh, fourteen ducks!
+They are swimming.
+Look at that big tree.
+There are some birds in it.
+Under the tree, there are three sheep and thirteen hens.
+They are walking on the grass.
+Look at the bees.
+How busy they are!
+My uncle likes his farm.
+He works hard on it.
+He is busy but very happy.
+Draw a farm you like and describe it.
+Read and think
+How can I cross the river?
+Uncle Cow, is the water deep?
+Can I cross the river?
+Haha ...
+The water is not deep.
+Stop, stop!
+Don't cross the river.
+The water is very deep.
+Mom, I'm not sure about the water.
+How can I cross the river?
+My dear, you can try it.
+Oh, I see!
+Can the little horse cross the river?
+What can we learn from the story?
+
+[下学期] Unit 3
+
+.课文
+Unit 3
+Let's talk Part A
+Hi, Mom!
+I'm back.
+What are you doing?
+I'm cooking in the kitchen.
+Wow, great!
+Where's my dad?
+He is working in the study.
+Hi, dear!
+What are you doing?
+I'm watching TV.
+Look, this elephant is drinking water, and that one is eating grass.
+Wow, how strong they are!
+Let's talk Part B
+Hi, brother!
+What are you doing?
+Are you writing?
+No, I'm not.
+I'm reading a book.
+Hi, Grandpa!
+Are you playing chess?
+Yes, we are.
+That's interesting!
+Hi, Mimi!
+Are you sleeping?
+Meow ...
+What do you often do at home?
+Talk with your classmates.
+Read and think
+Hi, Wilbur Wright and Orville Wright!
+What are you doing?
+We are making a plane.
+Wow, we are flying!
+Oh, no!
+Hi, Grandpa!
+What are they doing?
+They are making a plane.
+Great!
+We are flying!
+Cool!
+They are doing a great job!
+What are Wilbur and Orville doing?
+Do you know more about the inventors?
+
+[下学期] Unit 4
+
+.课文
+Unit 4
+Let's talk Part A
+It's time for breakfast, dear.
+What's for breakfast, Mom?
+We have bread, milk, eggs and vegetables.
+Thank you, Mom.
+Where is your father?
+Is he doing sports?
+No, he isn't.
+What is he doing?
+Haha ...
+He is eating an egg.
+Let's talk Part B
+What do we have for dinner today, dear?
+We have rice, chicken, vegetables, fish and soup.
+Wow, a big dinner!
+What are the children doing?
+Are they doing homework?
+Yes, they are.
+Dinner is ready, dear!
+We are coming, Mom!
+Make a big family dinner menu and talk about it.
+Read and think
+Mom, what's for breakfast?
+Spring rolls, steamed buns and porridge.
+Beef, eggs and vegetables too.
+But I like hamburgers, Mom.
+Sorry.
+We don't have hamburgers today.
+Let me make one for you.
+A Chinese hamburger!
+Very delicious.
+Thank you, Dad!
+Does the boy like the Chinese hamburger?
+What do you often have for breakfast?
+
+[下学期] Unit 5
+
+.课文
+Unit 5
+Let's talk Part A
+Look, how happy they are!
+What do they like to do after class?
+They like to play games.
+Sometimes, they like to sing songs together.
+Do you like to sing songs?
+Yes, I do.
+And I like to play the piano after school.
+How about you?
+I like to take photos.
+It's interesting.
+Look!
+That's Su Nan.
+What does he like to do?
+Does he like to swim?
+No, he doesn't.
+He likes to play chess.
+That's his favorite.
+Let's talk Part B
+We often have a good time after school.
+I like to draw pictures.
+Look at my friends.
+What do they like to do?
+Han Mei likes to play the piano.
+She often plays it after school.
+Wang Xiao likes to listen to music.
+Zhang Peng and Lele like to play football.
+My best friend Wang Ping likes to dance.
+That's her favorite.
+Look!
+She is dancing in the dancing room.
+What do you like to do after school?
+How about your friends?
+Read and think
+May 10
+Mother's Day
+Mother's Day is coming.
+I want to make a flower for Mom.
+Sounds great!
+Let's make together.
+OK.
+We need some markers and color paper.
+Here you are.
+How beautiful!
+Let's write some words.
+OK.
+Thanks!
+I love you too.
+Happy Mother's Day!
+We love you.
+What do the girls do for their mom?
+Do you often do anything for your mom on Mother's Day?
+What do you do?
+
+[下学期] Unit 6
+
+.课文
+Unit 6
+Let's talk Part A
+Happy Children's Day
+Hi, Mr. Zhao!
+Where are the children?
+They are on the playground.
+What are they doing?
+They're getting ready for Children's Day.
+Oh.
+This Thursday is June 1st.
+Is there a party for the children in our school?
+Yes, of course!
+At the party, girls like to dance and boys like to do kung fu.
+What about you, Mr. Zhao?
+What do you like to do for the children?
+I like to take photos for them.
+That's wonderful!
+Let's talk Part B
+Happy Children's Day
+Happy Children's Day!
+Children's Day is coming.
+The children are getting ready for the party now.
+Let's go and have a look.
+Wow, how happy they are!
+Some girls are dancing.
+Some are reading aloud.
+How about the boys?
+Look!
+This boy is playing erhu.
+That boy is doing kung fu.
+And there are some teachers too.
+What are they doing?
+Oh, they are playing games with other children.
+Children usually have a lot of fun on this day.
+They like it very much.
+How do the children get ready for their Children's Day?
+Underline the key words.
+Read and think
+What a nice day!
+June 1
+Yes, it is.
+PARTY
+Where are the animals?
+They're having a party over there.
+Let's have a look!
+Wow, lovely rabbits!
+Yes.
+They are jumping.
+What are the monkeys doing?
+They're playing games.
+Listen!
+The birds are singing happily.
+Yes.
+What lovely music!
+Look at the elephants.
+They are watering the trees and flowers.
+How happy they are!
+What are the animals doing at the party?
+How about other animals?
+Can you guess?
+
+[下学期] Unit 7
+
+.课文
+Unit 7
+Let's talk Part A
+Shanshan, get up!
+It's Sunday today.
+Let's go out to play.
+Great!
+What's the weather like today, Mom?
+Look at the bright sun.
+It's a sunny day.
+Please put on your cap.
+Yes.
+Look!
+I wear my cap.
+It's a little windy.
+Put on your coat, dear.
+OK, Mom!
+Look!
+Some children are flying kites.
+Wow, how beautiful!
+Let's fly kites too.
+Let's go!
+Let's talk Part B
+Today is Sunday.
+It's cloudy in Beijing.
+I plan to fly kites with my friends.
+My father wants to see you tomorrow.
+How's the weather in Harbin?
+Best wishes!
+Yours,  Tiantian
+Dear Grandpa and Grandma,  How are you?
+Dear Tiantian,  Thanks for your letter.
+We are happy to see your father tomorrow.
+It's windy and rainy here.
+Tell your father to put on a coat and take an umbrella.
+We miss you very much.
+Hope to see you soon.
+Best wishes!
+Yours,  Grandpa &amp; Grandma
+How is the weather today?
+What do you plan to do on Sunday?
+Read and think
+Morning, my friends!
+What a nice sunny day!
+Are you playing games?
+No.
+We are making our house.
+Look at the beautiful sun.
+Come and play with me.
+Sorry.
+We're busy.
+Oh, it's snowing.
+How cold it is!
+I want a house.
+Poor thing!
+Let's go and help him!
+Why are the brown birds busy?
+Do you like the blue bird?
+Why?
+
+[下学期] Unit 8
+
+.课文
+Unit 8
+Let's talk Part A
+What a fine day!
+There are so many flowers.
+Spring is coming.
+Yes.
+Listen!
+The birds are singing in the tree.
+Haha ...
+What nice music!
+Yes.
+Which season do you like best?
+Spring.
+The trees and grass are green.
+What about you?
+I like autumn best.
+The trees are red, yellow or brown.
+They're colorful.
+Yes.
+What a nice season!
+Let's talk Part B
+Seasons
+There are four seasons in a year.
+What are they?
+Oh, they are spring, summer, autumn and winter.
+Spring is warm.
+Trees are green.
+Flowers are beautiful.
+Children like to fly kites.
+Summer is very hot.
+Children like to swim in summer.
+Autumn becomes cool.
+There are many nice fruits on the trees.
+Farmers are very busy in this season.
+Winter is very cold.
+Sometimes it snows.
+We like to play with snow.
+It has a lot of fun.
+What do you often do in different seasons?
+Read and think
+Winter is coming.
+The days are shorter.
+The nights are longer.
+Many birds fly south.
+Animals are getting ready for winter.
+Look!
+They are gathering food.
+Frogs and snakes sleep all the winter.
+They don't eat or move.
+Winter is cold.
+It's hard for animals to find food.
+Please help them in winter.
+What do frogs and snakes often do in winter?
+What other animals sleep all the winter?

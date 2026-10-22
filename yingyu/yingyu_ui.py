@@ -1,7 +1,6 @@
 # yingyu_ui.py — 英语标签页（重建设计：内容 / 方式 / 字体 / 方向）
 import os
 import random
-import subprocess
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 
@@ -274,31 +273,162 @@ class YingyuTabWidget:
         self._update_preview()
 
     def on_open_data(self):
-        """用记事本打开数据文件，方便直接编辑。
+        """打开「数据编辑」窗口，直接改当前 版本/年级 的那一个文本文件。
 
-        数据就是 yingyu/data/yingyu_data.txt 这一个纯文本文件，改完保存后
-        程序会自动感知（读取时比对文件修改时间），不用重启。
+        数据按 版本/年级 分成 yingyu/data/<版本>/<年级>.txt（一个文件含上册+下册），
+        打开时会自动定位并把光标停在当前选中的「学期 + 单元」，保存后立即重新载入，
+        不需要重启软件，也不用手动去翻文件夹。
         """
+        version = (self.version_var.get() or "").strip()
+        grade = (self.grade_var.get() or "").strip()
+        if not version or not grade:
+            messagebox.showinfo("提示", "请先选择版本和年级。", parent=self.frame)
+            return
         try:
             from yingyu import yingyu_store as store
-            path = store.data_path()
+            text = store.read_grade_text(version, grade)
+            path = store.data_file(version, grade)
         except Exception as e:
             messagebox.showerror("打开失败", f"无法定位数据文件：{e}")
             return
-        if not os.path.exists(path):
-            messagebox.showwarning(
-                "文件不存在",
-                f"数据文件还没生成：\n{path}\n\n请先添加一个单词，程序会自动创建。")
-            return
+        self._open_data_editor(version, grade, self.semester_var.get(),
+                               self.unit_var.get(), path, text, store)
+
+    def _open_data_editor(self, version, grade, semester, unit, path, text, store):
+        """内置的轻量文本编辑器：定位到目标单元、高亮该行、Ctrl+S 保存即生效。"""
+        old = getattr(self, "_editor", None)
+        if old and old["win"].winfo_exists():
+            old["win"].destroy()
+
+        win = tk.Toplevel(self.frame)
+        win.title("数据编辑 · %s · %s（上册 + 下册）" % (version, grade))
+        win.geometry("900x660")
+        win.minsize(660, 400)
         try:
-            os.startfile(path)  # Windows 下用默认程序（通常是记事本）打开
-        except AttributeError:
+            win.transient(self.frame.winfo_toplevel())
+        except Exception:
+            pass
+
+        head = tk.Frame(win, bg="#f7f7f7")
+        head.pack(fill=tk.X)
+        tk.Label(head, text="%s · %s" % (version, grade), bg="#f7f7f7",
+                 font=("Microsoft YaHei", 10, "bold")).pack(anchor="w", padx=10, pady=(6, 0))
+        tk.Label(head, text=path, bg="#f7f7f7", fg="#888",
+                 font=("Microsoft YaHei", 8)).pack(anchor="w", padx=10)
+        tk.Label(head,
+                 text="格式：[上学期] Unit 1  ｜  .单词 / .课文 / .表达句  ｜  "
+                      "单词：单词 /音标/ 中文  ｜  句子：英文 || 中文  ｜  行首 * = 三会词",
+                 bg="#f7f7f7", fg="#666", font=("Microsoft YaHei", 8)).pack(anchor="w", padx=10, pady=(2, 6))
+
+        body = tk.Frame(win)
+        body.pack(fill=tk.BOTH, expand=True, padx=8, pady=(6, 0))
+        sb = ttk.Scrollbar(body)
+        sb.pack(side=tk.RIGHT, fill=tk.Y)
+        txt = tk.Text(body, wrap=tk.WORD, undo=True, font=("Microsoft YaHei", 10),
+                      yscrollcommand=sb.set, padx=6, pady=4)
+        txt.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        sb.config(command=txt.yview)
+        txt.insert("1.0", text)
+        txt.edit_reset()          # 打开时不算一次可撤销操作
+
+        bar = tk.Frame(win)
+        bar.pack(fill=tk.X, padx=10, pady=8)
+        status = tk.Label(bar, text="", fg="#059669", font=("Microsoft YaHei", 9))
+        status.pack(side=tk.RIGHT, padx=(8, 0))
+
+        def _goto_target():
+            """把光标停在当前选中的 学期+单元 上，并高亮那一行。"""
+            if unit and not unit.startswith("全部"):
+                needle = "[%s] %s" % (semester, unit)
+            else:
+                needle = "[%s]" % semester
+            idx = txt.search(needle, "1.0", stopindex=tk.END)
+            if not idx:
+                return False
+            txt.tag_configure("hit", background="#fff3bf")
+            txt.tag_remove("hit", "1.0", tk.END)
+            txt.tag_add("hit", "%s linestart" % idx, "%s +1line linestart" % idx)
+            txt.mark_set("insert", idx)
+            txt.see(idx)
+            return True
+
+        def _dirty():
+            return txt.get("1.0", "end-1c") != text
+
+        def _save():
+            content = txt.get("1.0", "end-1c")
             try:
-                subprocess.Popen(["xdg-open", path])
+                store.save_grade_text(version, grade, content)
+            except ValueError as e:
+                messagebox.showwarning("未保存", str(e), parent=win)
+                return
             except Exception as e:
-                messagebox.showinfo("数据文件位置", f"请手动打开：\n{path}\n\n({e})")
-        except Exception as e:
-            messagebox.showinfo("数据文件位置", f"请手动打开：\n{path}\n\n({e})")
+                messagebox.showerror("保存失败", str(e), parent=win)
+                return
+            status.config(text="已保存 ✓  数据已重新载入", fg="#059669")
+            win.after(2600, lambda: status.config(text="") if status.winfo_exists() else None)
+            self._after_data_saved()
+            _goto_target()
+
+        def _open_folder():
+            try:
+                os.startfile(os.path.dirname(path))
+            except Exception as e:
+                messagebox.showinfo("文件夹位置", "%s\n\n(%s)" % (os.path.dirname(path), e), parent=win)
+
+        def _open_notepad():
+            try:
+                if _dirty() and not messagebox.askyesno(
+                        "提示", "还有改动没保存，用外部程序打开会丢掉这些改动。继续？", parent=win):
+                    return
+                os.startfile(path)
+            except Exception as e:
+                messagebox.showinfo("文件位置", "%s\n\n(%s)" % (path, e), parent=win)
+
+        def _close():
+            if _dirty() and not messagebox.askyesno("关闭", "有改动还没保存，确定关闭？", parent=win):
+                return
+            win.destroy()
+
+        GradientButton(bar, text="保存", width=88, height=30, command=_save,
+                       color_top="#34d399", color_mid="#10b981", color_bot="#059669",
+                       hover_top="#6ee7b7", hover_mid="#34d399", hover_bot="#10b981"
+                       ).pack(side=tk.LEFT)
+        GradientButton(bar, text="打开文件夹", width=96, height=30, command=_open_folder,
+                       color_top="#e5e7eb", color_mid="#d1d5db", color_bot="#9ca3af",
+                       hover_top="#f3f4f6", hover_mid="#e5e7eb", hover_bot="#d1d5db"
+                       ).pack(side=tk.LEFT, padx=(8, 0))
+        GradientButton(bar, text="用记事本打开", width=108, height=30, command=_open_notepad,
+                       color_top="#93c5fd", color_mid="#60a5fa", color_bot="#3b82f6",
+                       hover_top="#bfdbfe", hover_mid="#93c5fd", hover_bot="#60a5fa"
+                       ).pack(side=tk.LEFT, padx=(8, 0))
+        GradientButton(bar, text="关闭", width=80, height=30, command=_close,
+                       color_top="#e5e7eb", color_mid="#d1d5db", color_bot="#9ca3af",
+                       hover_top="#f3f4f6", hover_mid="#e5e7eb", hover_bot="#d1d5db"
+                       ).pack(side=tk.LEFT, padx=(8, 0))
+
+        if not _goto_target():
+            status.config(text="未找到「%s」分节，已定位到文件开头" % semester, fg="#b45309")
+
+        win.bind("<Control-s>", lambda e: (_save(), "break")[1])
+        win.bind("<Control-S>", lambda e: (_save(), "break")[1])
+        win.protocol("WM_DELETE_WINDOW", _close)
+        win.after(60, lambda: txt.focus_set() if txt.winfo_exists() else None)
+        txt.see("insert")
+        self._editor = {"win": win, "txt": txt}
+
+    def _after_data_saved(self):
+        """数据文件保存后：让下拉框与预览跟着最新数据走。"""
+        try:
+            self.version_combo.configure(values=get_versions())
+            grades = get_grades(self.version_var.get())
+            self.grade_combo.configure(values=grades)
+            if grades and self.grade_var.get() not in grades:
+                self.grade_var.set(grades[0])
+            self._refresh_units(reset_to_all=False)
+            self._update_preview()
+        except Exception:
+            pass
 
     def on_add_version(self):
         # 弹窗输入版本名 → 在数据文件里建一个占位单元；成功则刷新并选中新版本

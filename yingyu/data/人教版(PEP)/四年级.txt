@@ -1,0 +1,600 @@
+# ══════════════════════════════════════════════════════════════
+#  人教版(PEP) · 四年级   （上学期 + 下学期）
+# ══════════════════════════════════════════════════════════════
+#  直接用记事本改，保存为 UTF-8；改完切回软件即生效，不需要重启。
+#
+#  [上学期] Unit 1           单元分节：学期 + 单元号
+#  .单词 / .课文 / .表达句    内容块，没内容可以整块不写
+#  team /tiːm/ 队；组         单词行：单词 /音标/ 中文意思
+#  *name /neɪm/ 名字          行首 * = 三会词
+#  Hello! || 你好！            句子行：英文 || 中文
+#
+#  加内容 = 在对应块下面加一行；加单元 = 新起一个 [学期] Unit N 分节。
+#  以 # 开头的是注释，空行会被忽略。
+# ══════════════════════════════════════════════════════════════
+
+[上学期] Unit 1
+
+.单词
+*PE /piːˈ/ 体育（球）
+*job /dʒɒb/ 工作；职业
+*doctor /'dɒktə(r)/ 医生
+farmer /'fɑːmə(r)/ 农场主；农民
+*nurse /nɜːs/ 护士
+office /'ɒfɪs/ worker /'wɜːkə(r)/ 公司职员
+factory /'fæktri/ worker 工厂工人
+*busy /'bɪzi/ 忙碌的
+*tired /'taɪəd/ 疲倦的
+*chore /tʃɔː(r)/ 家庭杂务
+*cook /kʊk/ 烹饪；煮
+*clean /kliːn/ 打扫；干净的
+room /ruːm/ 房间
+look after 照顾
+*sweep /swiːp/ 扫
+*floor /flɔː(r)/ 地板；地面
+together /tə'geðə(r)/ 在一起；共同
+*people /'piːpl/ 人；人们
+*child /tʃaɪld/ （复数children /'tʃɪldrən/）儿童；小孩
+
+.课文
+Unit 1
+Let's talk PartA
+You have a big family. Is this your father?
+Yes, it is. He's a PE teacher.
+What's your mother's job?
+She's a doctor.
+Doctors are great! My father is a doctor too.
+Let's talk PartB
+Mum and Dad are busy and tired. What can we do for them?
+We can do some chores.
+I can cook.
+I can clean the room.
+We can also make a gift!
+Listen and chant B
+Mum and Dad are busy.
+I cook for my family.
+I look after my doggy.
+I sweep the floor. It's easy.
+We are a happy family.
+
+[上学期] Unit 2
+
+.单词
+*his /hɪz/ 他的
+*strong /strɒŋ/ 强壮的
+*hair /heə(r)/ 头发
+*also /'ɔːlsəʊ/ 也
+*kind /kaɪnd/ 友好的
+*quiet /'kwaɪət/ 文静的
+*best /best/ 最好的
+*read /riːd/ 阅读
+*Chinese /tʃaɪ'niːz/ 中文；中国人；中国的
+*play /pleɪ/ 玩耍
+*game /geɪm/ 游戏
+*football /'fʊtbɔːl/ 足球运动
+*basketball /'bɑːskɪtbɔːl/ 篮球运动
+*always /'ɔːlweɪz/ 总是
+
+.课文
+Unit 2
+Let's talk PartA
+Mum, I have a new friend.
+Really? What's your friend's name?
+His name is Zhang Peng.
+Look! He's tall and strong.
+He has nice short hair too.
+Yes. He's also kind. He often helps me.
+Listen and chant A
+Tim is my friend.
+He's a good, good boy.
+He's tall and thin.
+He's a good, good boy.
+Lily is my friend.
+She's a good, good girl.
+She's quiet and kind.
+She's a good, good girl.
+Let's talk PartB
+Who's your best friend?
+Chen Jie. She's funny. She often makes me smile.
+How about you? Who's your best friend?
+My best friend is John. He's very kind. He often helps me with English.
+Read and compare
+My best friend
+Liu Jia is tall. She has long hair. She often reads books with me. We like animal books and often share. She likes weiqi, but I like ball games. I often play football and basketball. Liu Jia is kind. She always makes me smile. We are best friends.
+
+[上学期] Unit 3
+
+.单词
+*afternoon /ˌɑːftə'nuːn/ 下午
+*there /ðeə(r)/ （表示存在或发生）；在那里
+*playground /'pleɪɡraʊnd/ 游乐场；操场
+*park /pɑːk/ 公园
+*over /'əʊvə(r)/ 在……的远端（或对面）
+*hospital /'hɒspɪtl/ 医院
+*shop /ʃɒp/ 商店
+*toilet /'tɒɪlət/ 厕所；卫生间
+bus /bʌs/ stop /stɒp/ 公共汽车站
+*library /'laɪbrəri/ 图书馆
+*sport /spɔːt/ 体育运动
+*walk /wɔːk/ 散步；行走
+community /kə'mjuːnəti/ 社区
+*favourite /'feɪvərɪt/ 最喜欢的
+*place /pleɪs/ 地方；场所
+*photo /'fəʊtəʊ/ 照片
+*story /'stɔːri/ 故事
+buy /baɪ/ 购买
+
+.课文
+Unit 3
+Let's talk PartA
+Good afternoon!
+Good afternoon!
+Your neighbours are very friendly.
+Yes, they are. There is a playground. We often play there.
+That's nice.
+There is also a nice park over there.
+Let's go and see!
+Let's talk PartB
+This is a library.
+Wow! There are so many books.
+There is a taijiquan club.
+There are many people.
+There is a gym too.
+Great! Let's do some sports.
+Listen and do B
+There is a beautiful park. I often take a walk there.
+There is a playground. I do sports there.
+There is a shop. I go shopping there.
+There is a hospital. I see a doctor there.
+Read and tick
+My favourite place is the museum. There are many old things and photos. I can read stories about them. I can "hear" them too! There is also a nice shop. People buy gifts and books there. The museum is in a nice park. We often play in the park. I love that museum!
+
+[上学期] Unit 4
+
+.单词
+firefighter /'faɪəfaɪtə(r)/ 消防队员
+*why /waɪ/ 为什么
+*driver /'draɪvə(r)/ 司机
+cleaner /'kliːnə(r)/ 清洁工
+*cook /kʊk/ 厨师
+delivery /dɪ'lɪvəri/ worker 快递员
+police /pə'liːs/ officer /ə'fɪsə(r)/ 警察；警员
+a lot /lɒt/ of /əv/ 大量；许多
+*now /naʊ/ 现在
+make the bed /bed/ 铺床
+*old /əʊld/ 过去的；年纪大的；老的
+*tell /tel/ 讲述；告诉
+everyone /'evriwʌn/ 每人
+
+.课文
+Unit 4
+Let's talk PartA
+Look! A firefighter!
+Our neighbour is a firefighter. He often helps people.
+Yes, he's a very nice man.
+Liu Jia's father is also very nice.
+Why?
+He's a school bus driver. He takes us to school every day.
+That's an important job too!
+Let's talk PartB
+Look! The students are busy now!
+Chen Jie is making the bed.
+Here is Zhang Peng. He's singing old songs.
+Binbin and John are telling funny stories.
+Everyone is happy!
+Read and match
+We are community helpers. We often help children and old people.
+In the kindergarten, John and Class One are singing songs together. Zhang Peng is telling stories to Class Two.
+In the old people's home, Chen Jie is making the bed. Amy is drawing a picture of Ms Xu. They are all happy.
+We love the people in our community.
+
+[上学期] Unit 5
+
+.单词
+*speak /spiːk/ 说话；发言
+*weather /'weðə(r)/ 天气
+*sunny /'sʌni/ 阳光充足的
+*hot /hɒt/ 热的
+*bad /bæd/ 令人不快的；坏的
+*cold /kəʊld/ 冷的
+*windy /'wɪndi/ 多风的
+*cloudy /'klaʊdi/ 多云的
+*rainy /'reɪni/ 阴雨的
+*snowy /'snəʊi/ 多雪的
+*cool /kuːl/ 凉爽的
+*warm /wɔːm/ 温暖的
+*tomorrow /tə'mɒrəʊ/ 在明天
+*rain /reɪn/ 下雨；雨
+closed /kləʊzd/ 关闭的
+*film /fɪlm/ 电影
+*idea /aɪ'dɪə/ 想法；主意
+*fly /flaɪ/ 操纵（飞行器等）；飞
+*kite /kaɪt/ 风筝
+*snowman /'snəʊmæn/ 雪人
+*fun /fʌn/ 享乐；乐趣
+*their /ðeə(r)/ 他们的；她们的；它们的
+*swim /swɪm/ 游泳
+Sydney /'sɪdni/ 悉尼
+
+.课文
+Unit 5
+Let's talk PartA
+Hello! Mark speaking.
+Hi, Mark! This is John. What's the weather like in Sydney?
+Well, it's sunny today.
+Is it hot?
+No, it isn't. It's 21 degrees.
+That's not bad. It's only two degrees in Beijing.
+Wow! It's cold!
+Let's talk PartB
+John, it's raining now.
+Oh no! We can't play basketball in the park.
+It's OK. We can go to the library.
+But it's closed now.
+Hmm. Let's go and see a film.
+That's a good idea!
+Read and answer
+Hi John,
+How are you? I'm in a big park in Sydney today. It's hot and sunny here. It's fun to go to the park with my new friends. We play basketball together. Their children swim in the pool. How about you? Is it cold and windy in Beijing? Can you fly your kite?
+Love,
+Dad
+
+[上学期] Unit 6
+
+.单词
+*whose /huːz/ 谁的
+*sweater /'swetə(r)/ 毛衣
+*sock /sɒk/ 短袜
+mine /maɪn/ 我的
+*wear /weə(r)/ 穿；戴
+*shirt /ʃɜːt/ 衬衫
+*coat /kəʊt/ 大衣；外套
+*dress /dres/ 连衣裙
+*which /wɪtʃ/ 哪一个；哪一些
+*season /'siːzn/ 季节
+*winter /'wɪntə(r)/ 冬天
+*snow /snəʊ/ 下雪；雪
+get together 聚会
+*spring /sprɪŋ/ 春天
+*summer /'sʌmə(r)/ 夏天
+*autumn /'ɔːtəm/ 秋天
+*T-shirt /'tiːʃɜːt/ T恤衫
+fall /fɔːl/ 落下
+leaf /liːf/ （复数leaves /liːvz/）叶
+glove /glʌv/ 手套
+*then /ðen/ 然后；那时
+
+.课文
+Unit 6
+Let's talk PartA
+Whose sweater is this, Mum?
+It's your dad's. Put it there, please.
+Whose socks are these?
+They're mine.
+Can I wear this new shirt today?
+Yes, but wear a coat too. It's cold and windy outside.
+Let's talk PartB
+Sarah, which season do you like?
+Winter. It snows a lot. I can play in the snow and make a snowman. What about you?
+I like winter too. There are many festivals. My family and I often get together and have fun.
+Read and write
+I'm Wu Binbin. My family often helps at the children's centre. My dad is a doctor. He is kind. He often helps the children there. My mum is a cook. She cooks nice food there. My uncle is a PE teacher. He plays football with the children. My sister Xinxin and I play games with them. All my family help make our community better.
+
+[下学期] Unit 1
+
+.单词
+*sorry /'sɒri/ 对不起
+hurry /'hʌri/ up /ʌp/ 快点；赶快
+*late /leɪt/ 迟到；迟发生
+*class /klɑːs/ 课；课程；班；班级
+ready /'redi/ 准备好
+rule /ruːl/ 规则；规章
+*classroom /'klɑːsruːm/ 教室
+turn /tɜːn/ off /ɒf/ 关掉
+*light /laɪt/ 灯；光
+*blackboard /'blækbɔːd/ 黑板
+*desk /desk/ 书桌；办公桌
+*chair /tʃeə(r)/ 椅子
+*tidy /'taɪdi/ 整洁的；整齐的；使整洁；整理
+*music /'mjuːzɪk/ 音乐
+*door /dɔː(r)/ 门
+*window /'wɪndəʊ/ 窗
+*fan /fæn/ 风扇
+*when /wen/ 当……时；什么时候
+understand /ˌʌndə'stænd/ 懂；理解
+*wall /wɔːl/ 墙；壁
+newspaper /'njuːzpeɪpə(r)/ 报纸
+hand out /aʊt/ 分发
+workbook /'wɜːkbʊk/ 练习册；作业本
+
+.课文
+Unit 1
+Let's talk PartA
+Jack, you can't take toys to school.
+Oh, sorry. Can I take this apple?
+Yes, but don't eat it in class.
+OK.
+Hurry up! Don't be late for class!
+I'm ready. Let's go!
+Let's talk PartB
+Who's on duty today?
+We are, Miss White.
+I can clean the blackboard.
+I can sweep the floor.
+I can put back the desks and chairs.
+Wow! Our classroom is clean and tidy!
+Listen and do B
+We turn off the fans.
+We clean the desks.
+We sweep the floor.
+We close the windows.
+We put back the chairs and close the doors.
+Our job is done!
+Now the classroom is clean!
+Read and tick
+Helping hands in class
+We have some class rules. We put up our hands to speak. We turn off the lights after school. When we don't understand, we say, "Excuse me?"
+We also have some jobs. Some of us make wall newspapers. Some of us keep our classroom clean and tidy. Some hand out the workbooks. We all help make our classroom great!
+
+[下学期] Unit 2
+
+.单词
+*watch /wɒtʃ/ 看
+*TV /tiː'viː/ 电视
+homework /'həʊmwɜːk/ 家庭作业
+first /fɜːst/ 首先；首次；第一
+wet /wet/ 湿的；未干的
+*run /rʌn/ 跑；奔跑
+living /'lɪvɪŋ/ room 客厅；起居室
+*safe /seɪf/ 安全的
+*word /wɜːd/ 语言；单词；字
+*wash /wɒʃ/ 洗
+*helpful /'helpfl/ 有帮助的；有用的
+loud /laʊd/ （说话太大声的）；吵闹的
+*sleep /sliːp/ 睡觉
+*bedroom /'bedruːm/ 卧室
+*kitchen /'kɪtʃɪn/ 厨房
+*study /'stʌdi/ 书房
+bathroom /'bɑːθruːm/ 浴室；洗手间
+*think /θɪŋk/ 想；思考
+
+.课文
+Unit 2
+Let's talk PartA
+Mum, can I watch TV?
+No. You have to do your homework first.
+OK.
+Matt, be careful! The floor is wet.
+Sorry.
+Don't run in the living room. It's not safe.
+Let's talk PartB
+John, where is Dad?
+Shh. Don't be so loud! Dad is sleeping in his bedroom. He's tired.
+I'm sorry.
+Where is Mum?
+She's in the kitchen. Let's go and help her.
+Be careful, Jack. Don't touch hot things.
+OK.
+Read, tick and underline
+Rules
+There are rules at school and at home.
+I don't run in the classroom or in the living room. This rule keeps me safe. I keep my desk clean and tidy my bedroom. This rule keeps me healthy. I think of my friends and family. I use kind words.
+We work hard and follow the rules. I feel good and others feel good too.
+
+[下学期] Unit 3
+
+.单词
+*work /wɜːk/ （花费时间和精力）做（某事）；工作
+*hard /hɑːd/ 努力地；费力地
+follow /'fɒləʊ/ 遵循，听从（忠告、指示等）
+*feel /fiːl/ 觉得；感到
+*over /'əʊvə(r)/ 结束（的）
+*kid /kɪd/ 小孩
+*dinner /'dɪnə(r)/ （中午或晚上吃的）正餐
+*art /ɑːt/ 美术；艺术
+*lunch /lʌntʃ/ 午餐
+*maths /mæθs/ 数学
+get up 起床
+go to school 上学
+go home 回家
+go to bed 上床睡觉
+*want /wɒnt/ 想要
+*clock /klɒk/ 时钟
+just /dʒʌst/ 只是；仅仅；正要
+*minute /'mɪnɪt/ 分钟
+
+.课文
+Unit 3
+Let's talk PartA
+Hi, Binbin. School is over. Let's go to the playground.
+OK.
+What time is it?
+It's 5 o'clock.
+Time to go home, kids.
+What time is it now?
+It's 6 o'clock. It's time for dinner.
+Oh! Let's go.
+Listen and do A
+It's time for breakfast.
+Let's drink some milk.
+It's time for lunch.
+Let's have some chicken.
+It's time for dinner.
+Let's eat some rice.
+It's time for maths class.
+Let's count and write.
+It's time for art class.
+Let's draw a picture.
+It's time for English class.
+Let's read and write.
+Let's talk PartB
+It's 7 o'clock. It's time to get up.
+Breakfast is ready.
+It's time to go to school. Bye, Mum.
+Bye. Have a nice day!
+It's 8:30. It's time for English class.
+We're ready!
+Read and number
+It's 5:50. It's time to go home.
+Oh no! I want to play more!
+It's 6 o'clock. It's time for dinner.
+Look at the clock! It's 9:20. Time for bed.
+Just a minute.
+Mike! It's 7:40. Get up now, please!
+Hurry, Mike! It's 8:30. You're late for class.
+
+[下学期] Unit 4
+
+.单词
+*trousers /'traʊzəz/ 裤子
+*pair /peə(r)/ （由连在一起的相似两部分构成的）一条，一副
+*clothes /kləʊðz/ 衣服；服装
+*those /ðəʊz/ （指较远的人或事物）那些
+*shorts /ʃɔːts/ 短裤
+jacket /'dʒækɪt/ 夹克衫；短上衣
+*skirt /skɜːt/ 裙子
+*dear /dɪə(r)/ 亲爱的
+*expensive /ɪk'spensɪv/ 昂贵的
+*take /teɪk/ 买下
+cheap /tʃiːp/ 便宜的
+*shoe /ʃuː/ 鞋
+*beautiful /'bjuːtɪfl/ 美丽的
+hat /hæt/ 帽子
+sunglasses /'sʌnglɑːsɪz/ 太阳镜；墨镜
+*free /friː/ 免费的
+large /lɑːdʒ/ （服装、食物、日用品等）大型号的
+size /saɪz/ 尺码；号
+list /lɪst/ 清单；目录
+try /traɪ/ on 试穿
+*any /'eni/ 任何的；任一的
+
+.课文
+Unit 4
+Let's talk PartA
+Mum, my trousers are too short. Can I buy a new pair?
+Sure. Let's go to the clothes shop.
+Look, Mum! Those shorts are nice. Can I buy a pair?
+You already have too many shorts. Let's buy trousers.
+OK, Mum.
+Let's talk PartB
+Can I help you?
+Yes. I like this pink dress.
+How much is it?
+It's 180 yuan.
+I'm sorry, dear. That's expensive.
+Look! The blue skirt is nice too. It's 79 yuan.
+Yes. I like it.
+OK. Let's take it.
+Read and answer
+Dear Mike,
+Here's your shopping list.
+1.Sunglasses
+Buy a nice and cheap pair.
+2.Shorts
+Buy two pairs. Try them on first.
+3.A hat
+Find your size. You can choose any colour.
+Don't buy socks! You have a lot of socks!
+Mum
+
+[下学期] Unit 5
+
+.单词
+*cow /kaʊ/ 奶牛
+*horse /hɔːs/ 马
+*sheep /ʃiːp/ 羊；绵羊
+*pig /pɪg/ 猪
+*chicken /'tʃɪkɪn/ 鸡；鸡肉
+*tomato /tə'mɑːtəʊ/ 西红柿
+*bee /biː/ 蜜蜂
+*mouse /maʊs/ （复数mice /maɪs/）老鼠
+carrot /'kærət/ 胡萝卜
+*potato /pə'teɪtəʊ/ 土豆
+green bean /ˌgiːn'biːn/ 青刀豆；四季豆
+*can /kæn/ （盛食品或饮料的）金属罐
+a box of 一盒，一箱（东西）
+waste /weɪst/ 浪费；废品
+*food /fuːd/ 菜肴；食物
+delicious /dɪ'lɪʃəs/ 美味的；可口的
+clear the table 收拾餐桌
+set the table 摆放餐桌
+
+.课文
+Unit 5
+Let's talk PartA
+What animals do you have on the farm?
+I have a lot of animals. Cows, horses, sheep, pigs and chickens.
+How many cows do you have?
+I have 20.
+Cows are great. They give us milk.
+Yes. Farm animals give us many things.
+Let's talk PartB
+What are these?
+They're tomatoes.
+But they're yellow!
+Yes. A lot of tomatoes are big and red, but these are small and yellow.
+What are those?
+They're bee boxes.
+Bees are good for plants.
+Listen and chant B
+I like long vegetables:
+Cucumbers, carrots and green beans.
+I like round vegetables:
+Potatoes, tomatoes and green peas.
+I like flowers and honey,
+And so do the bees.
+But mice like rice.
+They eat anything they please!
+Read and circle
+This is Mr Wang's farm. Let's have a look!
+It's a busy day on the farm. Mr Wang is putting the tomatoes in boxes.
+These are carrots. Those are green beans and potatoes. How fresh!
+What are these? They are cans for milk.
+There are boxes of eggs too. It is a big year for Mr Wang.
+
+[下学期] Unit 6
+
+.单词
+feed /fiːd/ 给（人或动物）食物；饲养
+pass /pɑːs/ 给；递
+pick /pɪk/ 采；摘
+*milk /mɪlk/ 挤奶
+knife /naɪf/ 刀
+fork /fɔːk/ 餐叉
+chopstick /'tʃɒpstɪk/ （常用复数）筷子
+bowl /bəʊl/ 碗
+spoon /spuːn/ 勺；匙；调羹
+*supermarket /'suːpəmɑːkɪt/ 超市
+herself /hɜː'self/ （用作女性的反身代词）她自己，自己
+*week /wiːk/ 周；星期
+salad /'sæləd/ 蔬菜沙拉
+
+.课文
+Unit 6
+Let's talk PartA
+Look! Binbin and John are watering the vegetables.
+Oh yes! We can help too. Let's feed the chickens.
+Good idea!
+Let's feed the pigs.
+OK. Can you please pass me the vegetables?
+Sure. Here you are.
+Thanks.
+Listen and do A
+Plant the tomatoes.
+Water the tomatoes.
+Pick the tomatoes.
+Feed the cow.
+Give the cow water.
+Milk the cow.
+Let's talk PartB
+Mike, Amy, would you like a knife and fork?
+No, thank you, Mr Wang. I can use chopsticks.
+Can you please pass me some chopsticks too?
+OK.
+Don't waste food, please.
+Sorry.
+The food is delicious! Thank you!
+Let's clear the table.
+OK.
+Read and underline
+Where do you get your tomatoes? In a supermarket? At a farm? Chen Jie grows them by herself. She has a small "garden" at home. Spring is a good time to plant tomatoes. Chen Jie waters the tomato plants every week. In summer, Chen Jie picks the tomatoes. She makes a salad and eats it with her family. It's so delicious!

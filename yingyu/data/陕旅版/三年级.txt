@@ -1,0 +1,878 @@
+# ══════════════════════════════════════════════════════════════
+#  陕旅版 · 三年级   （上学期 + 下学期）
+# ══════════════════════════════════════════════════════════════
+#  直接用记事本改，保存为 UTF-8；改完切回软件即生效，不需要重启。
+#
+#  [上学期] Unit 1           单元分节：学期 + 单元号
+#  .单词 / .课文 / .表达句    内容块，没内容可以整块不写
+#  team /tiːm/ 队；组         单词行：单词 /音标/ 中文意思
+#  *name /neɪm/ 名字          行首 * = 三会词
+#  Hello! || 你好！            句子行：英文 || 中文
+#
+#  加内容 = 在对应块下面加一行；加单元 = 新起一个 [学期] Unit N 分节。
+#  以 # 开头的是注释，空行会被忽略。
+# ══════════════════════════════════════════════════════════════
+
+[上学期] Unit 1
+
+.单词
+hello /həˈləʊ/ 你好
+I'm = I am /aɪm/ 我是
+Miss /mɪs/ （用在未婚女子的姓或姓名之前，作为称呼）女士
+hi /haɪ/ 嗨；喂
+my /maɪ/ 我的
+name /neɪm/ 名字
+is /ɪz/ 是
+what /wɒt/ 什么
+your /jɔː(r)/ 你的；你们的
+please /pliːz/ 请
+OK /əʊˈkeɪ/ 好的
+goodbye /ˌɡʊdˈbaɪ/ 再见
+bye /baɪ/ 再见
+
+.课文
+Unit 1
+Let's talk Part A
+Hello, I'm Miss Li.
+Hi, Miss Li. I'm Liu Zhaoyang.
+Hello, I'm Li Shan.
+Hi, Li Shan. My name is Su Nan.
+Let's talk Part B
+What is your name?
+My name is Su Nan.
+Your name, please?
+I'm Kitty Miller.
+What's your name?
+I'm Chenchen.
+Goodbye, Chenchen!
+Bye.
+Let's play
+What's your name?
+Hi, Miss Li! My name is Li Shan.
+Your name, please?
+I'm Liu Zhaoyang.
+Let's sing
+Hello, hello, hello!
+What's your name?
+Hello, hello, hello!
+My name is Colin.
+My name is Colin.
+Hello, Colin. Hello, Colin.
+Hello, hello, hello!
+Read and act
+Hello, Wu Chen!
+Ah, who?
+I'm Sisi.
+Hello, Sisi!
+Hello!
+What's your name?
+My name is Qiqi. Haha ...
+Hello, Qiqi!
+Goodbye, Wu Chen.
+Bye!
+
+[上学期] Unit 2
+
+.单词
+are /ɑː(r)/ 是
+you /juː/ 你；你们
+yes /jes/ 是；是的
+I /aɪ/ 我
+am /æm; əm/ 是
+no /nəʊ/ 不；不是
+not /nɒt/ 不
+sorry /ˈsɒri/ 对不起
+look /lʊk/ 看
+who /huː/ 谁
+the /ðə; ði/ （指已提到或易领会到的人或事物）
+girl /ɡɜːl/ 女孩
+he /hiː/ 他
+a /ə; eɪ/ 一；一个
+boy /bɔɪ/ 男孩
+who's = who is /huːz/ 是谁
+she /ʃiː/ 她
+oh /əʊ/ 哦
+see /siː/ 明白；理解
+
+.课文
+Unit 2
+Let's talk Part A
+Hello! Are you Wu Chen?
+Yes, I am.
+Are you Lu Zhaoyang?
+No, I'm not.
+Sorry. What's your name?
+I'm Liu Zhaoyang.
+Let's talk Part B
+Look! Who is the girl?
+He is a boy. He is Nezha.
+Who's the boy?
+She is a girl. She is Hua Mulan.
+Oh, I see.
+Let's play
+Who's the girl?
+She is Kitty.
+Let's sing
+Who is the girl? Who is the girl?
+She is Li Shan, Li Shan, Li Shan.
+Who is the boy? Who is the boy?
+He is Su Nan, Su Nan, Su Nan.
+Read and act
+Look! Who's the boy?
+Wow, he is Liu Zhaoyang!
+Who's the girl?
+Hello!
+Haha ... She is Kitty!
+
+[上学期] Unit 3
+
+.单词
+good /ɡʊd/ 好
+morning /ˈmɔːnɪŋ/ 早晨；上午
+stand /stænd/ 站立
+up /ʌp/ 向上
+stand up /stænd ʌp/ 起立
+and /ænd/ 和
+sit /sɪt/ 坐
+down /daʊn/ 向下
+sit down /sɪt daʊn/ 坐下
+may /meɪ/ 可以
+come /kʌm/ 来
+come in /kʌm ɪn/ 进来
+afternoon /ˌɑːftəˈnuːn/ 下午
+Mr. /ˈmɪstə(r)/ 先生
+evening /ˈiːvnɪŋ/ 傍晚；晚上
+dad /dæd/ 爸爸
+dear /dɪə(r)/ 亲爱的
+night /naɪt/ 夜晚；晚上
+mom /mɒm/ 妈妈
+
+.课文
+Unit 3
+Let's talk Part A
+Good morning, Miss Li!
+Stand up, please.
+Sit down, please.
+Good morning, boys and girls!
+Come in, please!
+May I come in?
+Let's talk Part B
+Good morning, Colin!
+Good morning, Wu Chen!
+Good afternoon, Mr. Zhao!
+Good afternoon!
+Good evening, dear!
+Good evening, Dad!
+Good night, Mom and Dad!
+Good night, dear!
+Read and act
+Good morning, Mr. Sun.
+Good afternoon, Miss Flower.
+Good evening, Qiqi.
+Good evening, Sisi.
+Good night, Miss Moon.
+
+[上学期] Unit 4
+
+.单词
+how /haʊ/ 怎样；怎么
+fine /faɪn/ 健康的
+thank /θæŋk/ 感谢；谢谢
+very /ˈveri/ 非常
+well /wel/ 健康的
+thanks /θæŋks/ 谢谢
+this /ðɪs/ 这个
+nice /naɪs/ 好的
+to /tuː; tə/ 给；对；向；到
+meet /miːt/ 遇见
+too /tuː/ 也；太
+
+.课文
+Unit 4
+Let's talk Part A
+Hello, Liu Zhaoyang! How are you?
+I'm fine, thank you.
+Good afternoon, Mr. Zhao! How are you?
+Very well, thanks.
+Let's talk Part B
+Hello, Zhang Fan!
+Hi, Kitty!
+Li Shan, this is Zhang Fan.
+Zhang Fan, this is Li Shan.
+Nice to meet you, Zhang Fan.
+Nice to meet you too.
+Oh, no!
+Let's chant
+Hello, hello, hello. How are you?
+Hello, hello, hello. How are you?
+I'm fine. I'm OK. I'm very well.
+Hello, hello, hello. How are you?
+Hello, hello, hello. How are you?
+Read and act
+Hello, dear!
+Good afternoon, Madam!
+I am fine.
+How are you, pretty girl?
+How nice!
+
+[上学期] Unit 5
+
+.单词
+have /hæv/ 有
+bag /bæɡ/ 包
+box /bɒks/ 盒子
+pencil box /ˈpensl bɒks/ 文具盒
+wow /waʊ/ 哇；呀
+do /duː; də/ （助动词）
+in /ɪn/ 在…… 里面
+pen /pen/ 钢笔
+pencil /ˈpensl/ 铅笔
+ruler /ˈruːlə(r)/ 直尺
+an /ən; æn/ 一；一个
+*eraser /ɪˈreɪzə(r)/ 橡皮
+book /bʊk/ 书
+marker /ˈmɑːkə(r)/ 马克笔
+don't = do not /dəʊnt/ （助动词 do 的否定形式）
+but /bʌt/ 但是
+That's OK. /ðæts əʊˈkeɪ/ 没关系。
+Here you are. /hɪə(r) juː ɑː(r)/ 给你。
+
+.课文
+Unit 5
+Let's talk Part A
+Good morning, Li Shan.
+Good morning, Wu Chen.
+Wow, how nice!
+Look! I have a pencil box.
+What do you have in your pencil box?
+I have a pen, a pencil, a ruler and an eraser.
+Let's talk Part B
+Yes, I do. Here you are.
+Do you have an eraser?
+Thank you.
+No, I don't. But I have a pencil.
+Do you have a pen?
+That's OK. Thanks!
+Let's sing
+Do you have a pen?
+Yes, I do.
+No, I don't.
+Do you have a bag?
+Yes, I do.
+No, I don't.
+What do you have?
+I have a pen, a pencil and a pencil box.
+What do you have?
+I have a bag, a book and a ball.
+Read and act
+Do you have a book?
+Yes, I do.
+Show me your book.
+Here is my book.
+Oh, no!
+
+[上学期] Unit 6
+
+.单词
+many /ˈmeni/ 很多
+how many /haʊ ˈmeni/ 多少
+so /səʊ/ 这么；那么
+one /wʌn/ 一
+two /tuː/ 二
+three /θriː/ 三
+four /fɔː(r)/ 四
+let /let/ 让；使
+let's = let us /lets/ 让我们
+read /riːd/ 读
+*together /təˈɡeðə(r)/ 一起
+five /faɪv/ 五
+six /sɪks/ 六
+seven /ˈsevən/ 七
+eight /eɪt/ 八
+nine /naɪn/ 九
+ten /ten/ 十
+what about /wɒt əˈbaʊt/ 怎么样
+*only /ˈəʊnli/ 仅仅；只有
+it /ɪt/ 它
+it's = it is /ɪts/ 它是
+for /fɔː(r)/ 为；给
+
+.课文
+Unit 6
+Let's talk Part A
+Look! I have a book. Do you have a book?
+Yes, I do.
+Wow, so many books!
+One, two, three, four. I have four books.
+Oh, Nezha!
+Yes! Let's read it together.
+OK!
+Let's talk Part B
+Hello, Li Shan. How many markers do you have?
+I have six.
+How many markers do you have, Su Nan?
+I have seven.
+What about you?
+I have only one.
+Thank you.
+It's for you, Miss Li.
+Let's sing
+One little, two little, three little fingers,
+Four little, five little, six little fingers,
+Seven little, eight little, nine little fingers,
+Ten little fingers.
+Ten little, nine little, eight little fingers,
+Seven little, six little, five little fingers,
+Four little, three little, two little fingers,
+One little finger.
+Read and act
+Look! We have so many pears. One, two, three, four ...
+The big one is for you, Dad!
+Thank you!
+Thanks, my dear!
+The big one is for you, Mom!
+The big one is for you.
+The small one is for me.
+You're a good boy!
+You're great!
+
+[上学期] Unit 7
+
+.单词
+play /pleɪ/ 玩
+with /wɪð/ 和…… 一起
+toy /tɔɪ/ 玩具
+plane /pleɪn/ 飞机
+toy plane /tɔɪ pleɪn/ 玩具飞机
+great /ɡreɪt/ 很好的
+try /traɪ/ 试；尝试
+Have a try! /hæv ə traɪ/ 试一试！
+ship /ʃɪp/ 轮船
+toy ship /tɔɪ ʃɪp/ 玩具轮船
+that /ðæt/ 那个
+kite /kaɪt/ 风筝
+bear /beə(r)/ 熊
+toy bear /tɔɪ beə(r)/ 玩具熊
+doll /dɒl/ 洋娃娃
+ball /bɔːl/ 皮球
+robot /ˈrəʊbɒt/ 机器人
+car /kɑː(r)/ 小汽车
+toy car /tɔɪ kɑː(r)/ 玩具小汽车
+*really /ˈriːəli/ 真地
+*fun /fʌn/ 有趣的
+isn't = is not /ˈɪznt/ 不是
+me /miː/ 我（宾格形式）
+
+.课文
+Unit 7
+Let's talk Part A
+Let's play with the toys.
+OK. What's this?
+It's a toy plane.
+It's great!
+Have a try!
+Thanks! This is my toy ship.
+What's that?
+It's a kite.
+How nice!
+Let's talk Part B
+Is this a toy?
+Yes, it is.
+It's really fun.
+Is that a car?
+Yes, it is.
+Look! This is my robot.
+Let's play together.
+Great!
+No, it isn't. It's me.
+Is this a toy bear?
+Let's chant
+Is this a cat? Is this a kite?
+Yes, it is. It's a cat kite.
+Is that toy blue?
+Is that a ball?
+Yes, it is. It's a blue ball.
+Read and act
+Happy birthday!
+Thank you!
+Wow, so many gifts!
+What's this?
+Open it and see!
+Wow, it's a toy plane!
+What's that?
+Hello! I'm your friend, Sisi.
+
+[上学期] Unit 8
+
+.单词
+color /ˈkʌlə(r)/ 颜色
+What's up? /wɒts ʌp/ 怎么了？
+*lost /lɒst/ 丢失的
+red /red/ 红色；红色的
+white /waɪt/ 白色；白色的
+yellow /ˈjeləʊ/ 黄色；黄色的
+look at /lʊk æt/ 看一看
+black /blæk/ 黑色；黑色的
+brown /braʊn/ 棕色；棕色的
+pink /pɪŋk/ 粉色；粉色的
+green /ɡriːn/ 绿色；绿色的
+orange /ˈɒrɪndʒ/ 橘色；橙色；橘色的；橙色的
+blue /bluː/ 蓝色；蓝色的
+they /ðeɪ/ 他们；她们；它们
+lovely /ˈlʌvli/ 可爱的
+
+.课文
+Unit 8
+Let's talk Part A
+What's up?
+My ball is lost.
+Look, a red ball. Is that your ball?
+No, it isn't.
+What color is your ball?
+It's white and yellow.
+Look at this ball. Is it your ball?
+Yes, it is. Thank you!
+Let's talk Part B
+Do you have dolls?
+Yes, I do.
+How many dolls do you have?
+I have three dolls.
+What colors are they?
+Look! They're pink, blue and orange.
+Wow, they are so lovely!
+Thanks. Let's play together.
+OK.
+Let's chant
+It is yellow. It is brown.
+It is the big funny Brown.
+It is white. It is black.
+It is your big hat.
+It is red. It is blue.
+It is the bike under you.
+Read and think
+Look! A chameleon.
+What color is it?
+It's brown.
+Oh, look! It's green.
+Now it's red.
+What color is it?
+Do you know?
+
+[下学期] Unit 1
+
+.单词
+face /feɪs/ 脸
+head /hed/ 头
+mouth /maʊθ/ 嘴巴
+nose /nəʊz/ 鼻子
+eye /aɪ/ 眼睛
+ear /ɪə(r)/ 耳朵
+hair /heə(r)/ 头发
+big /bɪɡ/ 大的
+its /ɪts/ 它的
+small /smɔːl/ 小的
+has /hæz/ （have 的第三人称单数形式）
+baby /ˈbeɪbi/ 婴儿
+
+.课文
+Unit 1
+Let's talk Part A
+Look at me. This is my head.
+This is my face.
+It's my mouth.
+Look at my nose. Haha!
+They are my eyes.
+Is this my ear?
+Yes, it is.
+Is that my hair?
+No. It is my hair.
+Haha!
+Let's talk Part B
+Look! I have two toy bears.
+Wow, they are lovely!
+The brown bear is big.
+But its nose is small.
+The white bear is small.
+Its eyes are small too.
+Yes. And it has two small ears.
+Haha! It's a baby bear.
+Read and act
+Good afternoon!
+No, I'm not.
+Are you a bee?
+Look at my head. It's small.
+But your eyes are big.
+Yes! You have big eyes.
+How many eyes do you have?
+I have two eyes.
+But I have many many eyes.
+Aha!
+
+[下学期] Unit 2
+
+.单词
+these /ðiːz/ 这些
+arm /ɑːm/ 胳膊；手臂
+hand /hænd/ 手
+long /lɒŋ/ 长的
+those /ðəʊz/ 那些
+leg /leɡ/ 腿
+short /ʃɔːt/ 短的
+we /wiː/ 我们
+feet /fiːt/ 脚（foot 的复数形式）
+body /ˈbɒdi/ 身体
+foot /fʊt/ 脚
+*guess /ɡes/ 猜测
+tall /tɔːl/ 高的
+
+.课文
+Unit 2
+Let's talk Part A
+Hi! I'm Dobby. I have a big head and two big eyes.
+Hello!
+These are my arms and hands.
+Your arms are long.
+They are short.
+Those are Tobby's legs.
+Yes. We have short legs.
+Look at my feet. They're big!
+Yes. You have two big feet.
+But your body is small.
+Let's talk Part B
+Who's the girl?
+Please guess. She has long hair and big eyes.
+Oh, the girl is tall! Is she Li Shan?
+Yes. She has long legs.
+He has short black hair and a small nose.
+Is he Liu Zhaoyang?
+No!
+Look! He has long arms, long legs and big feet.
+Haha! He's Mr. Zhao.
+Let's chant
+I have two hands. Clap, clap, clap.
+I have two arms. Wave, wave, wave.
+I have two legs. Run, run, run.
+I have two feet. Stomp, stomp, stomp.
+This is my body. It's very healthy.
+Read and act
+Is that a big ball?
+No. It's the moon.
+This is the moon too.
+My arms are short.
+I have long arms.
+I have long legs.
+Is it the moon?
+No, it isn't.
+That is the moon.
+
+[下学期] Unit 3
+
+.单词
+love /lʌv/ 爱；热爱
+family /ˈfæməli/ 家；家庭
+photo /ˈfəʊtəʊ/ 照片；相片
+mother /ˈmʌðə(r)/ 母亲；妈妈
+father /ˈfɑːðə(r)/ 父亲；爸爸
+grandpa /ˈɡrænpɑː/ 爷爷；姥爷
+grandma /ˈɡrænmɑː/ 奶奶；姥姥
+happy /ˈhæpi/ 幸福的；开心的
+sister /ˈsɪstə(r)/ 姐姐；妹妹
+brother /ˈbrʌðə(r)/ 哥哥；弟弟
+his /hɪz/ 他的
+her /hɜː(r)/ 她的
+cute /kjuːt/ 可爱的
+
+.课文
+Unit 3
+Let's talk Part A
+Look at my photo.
+Wow, so nice! Who is she?
+She is my mother. And this is my father.
+Is this boy your brother?
+Yes, he is.
+They are my grandpa and grandma.
+Who are they?
+You have a happy family.
+Yes. I love my family.
+Let's talk Part B
+Hello, Li Shan.
+Yes, she is.
+Hi, Liu Zhaoyang! Is she your mother?
+Wow, she is tall!
+Who's the boy? His eyes are big. Is he your brother?
+No. It's my sister. Her hair is short.
+She's so cute.
+Let's chant
+Family, family, I have a big family.
+Grandpa and grandma.
+Father and mother.
+Brother and sister.
+Family, family, we are a happy family.
+Family, family, I love my family.
+Read and act
+Are you my mom?
+No, I'm not. Your mom has two big eyes and a big mouth.
+Your mom has two big eyes, a big mouth and a white belly.
+No, she isn't.
+Is she my mom?
+I'm not your mom. Your mom has two big eyes, a big mouth, a white belly and four legs.
+Mom! Mom!
+Yes, dear. I'm your mom.
+Are you my mom?
+
+[下学期] Unit 4
+
+.单词
+doctor /ˈdɒktə(r)/ 医生
+cook /kʊk/ 厨师
+busy /ˈbɪzi/ 繁忙的
+driver /ˈdraɪvə(r)/ 司机
+nurse /nɜːs/ 护士
+kind /kaɪnd/ 善良的
+student /ˈstjuːdnt/ 学生
+teacher /ˈtiːtʃə(r)/ 教师
+worker /ˈwɜːkə(r)/ 工人
+cool /kuːl/ 酷的
+
+.课文
+Unit 4
+Let's talk Part A
+Li Shan, what does your father do?
+He is a cook.
+What about your mother?
+She is a doctor. She's busy.
+Su Nan, what do your father and mother do?
+My father is a driver.
+No. She is a nurse. She's kind.
+Is your mother a driver too?
+Let's talk Part B
+She is my sister.
+Who is that girl?
+Is she a worker?
+Yes, she is.
+Wow, cool!
+Is that your father?
+No. He is my brother.
+Is he a student?
+No. He is a teacher.
+Oh, he's tall!
+Let's sing
+I'm at home with my family.
+What does my father do?
+He is a teacher.
+A kind, kind teacher.
+What does my mother do?
+She is a doctor.
+A busy, busy doctor.
+And I want to be a driver.
+A cool, cool driver.
+Read and act
+Is your father a cook?
+Yes, he is. He's cool!
+Who is he?
+I am a farmer too.
+He is my grandpa. He is a farmer.
+Is your mother a doctor?
+No, she isn't. She is a nurse. She's very kind.
+I am a nurse too.
+Oh, no!
+
+[下学期] Unit 5
+
+.单词
+*cookie /ˈkʊki/ 饼干
+like /laɪk/ 喜欢
+cake /keɪk/ 蛋糕
+bread /bred/ 面包
+milk /mɪlk/ 牛奶
+them /ðəm/ 他们；她们；它们（宾格形式）
+juice /dʒuːs/ 果汁
+water /ˈwɔːtə(r)/ 水
+candy /ˈkændi/ 糖果
+ice cream /ˌaɪs ˈkriːm/ 冰激凌
+have /hæv/ 吃
+some /sʌm/ 一些
+
+.课文
+Unit 5
+Let's talk Part A
+I like cakes.
+What do you like?
+What about you, Su Yu?
+I like bread and milk.
+They are nice. I like them.
+Wow, cookies!
+Thank you.
+Here you are!
+Let's talk Part B
+The cookies are nice. Do you like them?
+Yes, I do.
+Have some cookies.
+Thanks!
+Do you like candies?
+No, I don't.
+What about juice?
+No, thanks. I like water.
+Let's chant
+I like milk. I like milk.
+Do you like it, John?
+Oh, I don't know.
+Let me think. Let me think.
+Yes, I do. I like it too!
+I like bread. I like bread.
+Do you like it, John?
+Oh, I don't know.
+Let me think. Let me think.
+Yes, I do. I like it too!
+Read and act
+Wow, so many candies! I like candies very much.
+They are so sweet! One, two, three ... I like them all.
+Oh, no! My teeth!
+Haha!
+
+[下学期] Unit 6
+
+.单词
+does /dʌz/ （do 的第三人称单数形式）
+apple /ˈæpl/ 苹果
+*watermelon /ˈwɔːtəmelən/ 西瓜
+*pear /peə(r)/ 梨
+*strawberry /ˈstrɔːbəri/ 草莓
+orange /ˈɒrɪndʒ/ 橙子
+all /ɔːl/ 所有的
+be good for /biː ɡʊd fɔː(r)/ 对…… 有益
+us /ʌs/ 我们（宾格形式）
+grape /ɡreɪp/ 葡萄
+banana /bəˈnɑːnə/ 香蕉
+doesn't = does not /ˈdʌznt/ （do 的第三人称单数否定形式）
+sure /ʃʊə(r)/ 确信的；有把握的
+
+.课文
+Unit 6
+Let's talk Part A
+I like apples and watermelons. What does my grandma like, Mom?
+She likes pears and strawberries.
+What does my grandpa like?
+He likes oranges and apples.
+Apples? Dad likes apples too. We all like apples.
+Yes. Apples are good for us.
+Let's talk Part B
+Wow, so cute! Does it like bananas?
+Yes, it does.
+Does it like grapes?
+No, it doesn't.
+Does Li Jie like ice cream?
+I'm not sure.
+Do you like ice cream, Li Jie?
+Yes, I do.
+Haha ... We all like ice cream.
+Read and act
+How hungry I am!
+Wow, so many grapes! I like grapes very much. They are sweet!
+Oh, no! I can't get the grapes!
+Those grapes are not sweet. They are sour! I don't like them.
+
+[下学期] Unit 7
+
+.单词
+pet /pet/ 宠物
+cat /kæt/ 猫
+walk /wɔːk/ 行走
+here /hɪə(r)/ 在这里
+run /rʌn/ 跑步
+dog /dɒɡ/ 狗
+jump /dʒʌmp/ 跳；跃
+fish /fɪʃ/ 鱼
+rabbit /ˈræbɪt/ 兔子
+swim /swɪm/ 游泳
+fast /fɑːst/ 快地；快速地
+well /wel/ 好；好地
+*high /haɪ/ 高地
+
+.课文
+Unit 7
+Let's talk Part A
+Mimi, Mimi!
+What color is your cat?
+It's orange and white.
+Does your cat have orange legs?
+No, it doesn't. It has white legs.
+Does it have brown eyes?
+Yes, it does.
+Look! A cat walks here. Is it your cat?
+Yes, it is.
+Meow, meow!
+Let's chant
+Pet, pet, I have a pet dog.
+He is Doggy, a lovely doggy.
+Pet, pet, I have a pet cat.
+She is Kitty, a pretty kitty.
+Pet, pet, I have a pet rabbit.
+He is Bunny, a cute bunny.
+Pet, pet, I love my little pets.
+Let's read
+This is my pet dog.
+It has small eyes and short ears. It runs very fast.
+These are my pet fish.
+They have big eyes. They swim very well.
+Look at my rabbits.
+They have long ears.
+They jump very high.
+Read and act
+Zhang Hua has a pet dog. Its name is Doudou. Look! A rabbit!
+Doudou runs after the rabbit, and the rabbit jumps very high.
+Doudou sees a cat. It has an orange tail. Doudou runs after the cat, and the cat runs very fast.
+Doudou sees a ball. Doudou is so happy. It jumps up and catches the ball. Zhang Hua and Doudou have fun.
+
+[下学期] Unit 8
+
+.单词
+animal /ˈænɪml/ 动物
+friend /frend/ 朋友
+monkey /ˈmʌŋki/ 猴子
+tail /teɪl/ 尾巴
+elephant /ˈelɪfənt/ 大象
+grass /ɡrɑːs/ 草
+go /ɡəʊ/ 去
+zoo /zuː/ 动物园
+lion /ˈlaɪən/ 狮子
+tiger /ˈtaɪɡə(r)/ 老虎
+*bamboo /bæmˈbuː/ 竹子
+meat /miːt/ 肉
+panda /ˈpændə/ 熊猫
+
+.课文
+Unit 8
+Let's talk Part A
+Oh, a monkey! It has long arms and legs.
+And its tail is long too.
+Look at its eyes. They're small.
+Wow, elephants! How big!
+They have long noses and big ears. What do they like?
+They like grass.
+Let's go!
+Really? Animals are cute. Let's go to the zoo.
+Let's talk Part B
+So many bears!
+Do they like fish, Mom?
+Yes, they do.
+Wow, lovely pandas! Do they like grass?
+No, they don't. They like bamboo.
+Look! These are lions. And those are tigers.
+They like meat.
+What do they like?
+Let's chant
+Elephants, pandas in the zoo.
+Tigers and monkeys are there too.
+Big and small, tall and short.
+So many animals in the zoo.
+Stomp like the elephants.
+Walk like the pandas.
+Jump like the monkeys.
+I love animals in the zoo.
+Read and act
+Oh, nice leaves! I'm tall. I can have leaves. I'm great!
+Wow, green grass! I'm short. But I can have grass. I'm great too!
+Every dog has its day. You're both great.
+Let's be friends.
+That's great!

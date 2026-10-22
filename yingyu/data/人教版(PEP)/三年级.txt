@@ -1,0 +1,649 @@
+# ══════════════════════════════════════════════════════════════
+#  人教版(PEP) · 三年级   （上学期 + 下学期）
+# ══════════════════════════════════════════════════════════════
+#  直接用记事本改，保存为 UTF-8；改完切回软件即生效，不需要重启。
+#
+#  [上学期] Unit 1           单元分节：学期 + 单元号
+#  .单词 / .课文 / .表达句    内容块，没内容可以整块不写
+#  team /tiːm/ 队；组         单词行：单词 /音标/ 中文意思
+#  *name /neɪm/ 名字          行首 * = 三会词
+#  Hello! || 你好！            句子行：英文 || 中文
+#
+#  加内容 = 在对应块下面加一行；加单元 = 新起一个 [学期] Unit N 分节。
+#  以 # 开头的是注释，空行会被忽略。
+# ══════════════════════════════════════════════════════════════
+
+[上学期] Unit 1
+
+.单词
+*name /neɪm/ 名字
+*nice /naɪs/ 令人愉快的；友好的
+*ear /ɪə(r)/ 耳朵
+*hand /hænd/ 手
+*eye /aɪ/ 眼睛
+*mouth /maʊθ/ 嘴
+*arm /ɑːm/ 胳膊
+*can /kən, kæn/ 可以
+*share /ʃeə(r)/ 分享
+*smile /smaɪl/ 微笑；笑
+*listen /ˈlɪsn/ 听；倾听
+*help /help/ 帮助
+*say /seɪ/ 说；讲
+*friend /frend/ 朋友
+*good /ɡʊd/ 好的
+
+.课文
+Unit 1
+Let's talk PartA
+Hello! I'm Mike Black.
+Hi! My name is Wu Binbin.
+Nice to meet you.
+Nice to meet you too.
+Listen and do
+Wave your hand. Hello!
+Look into my eyes. Hi!
+Point to your ear. Listen!
+Point to your mouth. Smile!
+Wave your arm. Bye!
+Let's talk PartB
+Oh no!
+It's OK, Chen Jie.
+We can share.
+Thanks, Sarah.
+Hey, Sarah!
+We can share.
+Thank you, Chen Jie.
+Listen and chant
+Am I a good friend? Yes, I am!
+I listen and say "Hi!" I smile too.
+Am I a good friend? Yes, I am!
+I help and share. I play fair too.
+
+.表达句
+Hello! || 你好！
+Good morning! || 早上好！
+How are you? || 你好吗？
+I am fine, thank you. || 我很好，谢谢。
+What's your name? || 你叫什么名字？
+My name is Tom. || 我叫汤姆。
+Thank you! || 谢谢你！
+You're welcome. || 不客气。
+Goodbye! || 再见！
+See you! || 回头见！
+
+[上学期] Unit 2
+
+.单词
+*mum /mʌm/ （口语）妈妈
+*dad /dæd/ （口语）爸爸；爹爹
+*grandma /ˈɡrænmɑː/ 奶奶；姥姥
+*grandpa /ˈɡrænpɑː/ 爷爷；姥爷
+*grandfather /ˈɡrænfɑːðə(r)/ (外) 祖父；爷爷；姥爷；外公
+*grandmother /ˈɡrænmʌðə(r)/ (外) 祖母；奶奶；姥姥；外婆
+*mother /ˈmʌðə(r)/ 母亲；妈妈
+*father /ˈfɑːðə(r)/ 父亲；爸爸
+*me /miː/ 我
+*sister /ˈsɪstə(r)/ 姐；妹
+*family /ˈfæməli/ 家；家庭
+*have /hæv/ 有
+*big /bɪɡ/ 大的
+*cousin /ˈkʌzn/ 堂 (表) 兄弟；堂 (表) 姐妹
+*brother /ˈbrʌðə(r)/ 哥；弟
+*baby /ˈbeɪbi/ 婴儿
+*uncle /ˈʌŋkl/ 伯父；叔父；舅父；姑父；姨父
+*aunt /ɑːnt/ 伯母；婶母；舅母；姑母；姨母
+*small /smɔːl/ 小的
+
+.课文
+Unit 2
+Let's talk PartA
+Mum! Dad! This is my friend, Sarah Miller.
+Hi, Sarah.
+This is my grandma.
+This is my grandpa.
+Nice to meet you.
+Listen and chant A
+This is my mum.
+Hello, hello, hello!
+This is my dad.
+Hi, hi, hi!
+This is my sister.
+How are you?
+This is my grandma.
+Nice to meet you.
+This is my grandpa.
+How do you do?
+Let's talk PartB
+Sarah, you have a big family. Is this your sister?
+No, it's my cousin.
+Is that your brother?
+Yes, it is.
+Listen and chant B
+I have an uncle.
+I have an aunt.
+I have two cousins too.
+I have a brother,
+And a baby sister.
+They can play with me.
+
+[上学期] Unit 3
+
+.单词
+*like /laɪk/ 喜欢
+*dog /dɒɡ/ 狗
+*pet /pet/ 宠物
+*cat /kæt/ 猫
+*fish /fɪʃ/ 鱼；鱼肉
+*bird /bɜːd/ 鸟
+*rabbit /ˈræbɪt/ 兔
+*go /ɡəʊ/ 去；走
+*zoo /zuː/ 动物园
+*fox /fɒks/ 狐狸
+*Miss /mɪs/ （学生称呼）老师；女士
+*panda /ˈpændə/ 大熊猫
+red panda /red/panda 小熊猫
+*cute /kjuːt/ 可爱的
+*monkey /ˈmʌŋki/ 猴子
+*tiger /ˈtaɪɡə(r)/ 老虎
+*elephant /ˈelɪfənt/ 大象
+*lion /ˈlaɪən/ 狮子
+*animal /ˈænɪml/ 动物
+giraffe /dʒəˈrɑːf/ 长颈鹿
+tall /tɔːl/ 高的
+fast /fɑːst/ 快的
+
+.课文
+Unit 3
+Let's talk PartA
+Good morning, Mike!
+Good morning! Come in.
+I like your dog.
+Thanks. Do you have a pet?
+No, I don't.
+Yes, I do. I have a cat.
+Listen and do A
+Run, run, run like a dog.
+Sleep, sleep, sleep like a cat.
+Sing, sing, sing like a bird.
+Hop, hop, hop like a rabbit.
+Swim, swim, swim like a fish.
+Let's talk PartB
+Let's go to the zoo!
+Great! Look! What's this?
+It's a fox.
+Miss White, what's that?
+It's a red panda.
+It's cute!
+Listen and chant B
+What's this? It's an elephant.
+What's this? It's a monkey.
+What's this? It's a panda.
+What's this? It's a lion!
+What's this? It's a tiger!
+Run!
+
+[上学期] Unit 4
+
+.单词
+*apple /ˈæpl/ 苹果
+*banana /bəˈnɑːnə/ 香蕉
+*farm /fɑːm/ 农场
+*air /eə(r)/ 空气
+*orange /ˈɒrɪndʒ/ 橙子；柑橘
+*grape /ɡreɪp/ 葡萄
+*school /skuːl/ 学校
+*garden /ˈɡɑːdn/ 花园
+*need /niːd/ 需要
+*water /ˈwɔːtə(r)/ 给…… 浇水；水
+*flower /ˈflaʊə(r)/ 花；花朵
+*grass /ɡrɑːs/ 草；草地
+*plant /plɑːnt/ 种植；植物
+*new /njuː/ 新的
+*tree /triː/ 树
+*sun /sʌn/ 阳光；太阳
+*give /ɡɪv/ 给
+*them /ðəm, ðem/ 它们；他们；她们
+
+.课文
+Unit 4
+Let's talk PartA
+Mike, do you like apples?
+Yes, I do. And you?
+No, I don't. I like bananas.
+Do you like the farm?
+Yes, Miss White.
+I like the fresh air.
+Listen and chant A
+Grapes are small. Bananas are long.
+Apples and oranges make you strong.
+Trees grow and give us things:
+Fresh air, flowers and leaves in spring.
+Let's talk PartB
+The school gardens need help.
+We can water the flowers.
+We can water the grass.
+Nice. And?
+We can plant new trees.
+Listen and chant B
+Air, water and sun.
+These can all help plants grow.
+Plant, water, cut and turn.
+These are some things I know.
+
+[上学期] Unit 5
+
+.单词
+*colour /ˈkʌlə(r)/ 颜色
+*orange /ˈɒrɪndʒ/ 橙红色；橙红色的
+*green /ɡriːn/ 绿色；绿色的
+*red /red/ 红色；红色的
+*blue /bluː/ 蓝色；蓝色的
+*make /meɪk/ 使出现；做
+*brown /braʊn/ 棕色；棕色的
+*purple /ˈpɜːpl/ 紫色；紫色的
+*bear /beə(r)/ 熊
+*yellow /ˈjeləʊ/ 黄色；黄色的
+*duck /dʌk/ 鸭
+*sea /siː/ 海；海洋
+*some /səm, sʌm/ 一些
+*pink /pɪŋk/ 粉色；粉色的
+*draw /drɔː/ 画
+*white /waɪt/ 白色；白色的
+*black /blæk/ 黑色；黑色的
+
+.课文
+Unit 5
+Let's talk PartA
+What colour is it?
+It's orange.
+What colour is it?
+It's green.
+Look! Red and blue make purple.
+Wow!
+Listen and chant A
+I see colours here and there.
+Purple flowers, green grass and blue sea.
+I see colours here and there.
+A big brown bear. What else can you see?
+Let's talk PartB
+What colours do you like?
+I like red and pink.
+OK. Let's draw some red and pink flowers.
+And the birds?
+Let's draw some purple and brown birds.
+Listen and do B
+Black, black, sit down.
+White, white, turn around.
+Pink and red, touch the ground.
+Orange and red, jump up and down.
+
+[上学期] Unit 6
+
+.单词
+*old /əʊld/ (多少) 岁；年纪；旧的
+*five /faɪv/ 五
+*year /jɪə(r)/ 年纪；年
+*one /wʌn/ 一
+*two /tuː/ 二
+three /θriː/ 三
+four /fɔː(r)/ 四
+ten /ten/ 十
+six /sɪks/ 六
+seven /ˈsevn/ 七
+eight /eɪt/ 八
+*nine /naɪn/ 九
+*o'clock /əˈklɒk/ (表示整点)…… 点钟
+*cut /kʌt/ 切块
+*eat /iːt/ 吃
+*cake /keɪk/ 蛋糕
+
+.课文
+Unit 6
+Let's talk PartA
+Binbin, this is my brother, Sam.
+Hi, Sam! This is my sister, Xinxin.
+Hello, Xinxin!
+Hi, Sam!
+How old are you?
+I'm five years old.
+Me too.
+Listen and chant A
+Jump! Jump! Jump! One, two, three!
+Jump! Jump! Jump! Three, two, one!
+Four and five! Four and five!
+Jump up high! Jump up high!
+Five! Four! Three, two, one!
+Jump! Jump! It's such fun!
+Let's talk PartB
+How many apples?
+Two.
+How many bananas?
+Three. And one orange.
+OK.
+I have ten yuan.
+I have six yuan.
+Great! Let's go to the shop!
+Listen and chant B
+One head, two legs, ten toes.
+I am a child.
+One head, eight eyes, eight legs.
+I am a spider.
+One head, four wings, six legs.
+I am a bee.
+
+[下学期] Unit 1
+
+.单词
+*where /weə(r)/ 在哪里；到哪里
+*from /frɒm/ （表示来源）来自，从……来
+*about /əˈbaʊt/ 关于；大约
+*today /təˈdeɪ/ 今天
+*teacher /ˈtiːtʃə(r)/ 教师
+*student /ˈstjuːdnt/ 学生
+*after /ˈɑːftə(r)/ 在……后面
+*who /huː/ 谁；什么人
+*girl /ɡɜːl/ 女孩
+*neighbour /ˈneɪbə(r)/ 邻居
+*boy /bɔɪ/ 男孩
+*woman /ˈwʊmən/ 成年女子；妇女
+*man /mæn/ 成年男子；男人
+*Mr /ˈmɪstə(r)/ （用于男子的姓氏或姓名前）先生
+*classmate /ˈklɑːsmeɪt/ 同班同学
+*he /hiː/ 他
+*also /ˈɔːlsəʊ/ 也
+*English /ˈɪŋɡlɪʃ/ 英语的；英语
+*she /ʃiː/ 她
+*very /ˈveri/ 很；非常；十分
+*UK /ˌjuː ˈkeɪ/ 英国
+*China /ˈtʃaɪnə/ 中国
+*Canada /ˈkænədə/ 加拿大
+*USA /ˌjuː es ˈeɪ/ 美国
+
+.课文
+Unit 1
+Let's talk PartA
+Hi! I'm Zhang Peng. What's your name?
+My name's Amy Green. I'm new here.
+Me too!
+Where are you from?
+I'm from the UK. What about you?
+I'm from Shandong, China.
+Listen and chant A
+We are friends. We like to play.
+A boy from China, a girl from the UK.
+Students from Canada and the USA.
+We are friends. We like to play.
+Let's talk PartB
+Let me help. After you!
+Thank you.
+You're welcome.
+Who's that girl?
+That's our new neighbour, Amy.
+Listen and do B
+The man is my neighbour.
+Nice to see you.
+The boy is my neighbour.
+Nice to see you too.
+The woman is my neighbour.
+How are you today?
+The girl is my neighbour.
+Let's go out and play!
+
+[下学期] Unit 2
+
+.单词
+*has /hæz/ （have的第三人称单数形式）具有（某种外表、特性或特征）
+*long /lɒŋ/ （长度或距离）长的
+*body /ˈbɒdi/ 身体
+*short /ʃɔːt/ 短的；个子矮的
+*leg /leɡ/ 腿
+*right /raɪt/ （意见或判断）准确，确切，恰当
+*fat /fæt/ 肥的；肥胖的
+*thin /θɪn/ 瘦的
+*slow /sləʊ/ 缓慢的；慢的
+*love /lʌv/ 喜爱；爱
+*tail /teɪl/ 尾；尾巴
+*her /hɜː(r)/ 她；她的
+*gift /ɡɪft/ 礼物
+*picture /ˈpɪktʃə(r)/ 图画；绘画
+*card /kɑːd/ 贺卡；慰问卡；卡片
+*sing /sɪŋ/ 唱（歌）；演唱
+*dance /dɑːns/ 跳舞
+*talk /tɔːk/ 说话；讲话；谈话
+*face /feɪs/ 脸；面孔
+*all /ɔːl/ 所有；全部
+*song /sɒŋ/ 歌；歌曲
+*or /ɔː(r)/ 或；或者；还是
+*so /səʊ/ （表示大小或数量）这么，那么
+*much /mʌtʃ/ 许多；大量
+
+.课文
+Unit 2
+Let's talk PartA
+Your dog is cute. It has a long body and short legs.
+Yes, that's right.
+Do you like dogs?
+Yes, I do. Dogs are friendly. They can help us too.
+Listen and chant A
+I have a cat.
+He's old and fat,
+And he's also very slow.
+His tail is long.
+His legs are short.
+But I love him, don't you know?
+Let's talk PartB
+Bye, Mum. Love you!
+Bye, Dad.
+Do you often say that to your mum?
+Yes, I do. What about you?
+No, I don't. I often make her gifts.
+That's nice.
+Listen and chant B
+Make a card.
+Draw a picture.
+Make your mum smile.
+Sing a song.
+Dance together.
+We all like to smile.
+
+[下学期] Unit 3
+
+.单词
+*eraser /ɪˈreɪzə(r)/ 橡皮
+*find /faɪnd/ 找到；找回
+*ruler /ˈruːlə(r)/ 直尺
+*pen /pen/ 钢笔
+*pencil /ˈpensl/ 铅笔
+*book /bʊk/ 书；书籍
+*bag /bæɡ/ 包；袋
+*paper /ˈpeɪpə(r)/ 纸
+*these /ðiːz/ 这些
+*see /siː/ 看见
+*smell /smel/ 闻（气味）
+*taste /teɪst/ 尝（味道）
+*hear /hɪə(r)/ 听见；听到
+*touch /tʌtʃ/ 触摸；碰
+*nose /nəʊz/ 鼻；鼻子
+*tongue /tʌŋ/ 舌；舌头
+*class /klɑːs/ 课；班级
+*in /ɪn/ class 在课堂上
+*computer /kəmˈpjuːtə(r)/ 计算机；电脑
+*learn /lɜːn/ 学；学习
+
+.课文
+Unit 3
+Let's talk PartA
+Excuse me. Can I use your eraser, please?
+Sure. Here you are.
+Thanks.
+I can't find my ruler. Can I use your ruler, Zhang Peng?
+No problem.
+Listen and do A
+Read your book.
+Write on your paper.
+Write with your pencil.
+Draw a line with your ruler.
+Put the pen in your pencil box.
+Put everything in your bag.
+Let's talk PartB
+What's this?
+It's a pencil.
+What are these?
+They're grapes.
+Quack! Quack! What about this?
+Aha! It's a duck!
+Listen and do B
+See some fruit,
+Touch and feel.
+Taste an apple,
+Hear the sound.
+Take an orange,
+Smell the peel.
+
+[下学期] Unit 4
+
+.单词
+*breakfast /ˈbrekfəst/ 早餐；早饭
+*time /taɪm/ 时间
+*bread /bred/ 面包
+*egg /eɡ/ （作食物用的）蛋；鸡蛋
+*milk /mɪlk/ （牛或羊等的）奶
+*noodle /ˈnuːdl/ （常用复数）面条
+*juice /dʒuːs/ 果汁
+*rice /raɪs/ 大米
+*meat /miːt/ 肉
+*vegetable /ˈvedʒtəbl/ 蔬菜
+*healthy /ˈhelθi/ 健康的
+*plate /pleɪt/ 盘子
+*soup /suːp/ 汤
+*fruit /fruːt/ 水果
+*colourful /ˈkʌləfl/ 五彩缤纷的
+*candy /ˈkændi/ 糖果
+*yummy /ˈjʌmi/ 很好吃的
+
+.课文
+Unit 4
+Let's talk PartA
+Breakfast time!
+OK, Mum. I'd like some bread and eggs, please.
+Here you are. Have some milk too.
+Thanks.
+Listen and do A
+Eat your egg. Eat, eat, eat!
+Drink your milk. Drink, drink, drink!
+Cut your bread. Cut, cut, cut!
+Eat your noodles. Eat, eat, eat!
+Drink your juice. Drink, drink, drink!
+Share the cake. Yummy!
+Let's talk PartB
+Would you like some rice and meat?
+Yes, please.
+Here you are.
+Thanks, Mum.
+Have some vegetables too. They're good.
+Thank you. I love vegetables.
+Listen and chant B
+We are healthy. What do we need?
+Water, soup, milk and juice.
+We are healthy. What do we need?
+Vegetables, rice, meat and fruit.
+
+[下学期] Unit 5
+
+.单词
+*boat /bəʊt/ 小船；舟
+*cool /kuːl/ （因时髦、漂亮且与众不同而）酷的，绝妙的
+*keep /kiːp/ 保有；留着
+*at /æt/ 在（某处）
+*home /həʊm/ 家；住所
+*ball /bɔːl/ 球
+*doll /dɒl/ 玩偶；玩具娃娃
+*car /kɑː(r)/ 小汽车；轿车
+*on /ɒn/ （覆盖、附着）在……上
+*shelf /ʃelf/ （复数shelves /ʃelvz/）架子
+*in /ɪn/ 在……内；在……中
+*box /bɒks/ 盒子
+*cap /kæp/ 帽子
+*map /mæp/ 地图
+*under /ˈʌndə(r)/ 在（或到、通过）……下面
+*still /stɪl/ 还是；仍然
+*put /pʊt/ 放；安置
+
+.课文
+Unit 5
+Let's talk PartA
+Wow! So many toys!
+That's right. They're my old toys. Do you have old things?
+Yes, I do. I have some old books.
+This boat is cool.
+You can keep it.
+Thanks!
+Listen and chant A
+I have a ball.
+I have a doll.
+I have a car.
+I have a boat.
+I have many toys.
+They are all around.
+Let's talk PartB
+Mum, where is my animal book?
+Is it on the shelf?
+No, it isn't.
+Aha! It's in the box. And this old cap too.
+Listen and do B
+Up, up, up. Put your old map on the wall.
+Down, down, down. Put your books under the ball.
+Up, up, up. Put your old dolls on the shelf.
+Down, down, down. Put your boat under the bed.
+Up, up, up. Put your old things in a box.
+Down, down, down. Sit down and talk.
+
+[下学期] Unit 6
+
+.单词
+*fifteen /ˌfɪfˈtiːn/ 十五
+*twelve /twelv/ 十二
+*fourteen /ˌfɔːˈtiːn/ 十四
+*thirteen /ˌθɜːˈtiːn/ 十三
+*eleven /ɪˈlevn/ 十一
+*twenty /ˈtwenti/ 二十
+*seventeen /ˌsevnˈtiːn/ 十七
+*sixteen /ˌsɪksˈtiːn/ 十六
+*eighteen /ˌeɪˈtiːn/ 十八
+*nineteen /ˌnaɪnˈtiːn/ 十九
+*piggy bank /ˈpɪɡi bæŋk/ 猪形储钱罐
+*pay /peɪ/ 付费
+*back /bæk/ 回到原处
+
+.课文
+Unit 6
+Let's talk PartA
+How many books do we have?
+We have fifteen books.
+How many pencils do we have?
+Twelve.
+How many boxes do we need?
+We need three boxes.
+Listen and chant A
+Five and six makes eleven.
+Add one, it's twelve.
+Six and seven makes thirteen.
+Add one, it's fourteen.
+Three fives are fifteen.
+We can count to fifteen!
+Let's talk PartB
+How much is this bag?
+It's twenty yuan.
+How much is this book?
+Six yuan, or three for seventeen yuan.
+How about three for sixteen yuan?
+OK.
+Listen and chant B
+One minute, tick.
+Nineteen minutes, tick.
+Two minutes, tock.
+Twenty minutes, tock.
+Sixteen, seventeen, eighteen.
+Time goes slowly,
+Don't watch the clock.
+When you watch the clock!

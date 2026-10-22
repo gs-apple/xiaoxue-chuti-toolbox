@@ -1,0 +1,377 @@
+# ══════════════════════════════════════════════════════════════
+#  人教版(PEP) · 五年级   （上学期 + 下学期）
+# ══════════════════════════════════════════════════════════════
+#  直接用记事本改，保存为 UTF-8；改完切回软件即生效，不需要重启。
+#
+#  [上学期] Unit 1           单元分节：学期 + 单元号
+#  .单词 / .课文 / .表达句    内容块，没内容可以整块不写
+#  team /tiːm/ 队；组         单词行：单词 /音标/ 中文意思
+#  *name /neɪm/ 名字          行首 * = 三会词
+#  Hello! || 你好！            句子行：英文 || 中文
+#
+#  加内容 = 在对应块下面加一行；加单元 = 新起一个 [学期] Unit N 分节。
+#  以 # 开头的是注释，空行会被忽略。
+# ══════════════════════════════════════════════════════════════
+
+[上学期] Unit 1
+
+.单词
+team /tiːm/ （游戏或运动的）队；（一起工作的）组，班
+player /ˈpleɪə(r)/ 运动员；参赛选手
+him /hɪm/ 他
+lovely /ˈlʌvli/ 美丽的；优美的
+clever /ˈklevə(r)/ 聪明的；聪颖的
+young /jʌŋ/ 幼小的；年轻的
+hard-working /ˌhɑːd ˈwɜːkɪŋ/ 工作努力的；辛勤的
+science /ˈsaɪəns/ 科学；自然科学
+robot /ˈrəʊbɒt/ 机器人
+jump /dʒʌmp/ 跳；跃
+rope /rəʊp/ 绳；粗绳
+piano /piˈænəʊ/ 钢琴
+chess /tʃes/ 国际象棋
+front /frʌnt/ 前部
+easy /ˈiːzi/ 容易的；轻易的
+star /stɑː(r)/ 歌唱（或表演）明星
+wonderful /ˈwʌndəfl/ 精彩的；绝妙的
+Australia /ɒˈstreɪliə/ 澳大利亚
+
+.课文
+Unit 1
+Let's talk PartA
+Miss White: Hi, class. You'll have a new classmate. He's from Australia. His name is Oliver.
+Mike: What's he like?
+Miss White: He's tall and strong.
+Zhang peng: Is he good at football?
+Miss White: Yes, I think he is. He can run very fast.
+Zhang Peng: Great! Our football team needs more players.
+Miss White: Oliver can't speak Chinese. Would you like to help him, Zhang Peng?
+Zhang Peng: Sure!
+Listen and write T (True) or F (False).
+Chen Jie and Mike are in the classroom.
+1. They are talking about their English teacher. (    )
+2. Ms Wang is very kind. (    )
+Let's talk PartB
+Binbin: The Science and Art Festival is in two weeks.
+Sarah: Yes. What can you do for the festival?
+Binbin: I can make a robot.
+Oliver: Oh! I like making robots too. We can work together.
+Binbin: Great! Can you make robots, Sarah?
+Sarah: No, I can't.
+Oliver: What can you do?
+Sarah: I can dance.
+Oliver: That's great!
+Read and write
+Join us for the school talent show!
+Everyone can draw pictures. But can you make your pictures come to life? Mr Zhang will draw a lovely rabbit, and it will come to life in front of your eyes!
+Jumping rope is easy and fun. Meet the jumping stars: John and Amy. They are wonderful jumpers.
+Binbin loves music. He can play the piano and the pipa! Come and listen!
+Robin is a clever robot. He is good at playing Chinese chess. Can you play Chinese chess? Come and play with him!
+
+[上学期] Unit 2
+
+.单词
+sad /sæd/ 悲哀的；难过的
+matter /ˈmætə(r)/ 事情；问题
+project /ˈprɒdʒekt/ 项目；方案
+centre /ˈsentə(r)/ 中心
+agree /əˈɡriː/ 同意；赞成
+finish /ˈfɪnɪʃ/ 完成；做好
+Monday /ˈmʌndeɪ/ 星期一
+worried /ˈwʌrid/ 担心的；担忧的
+both /bəʊθ/ 两者
+excited /ɪkˈsaɪtɪd/ 激动的；兴奋的
+wrong /rɒŋ/ 错误的
+angry /ˈæŋɡri/ 愤怒的；生气的
+afraid /əˈfreɪd/ 担心；害怕
+parent /ˈpeərənt/ 父亲；母亲
+ask /ɑːsk/ 问；询问
+move /muːv/ 搬家；移动
+yours /jɔːz/ 您的（用于书信结尾的签名前）
+
+.课文
+Unit 2
+Let's talk PartA
+John is talking with his mum. Listen and write T (True) or F (False).
+1. They are talking about John's school project. (    )
+2. John wants to go to the old people's home. (    )
+Chen Jie: Hi, Mike. You look sad. What's the matter?
+Mike: It's about our school project. John wants to go to the children's centre, but I want to clean up the park.
+Chen Jie: I see. So you don't agree with each other?
+Mike: That's right. And we have to finish our project by Monday. I'm so worried!
+Chen Jie: Why not do both? I can help. We can work together.
+Mike: That's a good idea!
+Let's talk PartB
+Miss White: What's the matter, John? You look worried.
+John: It's about our project. Mike and I want to do different things.
+Miss White: I see. It's important to listen to each other.
+John: Yes, Miss White. I need to talk to Mike. But I'm afraid he's angry with me.
+Miss White: Look, here he comes. You can talk to him now.
+Mike: John, I'm sorry. Let's do both projects! Chen Jie can work with us.
+John: That's great!
+Binbin sees Mike. Listen and write T (True) or F (False).
+1. Mike wants to clean up the park. (    )
+2. Mike and Binbin have different ideas. (    )
+Read and write
+Dear Mike,
+I am happy at school. I have many friends. I play with them in the playground, and we share ideas in class. We laugh and study together all day. I enjoy school.
+But my family just moved to a new home. I have no friends there. I feel sad. I don't want to tell my parents. I don't want them to feel bad.
+What can I do? Can you help me?
+Yours, Jim
+
+[上学期] Unit 3
+
+.单词
+Wednesday /ˈwenzdeɪ/ 星期三
+subject /ˈsʌbdʒɪkt/ 科目；学科
+Monday /ˈmʌndeɪ/ 星期一
+Tuesday /ˈtjuːzdeɪ/ 星期二
+Friday /ˈfraɪdeɪ/ 星期五
+because /bɪˈkɒz/ 因为
+Thursday /ˈθɜːzdeɪ/ 星期四
+start /stɑːt/ 开始
+usually /ˈjuːʒuəli/ 通常地；经常地
+weekend /ˌwiːkˈend/ 周末
+sometimes /ˈsʌmtaɪmz/ 有时；间或
+Saturday /ˈsætədeɪ/ 星期六
+Sunday /ˈsʌndeɪ/ 星期日
+lesson /ˈlesn/ 课；一节课
+evening /ˈiːvnɪŋ/ 晚上；傍晚
+answer /ˈɑːnsə(r)/ 答复；回答
+ping-pong /ˈpɪŋ pɒŋ/ 乒乓球
+night /naɪt/ 夜；夜晚
+visit /ˈvɪzɪt/ 看望；拜访；参观
+grandparent /ˈɡrænpeərənt/ 祖父；祖母；外祖父；外祖母
+
+.课文
+Unit 3
+Let's talk PartA
+It is Monday night. John is talking with his grandpa. Listen and tick the classes you hear.
+John: I need to get ready for school. Let me think. Tomorrow is Tuesday.
+Grandpa: What do you have on Tuesdays?
+John: I have maths, Chinese, English and art.
+Grandpa: Do you like art?
+John: Yes, but I can't draw well.
+Grandpa: Well, practice makes perfect. You'll get better soon.
+Grandpa: What's your favourite day at school, John?
+John: Wednesday.
+Grandpa: What do you have on Wednesdays?
+John: I have Chinese, maths, music and PE.
+Grandpa: Maths is not easy.
+John: No, but I really like my maths teacher!
+Grandpa: That's good.
+Grandpa: Is music your favourite subject?
+John: Yes. I really like singing. And I like PE too.
+Grandpa: Great! Wednesday is your favourite day.
+Grandpa: But I like Tuesdays and Fridays.
+John: Why, Grandpa?
+Grandpa: Because I have my taijiquan class!
+Let's talk PartB
+Miss White: What do you usually do at the weekend, children?
+Zhang Peng: I often play football. Sometimes I play Chinese chess with my father.
+Miss White: That's nice.
+Sarah: My mother works at the weekend, so I often cook lunch for my family.
+Miss White: Good girl! Does your mother work on Saturdays and Sundays?
+Sarah: Yes, she does.
+Chen Jie: I do my homework on Saturdays. And I usually have pipa lessons on Sundays.
+Miss White: Great! Have a nice weekend, everyone!
+Miss White and Mr Li are talking. Listen and fill in the blanks.
+1. They are talking about ________ activities.
+2. ________ often cooks. ________ usually goes to the park with his dog.
+Read and write
+Miss White asks the students what they do after school. Here are the answers from Li Xia and Eric.
+Dear Miss White,
+I play ping-pong with Binbin on Mondays and Thursdays. On Tuesdays, I cook dinner because my mother works on Tuesday nights. On Wednesdays and Fridays, I usually read books. At the weekend, I often play with my friends in the park or visit my grandparents. I am busy, but I always do my homework on time!
+Li Xia
+Dear Miss White,
+On Monday, Tuesday and Friday evenings, I play football. I often watch TV on Wednesdays and Thursdays. On Saturdays and Sundays, I play basketball and go running. I am so busy. I don't have much time to study.
+Eric
+
+[上学期] Unit 4
+
+.单词
+stay /steɪ/ 待；保持；继续是
+should /ʃʊd/ （提出或征询建议）该，可以
+flu /fluː/ 流行性感冒；流感
+else /els/ 其他的；别的
+exercise /ˈeksəsaɪz/ 锻炼；训练；操练
+enough /ɪˈnʌf/ 足够的；充足的；充分的
+if /ɪf/ 如果；假若；倘若
+habit /ˈhæbɪt/ 习惯
+show /ʃəʊ/ （电视或广播）节目
+phone /fəʊn/ 电话；电话机
+then /ðen/ 那么；因此；既然；如此
+rest /rest/ 休息；放松
+take care of  爱护；照顾
+check /tʃek/ 查看；查明
+less /les/ （与不可数名词连用）较少的；更少的
+brush /brʌʃ/ （用刷子）刷净，刷亮，刷平顺
+tooth /tuːθ/ （复数teeth）牙；齿
+twice /twaɪs/ 两次；两遍
+hour /ˈaʊə(r)/ 小时
+free /friː/ 没有安排活动的；空闲的
+
+.课文
+Unit 4
+Let's talk PartA
+Mike's mother and Miss White are talking on the phone. Listen and write T (True) or F (False).
+1. Mike has a cold. (    )
+2. Mike should see a doctor. (    )
+Miss White: Mike has a cold today, children. He has to stay at home.
+Binbin: Oh no! It's flu season now.
+Miss White: That's right. How can we all stay healthy?
+Amy: We should eat healthy food.
+Miss White: Good. And what else?
+Zhang Peng: We should exercise every day.
+Miss White: Yes, but please drink enough water.
+Chen Jie: We should also get enough sleep, Miss White.
+Miss White: Right. And if you don't feel well, you should see a doctor.
+Let's talk PartB
+Sarah and Sam are talking at home. Listen and circle.
+1. Sarah has to do her homework / clean the house.
+2. Sam can/can't play computer games.
+Sam: Can I watch a TV show now, please?
+Sarah: No, I'm afraid not.
+Sam: Can I play on Mum's phone?
+Sarah: No. You shouldn't play on a phone so often.
+Sam: What should I do then?
+Sarah: You should rest your eyes. Let's take a walk.
+Sam: That's no fun.
+Sarah: OK. Let's play in the garden then. It's a nice day.
+Sam: Great!
+Read and write
+Do you have healthy habits?  Name: David
+1. What do you usually eat?
+I like hamburgers and ice cream. I eat them every day. I don't often eat green vegetables.
+2. Do you usually do sports?
+Yes. I have PE every day from Monday to Friday, but I don't do sports at the weekend.
+3. How many hours do you sleep every day?
+I usually sleep about eight hours a day, but sometimes I only sleep six hours.
+4. How do you usually spend your free time?
+I like watching TV, but I don't spend too much time on it.
+5. Do you often play with your friends?
+Yes. I play with my friends every day. We often play football together.
+
+[上学期] Unit 5
+
+.单词
+hungry /ˈhʌŋɡri/ 感到饿的
+beef /biːf/ 牛肉
+ice cream /ˌaɪs ˈkriːm/ （一份）冰激凌
+little /ˈlɪtl/ 少许；一点
+dumpling /ˈdʌmplɪŋ/ 饺子；汤圆
+tea /tiː/ 茶叶；茶；茶水
+hamburger /ˈhæmbɜːɡə(r)/ 汉堡包；汉堡牛肉饼
+Mrs /ˈmɪsɪz/ （用于女子的姓氏或姓名前）太太，夫人
+coconut /ˈkəʊkənʌt/ 椰子
+interesting /ˈɪntrəstɪŋ/ 有趣的；有吸引力的
+seed /siːd/ 种子；籽
+pull /pʊl/ 拔出；抽出
+pull up  拔出
+stem /stem/ （花草的）茎；（花或叶的）梗，柄
+root /ruːt/ 根；根茎
+lotus /ˈləʊtəs/ 莲属植物
+lake /leɪk/ 湖；湖泊
+world /wɜːld/ 世界；地球；天下
+round /raʊnd/ 圆形的；环形的；球形的
+different /ˈdɪfrənt/ 不同的；有区别的；有差异的
+way /weɪ/ 方法；手段；途径；方式
+
+.课文
+Unit 5
+Let's talk PartA
+Oliver is at home now. Listen and tick.
+Oliver: Mum, I'm hungry.
+Mum: What would you like to eat?
+Oliver: I'd like beef and rice.
+Mum: No problem. Would you like some chicken soup too?
+Oliver: Yes, please.
+Mum: You should also have some salad. Vegetables are good for you.
+Oliver: OK. Can I have some ice cream, please?
+Mum: Yes, but just a little.
+Oliver: OK. Thanks, Mum.
+Let's talk PartB
+Mrs Green is talking with the children. Listen and choose.
+1. What are they talking about? A. Drinks. B. Food. C. People.
+2. Which drink comes from Yunnan? A. Water. B. Tea. C. Apple juice.
+Mrs Green: What's your favourite fruit, Binbin?
+Binbin: Coconuts are my favourite.
+Mrs Green: Why do you like coconuts?
+Binbin: Because coconut water is nice. And it's healthy.
+Mrs Green: We can also cook delicious meals with coconut.
+Binbin: Yes! And some people make houses with coconut tree leaves.
+Mrs Green: That's interesting. Where does your coconut come from?
+Binbin: Hainan! There are many coconut trees there.
+Read and write
+The lotus plant
+Lotus flowers are very beautiful. They have many colours. Lotus plants grow in lakes around the world. It is also a great plant to eat.
+Lotus seeds are small and round. We can cook and eat them in different ways.
+We eat lotus roots. The big brown and yellow roots are delicious. There are many ways to cook them.
+Lotus leaves are big, round and green. We can eat the young leaves. We can also cook rice in the leaves.
+
+[上学期] Unit 6
+
+.单词
+river /ˈrɪvə(r)/ 河；江
+nature /ˈneɪtʃə(r)/ 自然界；大自然
+waterfall /ˈwɔːtəfɔːl/ 瀑布
+forest /ˈfɒrɪst/ 森林；林区
+famous /ˈfeɪməs/ 著名的；出名的
+mountain /ˈmaʊntən/ 高山；山岳
+wind /wɪnd/ 风；气流
+trip /trɪp/ （尤指短程往返的）旅行，旅游，出行
+dangerous /ˈdeɪndʒərəs/ 有危险的；不安全的
+heavy /ˈhevi/ 程度大的；严重的
+hotel /həʊˈtel/ 旅馆；旅社
+close /kləʊz/ 关；关闭；闭上
+umbrella /ʌmˈbrelə/ 伞；雨伞
+raincoat /ˈreɪnkəʊt/ 雨衣
+worry /ˈwʌri/ 担心；担忧；发愁
+fine /faɪn/ 晴朗的
+fog /fɒɡ/ 雾
+flood /flʌd/ 洪水；水灾
+fire /ˈfaɪə(r)/ 火；火灾
+know /nəʊ/ 知道；了解
+before /bɪˈfɔː(r)/ 在……之前
+go hiking /ɡəʊ ˈhaɪkɪŋ/ 徒步旅行
+bring /brɪŋ/ 带……到某处；带来；取来
+
+.课文
+Unit 6
+Let's talk PartA
+Mike's family are in a nature park. They are talking with Mr Liu, the tour guide. Listen and write T (True) or F (False).
+1. It is a cloudy day. (    )
+2. There are many animals in the nature park. (    )
+Mike's dad: Wow! That lake is really lovely!
+Mr Liu: Yes. There are also many rivers in the nature park.
+Mike's dad: Is there a waterfall in the forest?
+Mr Liu: Yes, there is. You'll see a beautiful one today!
+Mike: Great! Are there any famous mountains in the nature park?
+Mr Liu: Yes, there are. We'll visit one tomorrow. There are many flowers too. And there are rabbits!
+Let's talk PartB
+Mike and his dad are talking about the weather. Listen and circle.
+1. Today's weather is good/bad.
+2. There will be rain/snow this afternoon.
+Mr Liu: I'm sorry. The wind is very strong outside. We can't go on our trip this morning.
+Mike's mum: I agree. Strong winds are often dangerous.
+Mike's dad: There will be heavy rain in the afternoon too. Mike, stay in the hotel with Mum and close the windows. I'll go to buy some umbrellas and raincoats.
+Mike's mum: There is a small shop in the hotel. You can buy them there.
+Mike's dad: OK.
+Mr Liu: Please don't worry! It'll be a fine day tomorrow.
+Read and write
+Things you should know before mountain hiking
+Hiking in the mountains can be a lot of fun, but there are some things you should know:/nBe careful of bad weather. Don't go hiking in bad weather! In summer there is heavy rain and in winter there is heavy snow.
+Bring enough water. In the mountains there is often little clean water, so bring enough water with you.
+Wear good hiking shoes and the right clothes. It is very important to wear the right shoes. It is often windy in the mountains too, so bring a jacket with you.
+Tell people about your trip. Tell your parents and friends before you go. They need to know where you are.
+
+[下学期] Unit 1
+
+[下学期] Unit 2
+
+[下学期] Unit 3
+
+[下学期] Unit 4
+
+[下学期] Unit 5
+
+[下学期] Unit 6

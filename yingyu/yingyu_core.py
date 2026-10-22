@@ -7,9 +7,11 @@ import random
 from constants import BASE_DIR
 
 # ── 数据层 ───────────────────────────────────────────────────
-# 数据放在单个纯文本文件 yingyu/data/yingyu_data.txt（随程序目录分发，客户开箱即用），
-# 格式是「分节 + 行式」，记事本可直接编辑：
-#   [版本] 年级 学期 Unit N      ← 单元分节
+# 数据按「版本 / 年级」分成纯文本文件（随程序目录分发，客户开箱即用）：
+#   yingyu/data/人教版PEP/四年级.txt      ← 一个文件 = 一个版本的一个年级，
+#                                            里面按学期分节，含上学期 + 下学期
+# 单个文件内的格式是「分节 + 行式」，记事本可直接编辑：
+#   [上学期] Unit 1              ← 单元分节
 #   .单词 / .课文 / .表达句       ← 内容块
 #   词行：  单词 /音标/ 中文意思
 #   句行：  英文 || 中文
@@ -27,7 +29,7 @@ import os as _os
 UNIT_NAMES = ["Unit 1", "Unit 2", "Unit 3", "Unit 4", "Unit 5", "Unit 6", "全部单元"]
 
 def _reload():
-    """从数据文件重新读取（yingyu/data/yingyu_data.txt），返回最新结构（带缓存）。
+    """从数据文件重新读取（yingyu/data/<版本>/<年级>.txt），返回最新结构。
 
     结构：{版本: {年级: {学期: {"Unit N": {"单词": [行...], "课文": [...], "表达句": [...]}}}}}
     """
@@ -420,28 +422,32 @@ def get_phonetic_items():
 def add_version(name):
     """新增版本：建一个只含占位单元的版本，原子写回数据文件。
 
-    占位单元会在文件里留下一行分节标题，用户照着补内容即可。
+    会在 yingyu/data/<版本>/ 下建好各年级文件（三年级先建），占位单元在文件里
+    留下一行分节标题，用户照着补内容即可。
     """
     name = (name or "").strip()
     if not name:
         return False, "版本名不能为空。"
     if "[" in name or "]" in name:
         return False, "版本名里不能包含 [ 或 ]（会与分节标题冲突）。"
+    if any(c in name for c in '\\/:*?"<>|'):
+        return False, '版本名里不能包含 \\ / : * ? " < > | （要用作文件夹名）。'
     data = _get_data()
     if name in data:
         return False, f"版本「{name}」已存在，请勿重复添加。"
     data[name] = {"三年级": {"上学期": {"Unit 1": _store.empty_unit()}}}
     try:
-        path = _store.save(data)
+        paths = _store.save(data)
     except Exception as e:
         return False, f"写回数据文件失败：{e}"
+    path = paths[0] if paths else _store.data_file(name, "三年级")
     return True, (
-        f"已新增版本「{name}」。\n"
-        f"请打开数据文件，找到这一节补充内容：\n"
-        f"    [{name}] 三年级 上学期 Unit 1\n\n"
+        f"已新增版本「{name}」，数据文件已建好：\n{path}\n\n"
+        f"打开它，找到这一节补充内容：\n"
+        f"    [上学期] Unit 1\n\n"
         f"    .单词\n    team /tiːm/ 队；组\n\n"
         f"    .课文\n    Hello! || 你好！\n\n"
-        f"数据文件：{path}"
+        f"其它年级（四年级~六年级）在同一个文件夹里，需要时新建同名 txt 即可。"
     )
 
 def add_entry(version, grade, semester, unit_index, entry_type, **fields):

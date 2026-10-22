@@ -1,0 +1,818 @@
+# ══════════════════════════════════════════════════════════════
+#  陕旅版 · 五年级   （上学期 + 下学期）
+# ══════════════════════════════════════════════════════════════
+#  直接用记事本改，保存为 UTF-8；改完切回软件即生效，不需要重启。
+#
+#  [上学期] Unit 1           单元分节：学期 + 单元号
+#  .单词 / .课文 / .表达句    内容块，没内容可以整块不写
+#  team /tiːm/ 队；组         单词行：单词 /音标/ 中文意思
+#  *name /neɪm/ 名字          行首 * = 三会词
+#  Hello! || 你好！            句子行：英文 || 中文
+#
+#  加内容 = 在对应块下面加一行；加单元 = 新起一个 [学期] Unit N 分节。
+#  以 # 开头的是注释，空行会被忽略。
+# ══════════════════════════════════════════════════════════════
+
+[上学期] Unit 1
+
+.单词
+Mid-Autumn Festival /ˌmɪdˈɔːtəm ˈfestɪvl/ 中秋节
+*festival /ˈfestɪvl/ 节日
+again /əˈɡen/ 再次
+lesson /ˈlesn/ 课程
+will /wɪl/ 将要
+*term /tɜːm/ 学期
+labor /ˈleɪbə(r)/ 劳动
+*education /ˌedʒuˈkeɪʃn/ 教育
+labor education /ˈleɪbə(r) ˌedʒuˈkeɪʃn/ 劳动教育
+learn /lɜːn/ 学习
+make /meɪk/ 做；组成
+tea /tiː/ 茶
+mooncake /ˈmuːnkeɪk/ 月饼
+*sound /saʊnd/ 听起来
+moon /muːn/ 月亮
+September /sepˈtembə(r)/ 九月
+October /ɒkˈtəʊbə(r)/ 十月
+November /nəʊˈvembə(r)/ 十一月
+*enjoy /ɪnˈdʒɔɪ/ 欣赏；喜爱
+enjoy the moon /ɪnˈdʒɔɪ ðə muːn/ 赏月
+year /jɪə(r)/ 年
+*each /iːtʃ/ 每个；各个
+month /mʌnθ/ 月份
+middle /ˈmɪdl/ 中间
+in the middle of /ɪn ðə ˈmɪdl ɒv/ 在……的中间
+Chinese /ˌtʃaɪˈniːz/ 中国的；中国人
+people /ˈpiːpl/ 人；人们
+*important /ɪmˈpɔːtnt/ 重要的
+get together /ɡet təˈɡeðə(r)/ 聚集；相聚
+food /fuːd/ 食物
+story /ˈstɔːri/ 故事
+*full /fʊl/ 圆的；满的
+
+.课文
+Unit 1
+Part A
+Let's talk
+Get up, Colin!
+Get up!
+What time is it, Mom?
+It's seven.
+Oh, I see.
+May I come in?
+Come in, please.
+Look at the clock on the wall.
+It's eight twenty, Colin.
+You are late.
+I'm sorry.
+That's all right.
+Sit down, please.
+Thank you.
+Part B
+Let's learn more
+You are late again, Colin.
+Look!
+It's 8:30.
+I'm sorry, Miss White.
+What time do you get up?
+I get up at 8:05.
+What time do you go to bed, then?
+I go to bed at 11:15.
+Don't play too many computer games and go to bed early.
+OK.
+Work in pairs
+start
+finish
+What time is it?
+It's ten fifteen.
+Ask and fill in the form
+What time do you ...?
+I ...
+What time does your grandma ...?
+She ...
+Me
+Grandma
+Grandpa
+Father
+Mother
+Get up
+Go to work / school
+Do exercise
+Go to bed
+
+[上学期] Unit 2
+
+.单词
+birthday /ˈbɜːθdeɪ/ 生日
+wall /wɔːl/ 墙
+July /dʒuˈlaɪ/ 七月
+April /ˈeɪprəl/ 四月
+March /mɑːtʃ/ 三月
+December /dɪˈsembə(r)/ 十二月
+August /ˈɔːɡəst/ 八月
+January /ˈdʒænjuəri/ 一月
+February /ˈfebruəri/ 二月
+May /meɪ/ 五月
+candle /ˈkændl/ 蜡烛
+card /kɑːd/ 卡片
+young /jʌŋ/ 年轻的
+old /əʊld/ （多少）岁；年老的
+how old /haʊ əʊld/ 多大；几岁
+give /ɡɪv/ 送给；赠送
+make a card /meɪk ə kɑːd/ 做卡片
+buy /baɪ/ 买
+
+.课文
+Unit 2
+Part A
+Let's talk
+Can I help you, Grandma?
+Sure.
+Can you sweep the floor, dear?
+Yes, of course.
+Thank you, dear.
+What can I do for you, Grandpa?
+Can you water the flowers, please?
+OK.
+Good girl!
+You are helpful.
+Part B
+Let's learn more
+What can you do at home, Shanshan?
+I can make the bed.
+Can you do the dishes?
+Yes.
+I often help my mother do the dishes.
+Can you help me cook the meal?
+Let me try.
+Great!
+You are very helpful.
+
+[上学期] Unit 3
+
+.单词
+tidy /ˈtaɪdi/ 整洁的
+*pack /pæk/ 收拾（行李）；装箱
+clothes /kləʊðz/ 衣服
+pack clothes /pæk kləʊðz/ 整理衣物
+sunglasses /ˈsʌnɡlɑːsɪz/ 太阳镜
+whose /huːz/ 谁的
+raincoat /ˈreɪnkəʊt/ 雨衣
+*mine /maɪn/ 我的
+dress /dres/ 连衣裙
+shorts /ʃɔːts/ 短裤
+skirt /skɜːt/ 短裙
+shirt /ʃɜːt/ 衬衫（尤指男士衬衫）
+clean /kliːn/ 清扫；清洁
+every /ˈevri/ 每；每隔
+so /səʊ/ 因此；所以
+floor /flɔː(r)/ 地面；地板
+their /ðeə(r)/ 他们的；她们的；它们的
+always /ˈɔːlweɪz/ 总是；一直
+say /seɪ/ 说
+
+.课文
+Unit 3
+Part A
+Let's talk
+What's your favorite food?
+My favorite food is hamburgers.
+In the USA, we often eat hamburgers.
+What about you?
+In China, we often eat rice, noodles, dumplings, ...
+I like dumplings best.
+Oh, dumplings!
+They're delicious.
+I like Chinese food, too.
+Part B
+Let's learn more
+It's four thirty on Sunday.
+My family are having our afternoon tea.
+Mom is drinking coffee.
+That is her favorite drink.
+Dad is drinking tea.
+He loves it very much.
+My grandpa is reading.
+He reads every day.
+My brother loves chocolate.
+That's his favorite.
+What do I like?
+Oh, I like cookies best!
+Read again and answer the question
+What are their favorite things?
+Dad: tea
+Mom: coffee
+Grandpa: read
+Brother: chocolate
+Kevin: cookies
+Do a survey and report
+What's your favorite food?
+My favorite food is ...
+I like ... best.
+I love ... very much.
+...'s favorite ... is ...
+Read and discuss
+Where Are His Hamburgers?
+This is Mr.Black.
+He is in the USA.
+He has a small shop.
+There is much nice food in his shop.
+The hamburgers there are fresh.
+Look!
+Here are the cakes.
+They look very nice, too.
+A woman wants to buy some hamburgers.
+But where are they?
+
+[上学期] Unit 4
+
+.单词
+feel /fiːl/ 感觉；感到
+sad /sæd/ 悲伤的；难过的
+why /waɪ/ 为什么
+basketball /ˈbɑːskɪtbɔːl/ 篮球
+play basketball /pleɪ ˈbɑːskɪtbɔːl/ 打篮球
+rain /reɪn/ 下雨
+hard /hɑːd/ 用力地；猛烈地
+be /biː/ 是
+idea /aɪˈdɪə/ 想法；主意
+*glad /ɡlæd/ 高兴的；乐意的
+*god /ɡɒd/ 上帝
+dirty /ˈdɜːti/ 脏的
+angry /ˈæŋɡri/ 生气的；愤怒的
+right away /raɪt əˈweɪ/ 立刻；马上
+*match /mætʃ/ 比赛
+tired /ˈtaɪəd/ 疲惫的；劳累的
+cry /kraɪ/ 哭
+*matter /ˈmætə(r)/ 重要；要紧；有关系
+It doesn't matter. /ɪt ˈdʌznt ˈmætə(r)/ 没关系。
+*better /ˈbetə(r)/ 更好的
+next /nekst/ 紧接着的；下次的
+time /taɪm/ 次；回
+come on /kʌm ɒn/ 加油；快点
+catch /kætʃ/ 接住
+win /wɪn/ 赢得；获得
+game /ɡeɪm/ 比赛
+win the game /wɪn ðə ɡeɪm/ 赢得比赛
+excited /ɪkˈsaɪtɪd/ 兴奋的；激动的
+
+.课文
+Unit 4
+Part A
+Let's talk
+Colin and Liu Zhaoyang are at table.
+They are having dinner.
+Use the fork with your left hand and use the knife with your right hand.
+Oh, I see.
+Thank you.
+They are having noodles for lunch now.
+Oh, no!
+Not like that.
+Use the chopsticks with your right hand.
+I'm sorry.
+Chinese food is nice.
+But I can't use chopsticks well.
+Part B
+Let's learn more
+I want to have some soup.
+Would you please pass me the spoon, Su Nan?
+Here you are.
+Where is the knife?
+I want to cut the beef.
+Please pass him the knife, Li Shan.
+OK.
+Here it is.
+Mmm ...
+The noodles are nice.
+Would you give me some, please?
+Of course.
+And here are the chopsticks.
+Thank you.
+
+[上学期] Unit 5
+
+.单词
+park /pɑːk/ 公园
+*weekend /ˌwiːkˈend/ 周末
+*museum /mjuˈziːəm/ 博物馆
+parent /ˈpeərənt/ 父／母亲
+supermarket /ˈsuːpəmɑːkɪt/ 超市
+bookstore /ˈbʊkstɔː(r)/ 书店
+film /fɪlm/ 电影
+see a film /siː ə fɪlm/ 看电影
+cinema /ˈsɪnəmə/ 电影院
+shop /ʃɒp/ 商店
+gift /ɡɪft/ 礼物
+buy a gift /baɪ ə ɡɪft/ 买礼物
+library /ˈlaɪbrəri/ 图书馆
+
+.课文
+Unit 5
+Part A
+Let's talk
+Excuse me.
+Yes?
+Can I help you?
+Is there a supermarket near here?
+I want to buy some fruits.
+Yes.
+Can you tell me the way to the supermarket, then?
+Go along the street and you can see a hospital on the left.
+The supermarket is behind it.
+Thank you.
+You are welcome.
+Part B
+Let's learn more
+Can I help you?
+Yes.
+How can we get to the Children's Park?
+Oh.
+You can take a bus at the bus stop and get off at Park Road.
+Park Road?
+Yes.
+You can see a cinema there.
+The Children's Park is beside it.
+Is there a shop near the park?
+We want to buy some water.
+Yes.
+There is a shop between the school and the park.
+Thank you.
+You are welcome.
+Look, find and answer
+Where is the supermarket / bookstore / cinema / school?
+It's ...
+Park Road
+Bus stop
+Supermarket
+Bookstore
+School
+Park
+Cinema
+Read and discuss
+I Do Not Know the Way
+I'm very tired.
+I'd like to sleep for a minute.
+Excuse me.
+What can I do for you?
+How can I get to the supermarket?
+It's beside the hospital.
+Excuse me.
+Can you tell me the way to the supermarket?
+It's beside the hospital.
+Do you want to buy something?
+The supermarket is beside the hospital!
+Doesn't the man in the car know the way?
+
+[上学期] Unit 6
+
+.单词
+get /ɡet/ 到达
+get to /ɡet tuː/ 到达；抵达
+way /weɪ/ 路线
+*straight /streɪt/ 笔直地；成直线地
+go straight /ɡəʊ streɪt/ 直行
+turn /tɜːn/ 拐弯
+left /left/ 左边；左边的
+turn left /tɜːn left/ 左拐
+first /fɜːst/ 第一（个）的
+crossing /ˈkrɒsɪŋ/ 十字路口
+behind /bɪˈhaɪnd/ 在……后面
+*need /niːd/ 需要
+far /fɑː(r)/ 远的；遥远的
+far from /fɑː(r) frɒm/ 离……远
+turn right /tɜːn raɪt/ 右拐
+between /bɪˈtwiːn/ 在……之间
+off /ɒf/ 离开（某处）
+get off /ɡet ɒf/ 下（车、马等）
+take a bus /teɪk ə bʌs/ 乘公共汽车
+beside /bɪˈsaɪd/ 在……旁边
+stop /stɒp/ 车站
+bus stop /bʌs stɒp/ 公共汽车站
+ask /ɑːsk/ 问；询问
+*road /rəʊd/ 路；道路；公路
+second /ˈsekənd/ 第二（个）的
+
+.课文
+Unit 6
+Part A
+Let's talk
+What can I do for you?
+We want to buy a T-shirt for our child.
+How about this green one?
+It's OK.
+Wow, that orange one is beautiful.
+Mom, I like it.
+It looks good.
+How much is it?
+It's 50 yuan.
+That's OK.
+Part B
+Let's learn more
+Can I help you?
+Yes.
+I would like a pair of shoes for my child.
+How about these blue ones?
+They look too big for her.
+Would you like the green ones?
+They are small.
+How much are they?
+They are 100 yuan.
+OK.
+We'll take them.
+Here you are.
+Thank you.
+Read and act
+Can I help you?
+Yes.
+I'd like a dress for my girl.
+I like the red one!
+Here are the hats.
+Which one do you like?
+I like the yellow one.
+Do you mean this one?
+No, the big one.
+How much is it?
+It's 50 yuan.
+You look great!
+Fine.
+We'll take them.
+
+[上学期] Unit 7
+
+.单词
+how much /haʊ mʌtʃ/ 多少；多少钱
+*cabbage /ˈkæbɪdʒ/ 卷心菜
+*fresh /freʃ/ 新鲜的
+tomato /təˈmɑːtəʊ/ 西红柿
+juicy /ˈdʒuːsi/ 多汁的
+money /ˈmʌni/ 钱
+*would /wʊd/ 想要
+would like /wʊd laɪk/ 想要
+potato /pəˈteɪtəʊ/ 土豆
+*cucumber /ˈkjuːkʌmbə(r)/ 黄瓜
+*bean /biːn/ 豆；豆荚
+green beans /ɡriːn biːnz/ 青豆；四季豆
+*carrot /ˈkærət/ 胡萝卜
+*per /pɜː(r)/ 每；每一
+*kilo /ˈkiːləʊ/ 千克；公斤
+*expensive /ɪkˈspensɪv/ 昂贵的
+*anything /ˈeniθɪŋ/ 任何事物
+*else /els/ 其他的；别的
+in all /ɪn ɔːl/ 总共
+
+.课文
+Unit 7
+Part A
+Let's talk
+Do you know the girl?
+Yes.
+Her name is Kitty.
+She comes from the USA.
+She speaks English and she can speak a little Chinese.
+She looks tall and thin.
+But she likes sports.
+She can run very fast.
+Oh, really?
+Yes.
+We are good friends.
+We often play together after class.
+Part B
+Let's learn more
+Are they your family?
+Yes, they are.
+Look!
+The old woman is my grandma.
+The man beside her is my uncle.
+He is strong.
+Who is the young woman in red?
+That's my aunt, Lucy.
+She looks very beautiful in the red dress.
+Is the boy their kid?
+Yes.
+You are right.
+
+[上学期] Unit 8
+
+.课文
+Unit 8
+Part A
+Let's talk
+Good morning.
+Can I help you?
+Yes.
+I'd like to have a room.
+Your name, please?
+My name is Helen.
+Where are you from?
+The UK.
+Welcome to our hotel.
+Have a good time!
+Thanks.
+Part B
+Let's learn more
+Where do you come from?
+I come from Australia.
+Australia is far away.
+Yes.
+Now it is autumn there.
+What about you?
+I come from Xi'an.
+Is it far from here?
+Not very far.
+Welcome to visit our city.
+Thank you.
+
+[下学期] Unit 1
+
+.单词
+spring  春天
+summer  夏天
+autumn  秋天
+winter  冬天
+warm  温暖的
+hot  热的
+cool  凉爽的
+cold  寒冷的
+flower  花
+tree  树
+leaf  叶子
+snow  雪
+
+.课文
+Unit 1
+Part A
+Let's talk
+You look sad, dear.
+Why?
+Because it's snowing again.
+I can't go out to play.
+Why not?
+Come on.
+We can make a snowman.
+A snowman!
+It's a good idea.
+Oh, it's OK.
+A big snowman!
+How are you feeling now?
+Are you happy?
+Yes.
+I'm very happy.
+Part B
+Let's learn more
+Mom, are you tired?
+Yes, a little.
+Sit down and drink some water.
+Thank you.
+You are a good boy.
+Look!
+Miss White is angry.
+Why is she angry?
+Colin is late again.
+This makes her very angry.
+So Miss White is telling him to come to school on time and not to be late again.
+
+[下学期] Unit 2
+
+.课文
+Unit 2
+Part A
+Let's talk
+Spring is coming!
+How happy we are!
+Yeah!
+What do you do in spring?
+I often fly kites with my friends.
+Sometimes we climb the mountains.
+How about you?
+I plant trees with my parents every year on Tree Planting Day.
+Sometimes we ride bikes.
+How interesting!
+Part B
+Let's learn more
+There are four seasons in a year.
+What are they?
+Oh, they are spring, summer, autumn and winter.
+In March, April and May, it's warm and trees are green.
+We like to go out to play.
+Summeris hot, but we can go swimming and eat ice-creams.
+Autumn is cool but rich.
+We have many fruits in this season.
+Winter is cold.
+Sometimes it snows.
+We can make snowmen.
+So we feel happy!
+
+[下学期] Unit 3
+
+.课文
+Unit 3
+Part A
+Let's talk
+Which is your favorite season, Li Shan?
+Autumn.
+Why?
+Because autumn begins from September here.
+In September and October, it is cool and the mountains become very beautiful.
+Oh, really?
+Yes.
+The sky is blue.
+And the trees become red and yellow.
+But I like winter better.
+Because we have Christmas on December 25th and New Year on January 1st.
+We can have much good time together with our family and friends.
+Part B
+Let's learn more
+April
+March
+May
+July
+June
+August
+There are four seasons in a year.
+Each season has three months.
+Spring begins from March.
+Summer is from June to August.
+Autumn begins from September.
+Winter is from December to February.
+New Year is in the first month of the year.
+Then how many months are there in a year?
+Do you know?
+October
+September
+November
+January
+December
+February
+
+[下学期] Unit 4
+
+.课文
+Unit 4
+Part A
+Let's talk
+Excuse me, how can I get to the Bell Tower?
+You can go with me.
+Thank you.
+Xi'an is really a beautiful city.
+Yes.
+Do you live in the city, too?
+No.
+I live in a village far from the city.
+Is your village big?
+No.
+It is small, but very beautiful.
+In April and May, there are many kinds of flowers around.
+In September and October, we have many fruits.
+It sounds very nice.
+Part B
+Let's learn more
+In spring, they grow tomatoes, potatoes and other vegetables.
+Lele and his parents live in a village near a lake.
+They have a big house there.
+A river runs by.
+His parents work on a farm.
+They plant many trees, too.
+The trees are homes for birds and some wild animals.
+In spring, summer and autumn, Lele can see rabbits, snakes and even monkeys.
+They live happily together year after year.
+Lele loves his home.
+He loves the animals, too.
+
+[下学期] Unit 5
+
+.课文
+Unit 5
+Part A
+Let's talk
+What's the weather like today, Mom?
+It's cloudy.
+No.
+It's not cloudy.
+It's rainy.
+Oh, look!
+It's raining now.
+Take your umbrella with you.
+OK.
+See you, Mom and Dad!
+See you, dear!
+Part B
+Let's learn more
+What's the weather like now, Dad?
+It is fine.
+I can see the moon and stars in the sky.
+How is the weather tomorrow?
+It is Saturday.
+We are going to climb the mountains with our teachers.
+The weather report says it will be windy and cool tomorrow.
+You'd better wear your coat.
+I will, Dad.
+Thank you.
+
+[下学期] Unit 6
+
+.课文
+Unit 6
+Part A
+Let's talk
+May Day is coming.
+Where will you go on the holiday?
+I will go to Beijing with my parents.
+Great!
+You can visit many places of interest there: the Palace Museum, the Great Wall, ...
+What is the Palace Museum like?
+It is large.
+There are many big houses in it.
+Most houses are red and yellow.
+It is really wonderful.
+Really?
+I will enjoy my visit there.
+Part B
+Let's learn more
+What will you do this summer, Emily?
+I will travel to Hangzhou.
+I'm going to visit the West Lake.
+How will you go?
+I will go by train.
+Why not go by plane?
+It is fast.
+The train is slow, but I can enjoy the beautiful places along the way.
+Will your parents go with you?
+No, they won't.
+My friend will go with me.
+Oh.
+Have a good time!
+Thank you.
+
+[下学期] Unit 7
+
+.课文
+Unit 7
+Part A
+Let's talk
+Mom, I feel very bad today.
+What's wrong with you?
+I have a headache.
+Oh, you look ill.
+Just stay in bed.
+I will call the doctor.
+What about my lessons?
+Don't worry about them.
+I will call your teacher and tell her about it.
+Thank you, Mom.
+Part B
+Let's learn more
+Hello, Miss White.
+This is Helen, Colin's mother.
+Colin doesn't feel well this morning.
+He can't go to school today.
+What's wrong with him?
+He has a fever and a bad headache.
+I'm sorry to hear that.
+You'd better take him to see a doctor.
+We'll go to the hospital.
+OK.
+Please tell him not to worry about his lessons and have a good rest.
+Thank you.
+Goodbye!
+
+[下学期] Unit 8
+
+.课文
+Unit 8
+Part A
+Let's talk
+Don't litter on the floor.
+It's a bad habit.
+I'm sorry.
+You shouldn't tell lies.
+It's a bad habit.
+I'm sorry.
+I won't.
+We shouldn't make a noise in the library.
+We'd better keep quiet and we should have a good habit.
+All right.
+The boy shouldn't write on the tree.
+We should take care of trees and have a good habit.
+I see.
+Part B
+Let's learn more
+What are you doing, Kevin?
+I'm reading.
+Don't read in bed.
+It's bad for your eyes.
+But I like reading in bed.
+You shouldn't do that.
+It's a bad habit.
+You'd better read at the desk.
+All right, Mom.
+And you shouldn't have the book so close to your eyes.
+You should take care of your eyes.
+OK.
+Read and think
+It often rains in summer.
+You'd better take your umbrella.
+Look at the sun.
+It won't rain today.
+Oh, no!
+It's raining.
+Kerchoo!
+You'd better go to see a doctor.
