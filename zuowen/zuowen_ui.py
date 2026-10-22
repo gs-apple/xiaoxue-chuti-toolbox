@@ -753,6 +753,25 @@ class ZuowenTabWidget:
         """调用自定义API生成作文"""
         import threading
         import requests
+        from urllib.parse import urlparse
+
+        # 安全校验：仅允许 http/https，禁止 file://、ftp:// 等非常规协议
+        parsed = urlparse(api_url)
+        if parsed.scheme not in ("http", "https") or not parsed.netloc:
+            self.content_text.delete("1.0", tk.END)
+            self.content_text.insert(
+                "1.0",
+                f"AI生成失败：API 地址不合法（仅支持 http/https）：{api_url}"
+            )
+            return
+        if parsed.scheme == "http":
+            # 明文 http 会把 API 密钥以明文发送，存在窃听风险
+            self.content_text.delete("1.0", tk.END)
+            self.content_text.insert(
+                "1.0",
+                "警告：当前使用 http 明文传输，API 密钥可能被窃听，建议改用 https。\n正在继续请求……"
+            )
+            self.content_text.update()
 
         self.content_text.delete("1.0", tk.END)
         self.content_text.insert("1.0", "正在调用AI生成作文，请稍候...")

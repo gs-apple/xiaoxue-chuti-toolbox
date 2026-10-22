@@ -559,8 +559,23 @@ class ScraplingScraper:
             if not filename:
                 filename = "download.rar"
 
-            os.makedirs(save_dir, exist_ok=True)
-            filepath = os.path.join(save_dir, filename)
+            # 安全清洗：剥离任何目录成分，防止路径遍历（../、绝对路径、反斜杠）
+            filename = filename.replace('\\', '/')
+            filename = os.path.basename(filename)
+            filename = re.sub(r'[\/\\\\]', '', filename)  # 去残留分隔符
+            filename = filename.replace('..', '')
+            filename = ''.join(c for c in filename if c not in '<>:"|?*\x00')
+            if not filename or filename in ('.', '..'):
+                filename = "download.rar"
+
+            save_dir_abs = os.path.abspath(save_dir)
+            os.makedirs(save_dir_abs, exist_ok=True)
+            filepath = os.path.join(save_dir_abs, filename)
+            filepath_abs = os.path.abspath(filepath)
+            # 二次校验：最终路径必须落在 save_dir 内，否则拒绝保存
+            if filepath_abs != save_dir_abs and not filepath_abs.startswith(save_dir_abs + os.sep):
+                return {"success": False, "filepath": "", "message": "非法文件名，已拒绝保存"}
+
             with open(filepath, 'wb') as f:
                 for chunk in resp.iter_content(chunk_size=8192):
                     if chunk:

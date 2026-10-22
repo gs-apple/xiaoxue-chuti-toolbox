@@ -51,9 +51,13 @@ class _DedupCache:
 
     @classmethod
     def normalize(cls, question_text):
-        """标准化题目文本用于去重比较"""
+        """标准化题目文本用于去重比较
+
+        注意：分数标记 FRAC[分子,分母] 必须保留其中的数字（转为「分子/分母」），
+        否则所有分数题会被归一化成同一个字符串，导致去重误杀、题型数量不足。
+        """
         t = question_text
-        t = re.sub(r'FRAC\[\d+,\d+\]', lambda m: '', t)
+        t = re.sub(r'FRAC\[(\d+),(\d+)\]', r'\1/\2', t)
         t = t.replace(" ", "").replace("×", "*").replace("÷", "/")
         t = t.replace("（", "(").replace("）", ")")
         t = t.lower()
@@ -100,18 +104,51 @@ def _make_frac(den_min=2, den_max=12):
     return Fraction(num, den)
 
 def _safe_eval(expr: str):
-    """安全计算数学表达式，替代 eval()"""
+    """安全计算纯数学表达式（仅四则运算与一元正负号），不使用 eval。
+
+    通过 ast 解析并只允许数字字面量、加减乘除、括号与一元正负号，
+    从根本上杜绝代码注入（无 builtins、无属性访问、无函数调用）。
+    """
     import ast
 
-    # 只允许数字、运算符、括号、小数点、空格
-    allowed_chars = set('0123456789+-*/(). ')
-    if not all(c in allowed_chars for c in expr):
+    try:
+        node = ast.parse(expr, mode='eval')
+    except SyntaxError:
         return None
 
-    # 快速路径：纯整数四则运算，直接用 eval（已通过字符白名单校验）
+    def _eval(n):
+        if isinstance(n, ast.Expression):
+            return _eval(n.body)
+        if isinstance(n, ast.Constant):
+            if isinstance(n.value, bool) or not isinstance(n.value, (int, float)):
+                raise ValueError("仅支持数字")
+            return n.value
+        if isinstance(n, ast.BinOp):
+            left = _eval(n.left)
+            right = _eval(n.right)
+            if isinstance(n.op, ast.Add):
+                return left + right
+            if isinstance(n.op, ast.Sub):
+                return left - right
+            if isinstance(n.op, ast.Mult):
+                return left * right
+            if isinstance(n.op, ast.Div):
+                if right == 0:
+                    raise ZeroDivisionError
+                return left / right
+            raise ValueError("不支持的运算符")
+        if isinstance(n, ast.UnaryOp):
+            operand = _eval(n.operand)
+            if isinstance(n.op, ast.UAdd):
+                return +operand
+            if isinstance(n.op, ast.USub):
+                return -operand
+            raise ValueError("不支持的一元运算")
+        raise ValueError("不支持的表达式")
+
     try:
-        return eval(expr, {"__builtins__": {}}, {})
-    except (ZeroDivisionError, ValueError, TypeError, SyntaxError):
+        return _eval(node)
+    except (ZeroDivisionError, ValueError, TypeError):
         return None
     except Exception as e:
         raise ValueError(f"表达式计算失败: {expr}, 错误: {e}")
@@ -139,6 +176,7 @@ CATEGORY_NAMES = {
     "cb_project": "工程问题", "cb_form": "行程问题", "cb_concentration": "浓度问题",
     "cb_graph_count": "图形计数", "cb_graph_split": "图形分割",
     "cb_perimeter": "周长面积", "cb_3d_graph": "立体图形", "cb_equal_area": "等积变形",
+    "cb_clock": "时钟运用",
     "cb_odd_even": "奇偶分析", "cb_whole_div": "整除问题", "cb_remainder": "余数问题",
     "cb_prime": "质/合问题", "cb_gcd_lcm": "公约数/倍数",
     "cb_logic": "推理问题", "cb_arrange": "统筹问题", "cb_best": "最优化",
@@ -151,6 +189,7 @@ ADVANCE_TYPES = {
     "cb_sum_diff", "cb_age", "cb_tree", "cb_chicken_rabbit", "cb_duck",
     "cb_project", "cb_form", "cb_concentration",
     "cb_graph_count", "cb_graph_split", "cb_perimeter", "cb_3d_graph", "cb_equal_area",
+    "cb_clock",
     "cb_odd_even", "cb_whole_div", "cb_remainder", "cb_prime", "cb_gcd_lcm",
     "cb_logic", "cb_arrange", "cb_best", "cb_draw", "cb_container",
     "cb_assign", "cb_measure",
@@ -505,15 +544,6 @@ class MathProblemGenerator:
         return f"{_frac(a_frac)} ÷ {_frac(b_frac)} =", a_frac / b_frac
 
     # ==================== 四则混合 ====================
-    def _calc(self, a_val, op, b_val):
-        if op == '+': return a_val + b_val
-        if op == '-': return a_val - b_val
-        if op == '×': return a_val * b_val
-        if op == '÷':
-            if b_val == 0:
-                raise ValueError
-            return a_val / b_val
-
     def gen_mix_addsub(self, use_bracket=False):
         for _ in range(500):
             nums = [random.randint(1, 9999) for _ in range(3)]
@@ -1214,6 +1244,53 @@ class MathProblemGenerator:
         else:
             area = random.randint(12, 48)
             return f"一个梯形面积{area}平方厘米，与它等高的三角形（三角形的底等于梯形上底加下底），三角形面积是多少？", area
+
+    def gen_clock(self):
+        """时钟运用：认识时钟（读时间）+ 时钟计算（经过时间）"""
+        v = random.randint(1, 6)
+        if v <= 4:
+            # ── 认识时钟：整时、半时、几时几分 ──
+            if v == 1:
+                # 整时（时针正对数字）
+                h = random.randint(1, 12)
+                return f"右图时钟显示的时间是（    ）时（    ）分。[CLOCK:{h}:0]", {"type": "read", "hour": h, "minute": 0}
+            elif v == 2:
+                # 半时（时针在两数之间偏后）
+                h = random.randint(1, 11)
+                return f"右图时钟显示的时间是（    ）时（    ）分。[CLOCK:{h}:30]", {"type": "read", "hour": h, "minute": 30}
+            elif v == 3:
+                # 几时几分（分针不指向6或12，5的倍数）
+                h = random.randint(1, 11)
+                m = random.choice([5, 10, 20, 25, 35, 40, 50, 55])
+                return f"右图时钟显示的时间是（    ）时（    ）分。[CLOCK:{h}:{m}]", {"type": "read", "hour": h, "minute": m}
+            else:
+                # 几时几分（任意分钟，增加难度）
+                h = random.randint(1, 11)
+                m = random.randint(1, 59)
+                if m % 5 == 0:
+                    m = (m + random.choice([1, 2, 3, 4])) % 60
+                    if m == 0: m = random.choice([7, 13, 23, 37, 47, 53])
+                return f"右图时钟显示的时间是（    ）时（    ）分。[CLOCK:{h}:{m}]", {"type": "read", "hour": h, "minute": m}
+        else:
+            # ── 时钟计算：经过时间（不需要画图）──
+            if v == 5:
+                # 同小时内经过
+                h = random.randint(1, 11)
+                m1 = random.randint(0, 40)
+                gap = random.choice([10, 15, 20, 25, 30, 35, 40, 45, 50, 55])
+                m2 = m1 + gap
+                if m2 >= 60:
+                    h += 1; m2 -= 60
+                ans = gap
+                return f"从{h}:{m1:02d}到{h if m1+gap<60 else h+1}:{m2:02d}经过了（    ）分钟。", ans
+            else:
+                # 跨小时经过
+                h1 = random.randint(1, 10)
+                m1 = random.randint(20, 55)
+                h2 = h1 + random.randint(1, 2)
+                m2 = random.randint(0, min(m1 - 1, 45))
+                total_min = (h2 * 60 + m2) - (h1 * 60 + m1)
+                return f"从{h1}:{m1:02d}到{h2}:{m2:02d}经过了（    ）分钟。", total_min
 
     def gen_graph_count(self):
         v = random.randint(1, 5)
@@ -2003,6 +2080,7 @@ _GENERATOR_MAP = {
     "cb_project": "gen_project", "cb_form": "gen_form", "cb_concentration": "gen_concentration",
     "cb_perimeter": "gen_perimeter", "cb_3d_graph": "gen_3d_graph", "cb_equal_area": "gen_equal_area",
     "cb_graph_count": "gen_graph_count", "cb_graph_split": "gen_graph_split",
+    "cb_clock": "gen_clock",
     "cb_odd_even": "gen_odd_even", "cb_whole_div": "gen_whole_div", "cb_remainder": "gen_remainder",
     "cb_prime": "gen_prime", "cb_gcd_lcm": "gen_gcd_lcm",
     "cb_logic": "gen_logic", "cb_arrange": "gen_arrange", "cb_best": "gen_best",
@@ -2047,7 +2125,12 @@ def generate_questions(selections, use_bracket=False, grade=None, use_spider=Tru
     
     # 添加爬虫题目到提升题列表
     advance.extend(spider_questions)
-    
+
+    # 每次指定题型生成前清空跨历史去重缓存，避免历史累积题（尤其小题池的10以内）
+    # 导致新题几乎全部被判重复、连续重复触发提前退出而生成0道。
+    # 本次试卷内的去重仍由下方循环内的 is_duplicate/add 保证，不受影响。
+    _DedupCache.clear()
+
     for q_type, count in selections.items():
         method_name = _GENERATOR_MAP.get(q_type)
         if not method_name:
@@ -2058,13 +2141,18 @@ def generate_questions(selections, use_bracket=False, grade=None, use_spider=Tru
 
         generated = 0
         attempts = 0
-        max_attempts = min(count * 20, 1000)  # 安全校验：限制最大尝试次数，避免去重碰撞时长时间卡顿
+        # 尝试上限与请求数量成正比（不再硬封顶 1000）：当去重缓存已占用该题型大量旧题时，
+        # 仍需足够多的尝试才能收集到足量的不重复题目，否则会提前停止、数量不足。
+        # 同时用「连续重复」计数提前终止，避免题池相对缓存确实耗尽时陷入长循环。
+        max_attempts = max(count * 40, 2000)
+        consecutive_dup = 0
+        # 当连续大量重复（题池去重题已用尽）时，放开去重、允许重复补足到用户设定数量，
+        # 避免「请求200道却因题池仅164种而不凑足、甚至为0」的问题。
+        allow_dup = False
 
-        # 如果是提升题且已使用爬虫题，减少生成数量
+        # 爬虫真题作为「额外补充」叠加到提升题，绝不削减用户设定数量：
+        # 用户勾选的每个题型都严格生成 count 道，spider 题在循环外已并入 advance。
         target_count = count
-        if q_type in ADVANCE_TYPES and spider_questions:
-            spider_count_for_type = sum(1 for q in spider_questions if q[0] == q_type)
-            target_count = max(0, count - spider_count_for_type)
 
         while generated < target_count and attempts < max_attempts:
             attempts += 1
@@ -2075,10 +2163,17 @@ def generate_questions(selections, use_bracket=False, grade=None, use_spider=Tru
                     result = method()
                 if result and isinstance(result, tuple) and len(result) == 2:
                     question, answer = result
-                    # 全局去重：跳过已出过的题目
-                    if _DedupCache.is_duplicate(question):
+                    # 全局去重：跳过已出过的题目（allow_dup 后不再查重，直接补足数量）
+                    if not allow_dup and _DedupCache.is_duplicate(question):
+                        consecutive_dup += 1
+                        # 连续大量重复说明相对于去重缓存该题池已基本耗尽，
+                        # 放开去重继续补足到 target_count，而不是提前结束导致数量不足/为0。
+                        if consecutive_dup >= 500:
+                            allow_dup = True
                         continue
-                    _DedupCache.add(question)
+                    consecutive_dup = 0
+                    if not allow_dup:
+                        _DedupCache.add(question)
                     if q_type in ADVANCE_TYPES:
                         advance.append((q_type, question, answer))
                     else:
@@ -2200,6 +2295,7 @@ class DrawingSpec:
 GEOMETRY_QUESTION_TYPES = {
     "cb_perimeter", "cb_3d_graph", "cb_equal_area",
     "cb_graph_count", "cb_graph_split",
+    "cb_clock",
 }
 
 FIGURE_HEIGHTS = {
@@ -2208,6 +2304,7 @@ FIGURE_HEIGHTS = {
     "eq_tri_para": 17, "eq_tri_trap": 17, "eq_para_rect": 17,
     "points_circle": 18, "line_grid": 16, "rect_grid": 16,
     "line_segment": 12, "circle_lines": 17, "cell_grid": 16,
+    "clock": 30,
 }
 
 def _extract_perimeter(text: str) -> Optional[DrawingSpec]:
@@ -2267,12 +2364,24 @@ def _extract_graph_split(text: str) -> Optional[DrawingSpec]:
         return DrawingSpec("cell_grid", {"rows": int(m.group(1)), "cols": int(m.group(2))}, 25)
     return None
 
+
+def _extract_clock(text: str) -> Optional[DrawingSpec]:
+    """从时钟题目文本中提取绘图参数。认识时钟题需要画表盘，计算题不需要。"""
+    # 认识时钟：文本含"时钟显示" → 需要画表盘，参数从答案(dict)中获取
+    # 这里用正则从文本隐式编码中提取；gen_clock 将参数编码为后缀标记
+    m = re.search(r'\[CLOCK:(\d+):(\d+)\]', text)
+    if m:
+        return DrawingSpec("clock", {"hour": int(m.group(1)), "minute": int(m.group(2))}, 30)
+    return None
+
+
 _EXTRACTORS = {
     "cb_perimeter": _extract_perimeter,
     "cb_3d_graph": _extract_3d,
     "cb_equal_area": _extract_equal_area,
     "cb_graph_count": _extract_graph_count,
     "cb_graph_split": _extract_graph_split,
+    "cb_clock": _extract_clock,
 }
 
 def extract_drawing_spec(q_type: str, question_text: str) -> Optional[DrawingSpec]:
@@ -2541,6 +2650,70 @@ def draw_circle_lines(c, x, y, w, h, params):
 def draw_cell_grid(c, x, y, w, h, params):
     draw_rect_grid(c, x, y, w, h, params)
 
+
+def draw_clock(c, x, y, w, h, params):
+    """绘制圆形时钟表盘：外圆、12个数字、60个刻度、时针、分针。"""
+    import math
+    fn = c._fontname if hasattr(c, '_fontname') else 'SimSun'
+    hour = params["hour"]
+    minute = params["minute"]
+
+    # 可用区域
+    pad = 2
+    avail_w = w - 2 * pad
+    avail_h = h - 8  # 上方留空给文字
+    cx = x + w / 2
+    cy = y + avail_h / 2 + 4
+    radius = min(avail_w, avail_h) / 2 * 0.92
+
+    # ── 外圆 ──
+    c.setLineWidth(1.0)
+    c.circle(cx, cy, radius)
+
+    # ── 刻度（60个小刻度，每5个一个长刻度）──
+    # 角度体系：PDF坐标系y轴向上，90°=12点(上)，0°=3点(右)，-90°=6点(下)，180°=9点(左)
+    for i in range(60):
+        angle = math.radians(90 - i * 6)  # i=0→12点方向, i=15→3点方向, i=30→6点方向, i=45→9点方向
+        is_long = (i % 5 == 0)
+        inner_r = radius * (0.82 if is_long else 0.90)
+        outer_r = radius * 0.96
+        ix = cx + inner_r * math.cos(angle)
+        iy = cy + inner_r * math.sin(angle)
+        ox = cx + outer_r * math.cos(angle)
+        oy = cy + outer_r * math.sin(angle)
+        c.setLineWidth(0.6 if is_long else 0.3)
+        c.line(ix, iy, ox, oy)
+
+    # ── 数字 1-12 ──
+    c.setFont(fn, 7 if radius < 22 else 8.5)
+    num_r = radius * 0.72
+    for n in range(1, 13):
+        angle = math.radians(90 - n * 30)  # n=12→-90°≡270°(上/12点), n=3→0°(右/3点), n=6→-90°(下/6点), n=9→180°(左/9点)
+        nx = cx + num_r * math.cos(angle)
+        ny = cy + num_r * math.sin(angle)
+        c.drawCentredString(nx, ny, str(n))
+
+    # ── 时针 ──
+    h_angle = math.radians(90 - (hour % 12 + minute / 60) * 30)
+    hl = radius * 0.48
+    hx_end = cx + hl * math.cos(h_angle)
+    hy_end = cy + hl * math.sin(h_angle)
+    c.setLineWidth(1.4)
+    c.line(cx, cy, hx_end, hy_end)
+
+    # ── 分针 ──
+    m_angle = math.radians(90 - minute * 6)
+    ml = radius * 0.68
+    mx_end = cx + ml * math.cos(m_angle)
+    my_end = cy + ml * math.sin(m_angle)
+    c.setLineWidth(0.9)
+    c.line(cx, cy, mx_end, my_end)
+
+    # ── 中心圆点 ──
+    c.setFillColorRGB(0, 0, 0)
+    c.circle(cx, cy, 1.3, fill=1)
+
+
 _DRAW_FUNCS = {
     "rectangle": draw_rectangle,
     "square": draw_square,
@@ -2557,6 +2730,7 @@ _DRAW_FUNCS = {
     "line_segment": draw_line_segment,
     "circle_lines": draw_circle_lines,
     "cell_grid": draw_cell_grid,
+    "clock": draw_clock,
 }
 
 def draw_figure(c, x, y, width, height, spec: DrawingSpec):
@@ -2683,6 +2857,17 @@ def _safe_fmt_answer(ans):
         if ans.is_integer():
             return str(int(ans))
         return f"{ans:g}"
+    elif isinstance(ans, dict):
+        # 时钟认识题答案：dict含 hour/minute
+        if ans.get("type") == "read":
+            h, m = ans["hour"], ans["minute"]
+            if m == 0:
+                return f"{h}时"
+            elif m % 5 == 0:
+                return f"{h}时{m}分"
+            else:
+                return f"{h}时{m}分"
+        return str(ans)
     else:
         return str(ans)
 
@@ -2719,14 +2904,14 @@ def _draw_bold(c, x, y, text, font_name, font_size):
     c.drawString(x, y, text)
     c.drawString(x + 0.3, y, text)
 
-def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles=False, mode="export", grade="", use_bracket=False):
+
+
+def _draw_document(c, questions_data, total_pages, use_vertical, use_answer,
+                   show_titles, mode, grade, use_bracket):
+    """按给定总页数把整份试卷绘制到 canvas c 上（只绘制，不保存）。
+    返回绘制结束后的实际页数。"""
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.units import mm
-    from reportlab.pdfgen import canvas
-    from reportlab.lib import colors
-
-    _register_fonts()
-    fn_sun = _get_font()
 
     basic_qs = questions_data.get("basic", [])
     advance_qs = questions_data.get("advance", [])
@@ -2734,20 +2919,13 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles
 
     basic_answers = []
     for item in basic_qs:
-        if len(item) >= 3:
-            basic_answers.append(item[2])
-        else:
-            basic_answers.append("略")
+        basic_answers.append(item[2] if len(item) >= 3 else "略")
     advance_answers = []
     for item in advance_qs:
-        if len(item) >= 3:
-            advance_answers.append(item[2])
-        else:
-            advance_answers.append("略")
+        advance_answers.append(item[2] if len(item) >= 3 else "略")
     all_answers = basic_answers + advance_answers
 
-    filename = _build_filename(questions_data, mode=mode, grade=grade, use_bracket=use_bracket, use_vertical=use_vertical, use_answer=use_answer)
-    filepath = os.path.join(BASE_DIR, filename)
+    fn = _get_font()
 
     pw, ph = A4
     lm = 15 * mm
@@ -2756,10 +2934,22 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles
     bm = 18 * mm
     uw = pw - lm - rm
 
-    reg_row_h = 8 * mm if not use_vertical else 32 * mm
+    # 竖式模式：保持原有列数（3列）与字号字体不变，仅将每行行数由7行增至8行
+    # （3列×8行 = 24题/页）。列宽≈60mm 充裕，长数字也不会超出纸张。
+    if use_vertical:
+        reg_row_h = 31 * mm   # 每页8行（原7行）；8×31=248mm < 可用255mm，留有余量
+        _basic_cols = 3
+        _v_fs_q = 11.5
+        _v_fs_l = 11
+    else:
+        reg_row_h = 8 * mm
+        _basic_cols = 4
+        _v_fs_q = 11.5
+        _v_fs_l = 11
     adv_row_h = 35 * mm
 
-    MIXED_TYPES = {"cb_mix_addsub", "cb_mix_addmul", "cb_mix_addmulsub", "cb_mix_dec", "cb_mix_frac"}
+    MIXED_TYPES = {"cb_mix_addsub", "cb_mix_addmul", "cb_mix_addmulsub",
+                   "cb_mix_dec", "cb_mix_frac"}
 
     regular = []
     for i, item in enumerate(basic_qs):
@@ -2770,10 +2960,6 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles
         if len(item) >= 2:
             advanced.append((i + len(basic_qs), item[1], item[0]))
 
-    total_pages = [1]
-    c = canvas.Canvas(filepath, pagesize=A4)
-    c.setTitle("数学练习题")
-
     header_y = ph - tm + 12 * mm
     header_line_y = header_y - 2 * mm
     first_page_start_y = header_line_y - 6 * mm
@@ -2783,14 +2969,14 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles
     cur_y = first_page_start_y
 
     def draw_header():
-        c.setFont(fn_sun, 10)
-        c.drawString(lm, header_y, "日期:_____年_____月_____日")
+        c.setFont(fn, 10)
+        c.drawString(lm, header_y, "日期:_____年_____月____日")
         c.drawRightString(pw - rm, header_y, f"共{total_count}题")
         c.setLineWidth(0.3)
         c.line(lm, header_line_y, pw - rm, header_line_y)
-        c.setFont(fn_sun, 9)
+        c.setFont(fn, 9)
         c.drawRightString(pw - rm, bm * 0.5, f"{current_page[0]}/{total_pages[0]}")
-        c.setFont(fn_sun, 10)
+        c.setFont(fn, 10)
 
     def new_page():
         c.showPage()
@@ -2799,7 +2985,6 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles
         return other_page_start_y
 
     draw_header()
-    page_started = True
 
     if regular:
         renumbered = [(seq, q, t) for seq, (i, t, q) in enumerate(regular, 1)]
@@ -2807,13 +2992,13 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles
         regular_mixed = [(seq, q, t) for seq, q, t in renumbered if t in MIXED_TYPES]
 
         if show_titles:
-            c.setFont(fn_sun, 12)
-            _draw_bold(c, lm, cur_y, f"基础计算（{len(regular)}题）", fn_sun, 12)
+            c.setFont(fn, 12)
+            _draw_bold(c, lm, cur_y, f"基础计算（{len(regular)}题）", fn, 12)
             cur_y -= reg_row_h
 
-        col_w = uw / 4
+        col_w = uw / _basic_cols
         for idx, (seq, question, _qtype) in enumerate(regular_normal):
-            col = idx % 4
+            col = idx % _basic_cols
             if col == 0 and idx > 0:
                 cur_y -= reg_row_h
                 if cur_y < bm + reg_row_h:
@@ -2822,15 +3007,15 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles
             label = f"{seq:>3}. "
             question = question.replace(" + ", "+").replace(" - ", "-").replace(" × ", "×").replace(" ÷ ", "÷")
             parts = _split_frac_parts(question)
-            c.setFont(fn_sun, 11.5)
-            lw = c.stringWidth(label, fn_sun, 11)
+            c.setFont(fn, _v_fs_q)
+            lw = c.stringWidth(label, fn, _v_fs_l)
             c.drawString(x, cur_y, label)
-            _draw_mixed(c, x + lw, cur_y, parts, fn_sun, 11)
+            _draw_mixed(c, x + lw, cur_y, parts, fn, _v_fs_q)
 
         if regular_normal:
-            last_col = len(regular_normal) % 4
-            if last_col != 0:
-                cur_y -= reg_row_h
+            # 无论最后一行是否占满 4 列，都要把 y 推进到下一行，
+            # 否则下一种题型（regular_mixed）会画在同一行上导致叠加。
+            cur_y -= reg_row_h
 
         if regular_mixed:
             col_w_m = uw / 3
@@ -2843,23 +3028,23 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles
                 x = lm + col * col_w_m
                 label = f"{seq:>3}. "
                 parts = _split_frac_parts(question)
-                c.setFont(fn_sun, 11.5)
-                lw = c.stringWidth(label, fn_sun, 11)
+                c.setFont(fn, 11.5)
+                lw = c.stringWidth(label, fn, 11)
                 c.drawString(x, cur_y, label)
-                _draw_mixed(c, x + lw, cur_y, parts, fn_sun, 11)
+                _draw_mixed(c, x + lw, cur_y, parts, fn, 11)
 
     if advanced:
         adv_font_size = 10.5
         adv_line_gap = 5.5 * mm
         adv_work_gap = 20 * mm
 
-        def wrap_text_adv(text, max_w, fn, fs):
+        def wrap_text_adv(text, max_w, fn2, fs):
             lines_out = []
             cur_line = ""
             plain = _frac_to_text_export(text)
             for ch in list(plain):
                 test = cur_line + ch
-                if c.stringWidth(test, fn, fs) <= max_w:
+                if c.stringWidth(test, fn2, fs) <= max_w:
                     cur_line = test
                 else:
                     if cur_line:
@@ -2877,8 +3062,8 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles
             cur_y = first_page_start_y
 
         if show_titles:
-            c.setFont(fn_sun, 12)
-            _draw_bold(c, lm, cur_y, f"运用题（{len(advanced)}题）", fn_sun, 12)
+            c.setFont(fn, 12)
+            _draw_bold(c, lm, cur_y, f"运用题（{len(advanced)}题）", fn, 12)
             cur_y -= reg_row_h
 
         FIGURE_SIZE_MM = 30
@@ -2912,38 +3097,56 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles
             right_item = advanced[i + 1] if i + 1 < len(advanced) else None
             pairs.append((left_item, right_item))
 
+        # 每页固定 7 对（左右两列 × 7 行）= 14 道提升题。
+        # 作答区高度自适应：把整页剩余空间均分给本页剩余的题对，既保证每页题数稳定，
+        # 又能撑满页面不留大片空白；题目过长时退回自然高度，保证不重叠。
+        ADV_PAIRS_PER_PAGE = 7
+        MIN_WORK_GAP = 12 * mm
+        pairs_on_page = 0
+
         for left_item, right_item in pairs:
             left_label = f"{left_item[0] + 1}. "
-            left_qtext = _frac_to_text_export(left_item[1])
+            # 剥离时钟绘图标记（不显示给用户）
+            left_qtext = re.sub(r'\[CLOCK:\d+:\d+\]', '', _frac_to_text_export(left_item[1])).strip()
             left_geo = is_geometry(left_item)
             left_w = text_w_adv if left_geo else col_w_adv
 
             right_label = f"{right_item[0] + 1}. " if right_item else ""
-            right_qtext = _frac_to_text_export(right_item[1]) if right_item else ""
+            right_qtext = re.sub(r'\[CLOCK:\d+:\d+\]', '', _frac_to_text_export(right_item[1])).strip() if right_item else ""
             right_geo = is_geometry(right_item) if right_item else False
             right_w = text_w_adv if right_geo else col_w_adv
 
-            c.setFont(fn_sun, adv_font_size)
-            left_lines = wrap_text_adv(left_label + left_qtext, left_w, fn_sun, adv_font_size) if left_qtext else []
-            right_lines = wrap_text_adv(right_label + right_qtext, right_w, fn_sun, adv_font_size) if right_qtext else []
+            c.setFont(fn, adv_font_size)
+            left_lines = wrap_text_adv(left_label + left_qtext, left_w, fn, adv_font_size) if left_qtext else []
+            right_lines = wrap_text_adv(right_label + right_qtext, right_w, fn, adv_font_size) if right_qtext else []
             max_lines = max(len(left_lines), len(right_lines))
-            pair_height = max_lines * adv_line_gap + adv_work_gap
+            natural_h = max_lines * adv_line_gap + MIN_WORK_GAP
+            # 带几何图形的题：本对高度至少要容下图形，避免图压到下一题
+            if left_geo or right_geo:
+                natural_h = max(natural_h, FIGURE_SIZE_MM * mm + 3 * mm)
 
-            if cur_y - pair_height < bm:
+            # 本页已排满 7 对，或剩余高度放不下这一对时换页
+            if pairs_on_page >= ADV_PAIRS_PER_PAGE or cur_y - natural_h < bm:
                 cur_y = new_page()
+                pairs_on_page = 0
 
-            c.setFont(fn_sun, adv_font_size)
+            slots_left = ADV_PAIRS_PER_PAGE - pairs_on_page
+            avail = cur_y - bm
+            pair_height = max(natural_h, avail / slots_left) if slots_left > 0 else natural_h
+
+            c.setFont(fn, adv_font_size)
             for li, line_txt in enumerate(left_lines):
                 c.drawString(left_x, cur_y - li * adv_line_gap, line_txt)
             draw_fig_right(left_item, left_x, col_w_adv, cur_y)
 
             if right_item:
-                c.setFont(fn_sun, adv_font_size)
+                c.setFont(fn, adv_font_size)
                 for li, line_txt in enumerate(right_lines):
                     c.drawString(right_x, cur_y - li * adv_line_gap, line_txt)
                 draw_fig_right(right_item, right_x, col_w_adv, cur_y)
 
             cur_y -= pair_height
+            pairs_on_page += 1
 
     if use_answer and all_answers:
         c.showPage()
@@ -2951,11 +3154,11 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles
         draw_header()
         cur_y = other_page_start_y
 
-        c.setFont(fn_sun, 14)
+        c.setFont(fn, 14)
         c.drawCentredString(pw / 2, cur_y - 3 * mm, "参 考 答 案")
         cur_y -= 10 * mm + 3 * mm
 
-        c.setFont(fn_sun, 9)
+        c.setFont(fn, 9)
         ans_line_h = 6 * mm
         ans_sep = "    "
         ans_texts = []
@@ -2966,194 +3169,80 @@ def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles
         cur_line = ""
         for txt in ans_texts:
             test = cur_line + (ans_sep + txt if cur_line else txt)
-            if c.stringWidth(test, fn_sun, 9) <= uw:
+            if c.stringWidth(test, fn, 9) <= uw:
                 cur_line = test
             else:
                 if cur_line:
                     if cur_y < bm + ans_line_h:
                         cur_y = new_page()
-                        c.setFont(fn_sun, 9)
+                        c.setFont(fn, 9)
                     c.drawString(lm, cur_y, cur_line)
                     cur_y -= ans_line_h
                 cur_line = txt
         if cur_line:
             if cur_y < bm + ans_line_h:
                 cur_y = new_page()
-                c.setFont(fn_sun, 9)
+                c.setFont(fn, 9)
             c.drawString(lm, cur_y, cur_line)
             cur_y -= ans_line_h
 
+    return current_page[0]
+
+
+def export_pdf(questions_data, use_vertical=False, use_answer=False, show_titles=False,
+               mode="export", grade="", use_bracket=False):
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import A4
+
+    _register_fonts()
+
+    basic_qs = questions_data.get("basic", [])
+    advance_qs = questions_data.get("advance", [])
+    total_count = len(basic_qs) + len(advance_qs)
+
+    filename = _build_filename(questions_data, mode=mode, grade=grade, use_bracket=use_bracket,
+                               use_vertical=use_vertical, use_answer=use_answer)
+    filepath = os.path.join(BASE_DIR, filename)
+
+    # reportlab 的 Canvas 不会截断已存在文件，反而会追加；故每次绘制前先删除旧文件
+    def _safe_remove(p):
+        if os.path.exists(p):
+            try:
+                os.remove(p)
+            except OSError:
+                pass
+
+    # 第一遍：渲染到临时文件，仅用于探明真实页数（避免直接写最终文件被二次渲染拼接）
+    part = filepath + ".part"
+    _safe_remove(part)
+    c = canvas.Canvas(part, pagesize=A4)
+    c.setTitle("数学练习题")
+    total_pages = _draw_document(c, questions_data, [1], use_vertical, use_answer,
+                                 show_titles, mode, grade, use_bracket)
     c.save()
 
-    if current_page[0] != total_pages[0]:
-        total_pages[0] = current_page[0]
-        current_page[0] = 1
+    if total_pages > 1:
+        # 多页：用正确的总页数重新渲染到最终文件（先删旧文件，绝不追加）
+        _safe_remove(filepath)
         c = canvas.Canvas(filepath, pagesize=A4)
         c.setTitle("数学练习题")
-        cur_y = first_page_start_y
-        page_started = True
-        draw_header()
-
-        if regular:
-            renumbered2 = [(seq, q, t) for seq, (i, t, q) in enumerate(regular, 1)]
-            regular_normal = [(seq, q, t) for seq, q, t in renumbered2 if t not in MIXED_TYPES]
-            regular_mixed = [(seq, q, t) for seq, q, t in renumbered2 if t in MIXED_TYPES]
-
-            if show_titles:
-                c.setFont(fn_sun, 12)
-                _draw_bold(c, lm, cur_y, f"基础计算（{len(regular)}题）", fn_sun, 12)
-                cur_y -= reg_row_h
-
-            col_w = uw / 4
-            for idx, (seq, question, _qtype) in enumerate(regular_normal):
-                col = idx % 4
-                if col == 0 and idx > 0:
-                    cur_y -= reg_row_h
-                    if cur_y < bm + reg_row_h:
-                        c.showPage()
-                        current_page[0] += 1
-                        draw_header()
-                        cur_y = other_page_start_y
-                x = lm + col * col_w
-                label = f"{seq:>3}. "
-                question = question.replace(" + ", "+").replace(" - ", "-").replace(" × ", "×").replace(" ÷ ", "÷")
-                parts = _split_frac_parts(question)
-                c.setFont(fn_sun, 11.5)
-                lw = c.stringWidth(label, fn_sun, 11)
-                c.drawString(x, cur_y, label)
-                _draw_mixed(c, x + lw, cur_y, parts, fn_sun, 11)
-
-            if regular_normal:
-                last_col = len(regular_normal) % 4
-                if last_col != 0:
-                    cur_y -= reg_row_h
-
-            if regular_mixed:
-                col_w_m = uw / 3
-                for idx, (seq, question, _qtype) in enumerate(regular_mixed):
-                    col = idx % 3
-                    if col == 0 and idx > 0:
-                        cur_y -= reg_row_h
-                        if cur_y < bm + reg_row_h:
-                            c.showPage()
-                            current_page[0] += 1
-                            draw_header()
-                            cur_y = other_page_start_y
-                    x = lm + col * col_w_m
-                    label = f"{seq:>3}. "
-                    parts = _split_frac_parts(question)
-                    c.setFont(fn_sun, 11.5)
-                    lw = c.stringWidth(label, fn_sun, 11)
-                    c.drawString(x, cur_y, label)
-                    _draw_mixed(c, x + lw, cur_y, parts, fn_sun, 11)
-
-        if advanced:
-            adv_font_size = 10.5
-            adv_line_gap = 5.5 * mm
-            adv_work_gap = 20 * mm
-
-            if regular:
-                cur_y -= reg_row_h + 4 * mm
-                if cur_y < bm + adv_line_gap + adv_work_gap:
-                    c.showPage()
-                    current_page[0] += 1
-                    draw_header()
-                    cur_y = other_page_start_y
-            else:
-                cur_y = first_page_start_y
-
-            if show_titles:
-                c.setFont(fn_sun, 12)
-                _draw_bold(c, lm, cur_y, f"运用题（{len(advanced)}题）", fn_sun, 12)
-                cur_y -= reg_row_h
-
-            col_gap = 6 * mm
-            col_w_adv = (uw - col_gap) / 2
-            left_x = lm
-            right_x = lm + col_w_adv + col_gap
-            text_w_adv = col_w_adv - FIGURE_SIZE_MM * mm - 2 * mm
-
-            pairs = []
-            for i in range(0, len(advanced), 2):
-                left_item = advanced[i]
-                right_item = advanced[i + 1] if i + 1 < len(advanced) else None
-                pairs.append((left_item, right_item))
-
-            for left_item, right_item in pairs:
-                left_label = f"{left_item[0] + 1}. "
-                left_qtext = _frac_to_text_export(left_item[1])
-                left_geo = is_geometry(left_item)
-                left_w = text_w_adv if left_geo else col_w_adv
-
-                right_label = f"{right_item[0] + 1}. " if right_item else ""
-                right_qtext = _frac_to_text_export(right_item[1]) if right_item else ""
-                right_geo = is_geometry(right_item) if right_item else False
-                right_w = text_w_adv if right_geo else col_w_adv
-
-                c.setFont(fn_sun, adv_font_size)
-                left_lines = wrap_text_adv(left_label + left_qtext, left_w, fn_sun, adv_font_size) if left_qtext else []
-                right_lines = wrap_text_adv(right_label + right_qtext, right_w, fn_sun, adv_font_size) if right_qtext else []
-                max_lines = max(len(left_lines), len(right_lines))
-                pair_height = max_lines * adv_line_gap + adv_work_gap
-
-                if cur_y - pair_height < bm:
-                    c.showPage()
-                    current_page[0] += 1
-                    draw_header()
-                    cur_y = other_page_start_y
-
-                c.setFont(fn_sun, adv_font_size)
-                for li, line_txt in enumerate(left_lines):
-                    c.drawString(left_x, cur_y - li * adv_line_gap, line_txt)
-                draw_fig_right(left_item, left_x, col_w_adv, cur_y)
-
-                if right_item:
-                    c.setFont(fn_sun, adv_font_size)
-                    for li, line_txt in enumerate(right_lines):
-                        c.drawString(right_x, cur_y - li * adv_line_gap, line_txt)
-                    draw_fig_right(right_item, right_x, col_w_adv, cur_y)
-
-                cur_y -= pair_height
-
-        if use_answer and all_answers:
-            c.showPage()
-            current_page[0] += 1
-            draw_header()
-            cur_y = other_page_start_y
-            c.setFont(fn_sun, 14)
-            c.drawCentredString(pw / 2, cur_y - 3 * mm, "参 考 答 案")
-            cur_y -= 10 * mm + 3 * mm
-            c.setFont(fn_sun, 9)
-            ans_line_h = 6 * mm
-            ans_sep = "    "
-            ans_texts = []
-            for i, ans in enumerate(all_answers):
-                ans_str = _safe_fmt_answer(ans)
-                ans_texts.append(f"{i + 1}. {ans_str}")
-            cur_line = ""
-            for txt in ans_texts:
-                test = cur_line + (ans_sep + txt if cur_line else txt)
-                if c.stringWidth(test, fn_sun, 9) <= uw:
-                    cur_line = test
-                else:
-                    if cur_line:
-                        if cur_y < bm + ans_line_h:
-                            c.showPage()
-                            current_page[0] += 1
-                            draw_header()
-                            c.setFont(fn_sun, 9)
-                        c.drawString(lm, cur_y, cur_line)
-                        cur_y -= ans_line_h
-                    cur_line = txt
-            if cur_line:
-                if cur_y < bm + ans_line_h:
-                    c.showPage()
-                    current_page[0] += 1
-                    draw_header()
-                    c.setFont(fn_sun, 9)
-                c.drawString(lm, cur_y, cur_line)
-                cur_y -= ans_line_h
-
+        _draw_document(c, questions_data, [total_pages], use_vertical, use_answer,
+                       show_titles, mode, grade, use_bracket)
         c.save()
+        try:
+            os.remove(part)
+        except OSError:
+            pass
+    else:
+        # 单页：第一遍页脚已正确(1/1)，直接原子替换
+        if os.path.exists(filepath):
+            try:
+                os.remove(filepath)
+            except OSError:
+                pass
+        try:
+            os.replace(part, filepath)
+        except OSError:
+            pass
 
     return filepath

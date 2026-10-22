@@ -1,16 +1,62 @@
 # main.py — 小学出题工具箱 (tkinter 版)
+import sys
+import ctypes
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 from shuxue.shuxue_ui import ShuxueTabWidget
 from zitie.zi_tie_ui import ZiTieTabWidget
 from zuowen.zuowen_ui import ZuowenTabWidget
 from zhenti.zhenti_ui import ZhentiTabWidget
+from yingyu.yingyu_ui import YingyuTabWidget
+from quwei.quwei_ui import QuweiTabWidget
+from dashang.dashang_ui import DashangTabWidget
 from constants import BG_COLOR
 
 # 版本信息（每10位进1，如 V1.0.10 -> V1.1.0）
-VERSION = "V1.1.1"
+VERSION = "V1.2.5"
 APP_NAME = "小学出题工具箱"
+
+# ---------- 禁止多开（Windows 命名互斥体） ----------
+_MUTEX_NAME = "Local\\XiaoxueChutiToolbox_SingleInstance"
+_mutex_handle = None  # 保持引用，进程存活期间互斥体一直持有
+ERROR_ALREADY_EXISTS = 183
+
+
+def acquire_single_instance():
+    """创建命名互斥体；若已存在说明程序已在运行，返回 False。"""
+    global _mutex_handle
+    kernel32 = ctypes.windll.kernel32
+    _mutex_handle = kernel32.CreateMutexW(None, False, _MUTEX_NAME)
+    return kernel32.GetLastError() != ERROR_ALREADY_EXISTS
+
+
+def activate_existing_window():
+    """找到已运行实例的主窗口并激活到前台。返回是否成功。"""
+    user32 = ctypes.windll.user32
+    hwnd = user32.FindWindowW(None, f"{APP_NAME} {VERSION}")
+    if not hwnd:
+        # 标题可能因版本不同而变化，按前缀模糊查找
+        found = []
+
+        @ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_void_p, ctypes.c_void_p)
+        def _enum(h, _):
+            buf = ctypes.create_unicode_buffer(256)
+            user32.GetWindowTextW(h, buf, 256)
+            if buf.value.startswith(APP_NAME):
+                found.append(h)
+                return False
+            return True
+
+        user32.EnumWindows(_enum, None)
+        hwnd = found[0] if found else None
+    if hwnd:
+        SW_RESTORE = 9
+        if user32.IsIconic(hwnd):   # 最小化则先还原
+            user32.ShowWindow(hwnd, SW_RESTORE)
+        user32.SetForegroundWindow(hwnd)
+        return True
+    return False
 
 
 class MathGeneratorApp:
@@ -71,10 +117,30 @@ class MathGeneratorApp:
         self.zhenti_tab = ZhentiTabWidget(notebook)
         notebook.add(self.zhenti_tab.frame, text=" 真 题 ")
 
+        # 英语标签页
+        self.yingyu_tab = YingyuTabWidget(notebook)
+        notebook.add(self.yingyu_tab.frame, text=" 英 语 ")
+
+        # 趣味标签页（简笔画 / 迷宫运笔 / 数独 / 幻方）
+        self.quwei_tab = QuweiTabWidget(notebook)
+        notebook.add(self.quwei_tab.frame, text=" 趣 味 ")
+
+        # 打赏标签页
+        self.dashang_tab = DashangTabWidget(notebook)
+        notebook.add(self.dashang_tab.frame, text=" 打 赏 ")
+
     def run(self):
         self.root.mainloop()
 
 
 if __name__ == "__main__":
+    if not acquire_single_instance():
+        # 已有实例：把它的窗口拉到前台；找不到窗口才弹提示
+        if not activate_existing_window():
+            _tip = tk.Tk()
+            _tip.withdraw()
+            messagebox.showwarning(APP_NAME, f"{APP_NAME}已在运行，请勿重复打开！")
+            _tip.destroy()
+        sys.exit(0)
     app = MathGeneratorApp()
     app.run()

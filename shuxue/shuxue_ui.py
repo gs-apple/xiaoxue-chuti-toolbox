@@ -36,6 +36,7 @@ class ShuxueTabWidget:
         "工程问题": "cb_project", "行程问题": "cb_form", "浓度问题": "cb_concentration",
         "图形计数": "cb_graph_count", "图形分割": "cb_graph_split",
         "周长面积": "cb_perimeter", "立体图形": "cb_3d_graph", "等积变形": "cb_equal_area",
+        "时钟运用": "cb_clock",
         "奇偶分析": "cb_odd_even", "整除问题": "cb_whole_div", "余数问题": "cb_remainder",
         "质/合问题": "cb_prime", "公约数/倍数": "cb_gcd_lcm",
         "推理问题": "cb_logic", "统筹问题": "cb_arrange", "最优化": "cb_best",
@@ -104,6 +105,9 @@ class ShuxueTabWidget:
         self.cb_mix_dec = self._cb_spin(mix, "小数混合")
         self.cb_mix_frac = self._cb_spin(mix, "分数混合")
 
+        # 记录基础题与提升题的分界点（用于差异化默认值）
+        self._basic_count = len(self._checkboxes)  # 基础题个数
+
         # 5. 快速出题
         quick = ttk.LabelFrame(calc_grid, text="快速出题")
         quick.grid(row=1, column=0, padx=1, pady=0, sticky="nsew")
@@ -115,7 +119,7 @@ class ShuxueTabWidget:
         self.grade_combo.current(0)
         self.grade_combo.pack(side=tk.LEFT)
         self.quick_count_edit = tk.Entry(qrow, width=5, justify="center")
-        self.quick_count_edit.insert(0, "30")
+        self.quick_count_edit.insert(0, "29")
         self.quick_count_edit.pack(side=tk.LEFT, padx=4)
         self.btn_onekey = tk.Button(quick, text="一键出题", width=12,
                                     command=self.do_onekey)
@@ -130,7 +134,8 @@ class ShuxueTabWidget:
         b1 = tk.Frame(addf, bg=BG)
         b1.pack(fill=tk.X, padx=2, pady=1)
         tk.Checkbutton(b1, text="带括号", variable=self._bracket_var).pack(side=tk.LEFT)
-        tk.Checkbutton(b1, text="竖式", variable=self._vertical_var).pack(side=tk.RIGHT)
+        tk.Checkbutton(b1, text="竖式", variable=self._vertical_var,
+                      command=self._on_vertical_toggle).pack(side=tk.RIGHT)
         tk.Checkbutton(addf, text="包含答案", variable=self._answer_var).pack(anchor="w", padx=2)
 
         # --- 提升题 ---
@@ -169,6 +174,7 @@ class ShuxueTabWidget:
         self.cb_perimeter = self._cb_spin(geo, "周长面积")
         self.cb_3d_graph = self._cb_spin(geo, "立体图形")
         self.cb_equal_area = self._cb_spin(geo, "等积变形")
+        self.cb_clock = self._cb_spin(geo, "时钟运用")
 
         num = ttk.LabelFrame(adv_grid, text="数论类")
         num.grid(row=0, column=3, padx=1, pady=0, sticky="nsew")
@@ -185,6 +191,11 @@ class ShuxueTabWidget:
         self.cb_best = self._cb_spin(logic, "最优化")
         self.cb_draw = self._cb_spin(logic, "抽屉问题")
         self.cb_container = self._cb_spin(logic, "容斥问题")
+
+        # 提升题编辑框默认值 = 14（基础题保持 124）
+        for _, e, _ in self._checkboxes[self._basic_count:]:
+            e.delete(0, tk.END)
+            e.insert(0, "14")
 
         # --- 功能区 (先 pack，放底部) ---
         func_group = ttk.LabelFrame(math_layout, text="功能区")
@@ -223,19 +234,29 @@ class ShuxueTabWidget:
                              pady=0, highlightthickness=0, borderwidth=0)
         cb.pack(side=tk.LEFT)
         e = tk.Entry(f, width=4, justify="center", highlightthickness=0)
-        e.insert(0, "20")
+        e.insert(0, "124")
         e.pack(side=tk.RIGHT)
         attr = self._ATTR_MAP.get(text, text)
         self._checkboxes.append((var, e, attr))
         return f
 
     def clear_all_checks(self):
-        for var, entry, _ in self._checkboxes:
+        for i, (var, entry, _) in enumerate(self._checkboxes):
             var.set(0)
             entry.delete(0, tk.END)
-            entry.insert(0, "20")
+            if i < self._basic_count:
+                entry.insert(0, "24" if self._vertical_var.get() else "124")
+            else:
+                entry.insert(0, "14")
         self.preview_text.delete("1.0", tk.END)
         self._questions_data = None
+
+    def _on_vertical_toggle(self):
+        """勾选/取消「竖式」时，基础计算题编辑框默认值在 24 / 124 间自动切换。"""
+        val = "24" if self._vertical_var.get() else "124"
+        for var, entry, _ in self._checkboxes[:self._basic_count]:
+            entry.delete(0, tk.END)
+            entry.insert(0, val)
 
     def _get_selections(self):
         selections = {}
@@ -245,7 +266,7 @@ class ShuxueTabWidget:
                     count = int(entry.get())
                     count = max(1, min(count, 10000))
                 except (ValueError, TypeError):
-                    count = 20
+                    count = 124
                 selections[attr] = count
         return selections
 
@@ -262,7 +283,7 @@ class ShuxueTabWidget:
         self.btn_generate.config(state="disabled", text="生成中...")
         self._gen_thread = threading.Thread(
             target=self._run_generate,
-            args=(generate_questions, selections, use_bracket, grade),
+            args=(generate_questions, selections, use_bracket, grade, False),
             daemon=True
         )
         self._gen_thread.start()
@@ -275,7 +296,7 @@ class ShuxueTabWidget:
             count = int(self.quick_count_edit.get())
             count = max(1, min(count, 10000))
         except (ValueError, TypeError):
-            count = 30
+            count = 29
 
         self.btn_onekey.config(state="disabled", text="生成中...")
         self._gen_thread = threading.Thread(
@@ -315,7 +336,7 @@ class ShuxueTabWidget:
         advance_qs = self._questions_data.get("advance", [])
         total_count = len(basic_qs) + len(advance_qs)
 
-        lines = [f"日期：______年_____月_____日         出题总量：{total_count} 题", ""]
+        lines = [f"日期:_____年_____月____日         出题总量：{total_count} 题", ""]
 
         if basic_qs:
             lines.append("【基础题】")

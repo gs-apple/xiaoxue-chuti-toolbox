@@ -16,3 +16,18 @@ dist/
 __pycache__/
 *.pyc
 venv/
+.venv/
+
+# 一次性脚本与中间产物（教材提取 / 爬虫 dump / 数据备份）
+tmp_*.py
+tmp_slb_extract/
+sl_extract/
+suyang_dump/
+*.bak
+*.bak[0-9]*
+*.bak*_clean
+compare_report.txt
+
+# 清理备份包
+清理备份_*.zip
+_清理备份_*/
