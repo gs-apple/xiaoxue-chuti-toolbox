@@ -1,5 +1,7 @@
 # yingyu_ui.py — 英语标签页（重建设计：内容 / 方式 / 字体 / 方向）
+import os
 import random
+import subprocess
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 
@@ -164,9 +166,17 @@ class YingyuTabWidget:
         btn_clear = GradientButton(finner, text="清空", width=100, height=32, command=self.on_clear)
         btn_pdf = GradientButton(finner, text="导出PDF", width=100, height=32, command=self.on_export_pdf)
 
+        # 「打开数据」小按钮：用记事本直接打开数据文件，客户也能自助维护词句
+        btn_data = GradientButton(finner, text="打开数据", width=72, height=32,
+                                  command=self.on_open_data,
+                                  color_top="#93c5fd", color_mid="#60a5fa", color_bot="#3b82f6",
+                                  hover_top="#bfdbfe", hover_mid="#93c5fd", hover_bot="#60a5fa")
+
         for i, b in enumerate((btn_add, btn_addword, btn_gen, btn_clear, btn_pdf), 1):
             finner.columnconfigure(i, weight=1)
-            b.grid(row=0, column=i, padx=10)
+            b.grid(row=0, column=i, padx=6)
+        finner.columnconfigure(6, weight=0)
+        btn_data.grid(row=0, column=6, padx=(4, 0))
 
         # 预览区（填充中部剩余空间，功能区固定在底边）
         prev_frame = tk.Frame(main, bg=BG)
@@ -263,8 +273,35 @@ class YingyuTabWidget:
         self._refresh_units()
         self._update_preview()
 
+    def on_open_data(self):
+        """用记事本打开数据文件，方便直接编辑。
+
+        数据就是 yingyu/data/yingyu_data.txt 这一个纯文本文件，改完保存后
+        程序会自动感知（读取时比对文件修改时间），不用重启。
+        """
+        try:
+            from yingyu import yingyu_store as store
+            path = store.data_path()
+        except Exception as e:
+            messagebox.showerror("打开失败", f"无法定位数据文件：{e}")
+            return
+        if not os.path.exists(path):
+            messagebox.showwarning(
+                "文件不存在",
+                f"数据文件还没生成：\n{path}\n\n请先添加一个单词，程序会自动创建。")
+            return
+        try:
+            os.startfile(path)  # Windows 下用默认程序（通常是记事本）打开
+        except AttributeError:
+            try:
+                subprocess.Popen(["xdg-open", path])
+            except Exception as e:
+                messagebox.showinfo("数据文件位置", f"请手动打开：\n{path}\n\n({e})")
+        except Exception as e:
+            messagebox.showinfo("数据文件位置", f"请手动打开：\n{path}\n\n({e})")
+
     def on_add_version(self):
-        # 弹窗输入版本名 → 写 ini + 建空白 json；成功则刷新并选中新版本
+        # 弹窗输入版本名 → 在数据文件里建一个占位单元；成功则刷新并选中新版本
         name = simpledialog.askstring("新增版本", "请输入新版本名称（如：北师大版）：", parent=self.frame)
         if not name:
             return

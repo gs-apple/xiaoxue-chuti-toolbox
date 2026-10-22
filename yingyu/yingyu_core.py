@@ -6,36 +6,35 @@ import random
 
 from constants import BASE_DIR
 
-# ── 扁平数据层 ───────────────────────────────────────────────
-# 数据放在 yingyu_data.py（纯扁平 .py，风格同 zitie_data.py），本文件负责加载/解析/写回，
-# 与 zitie 的「zitie_data.py(数据) + zitie_core.py(逻辑)」同构。
-#   ENGLISH_DATA[版本][年级][学期]["Unit N"] = {"words": 多行字符串, "课文": 多行字符串}
+# ── 数据层 ───────────────────────────────────────────────────
+# 数据放在单个纯文本文件 yingyu/data/yingyu_data.txt（随程序目录分发，客户开箱即用），
+# 格式是「分节 + 行式」，记事本可直接编辑：
+#   [版本] 年级 学期 Unit N      ← 单元分节
+#   .单词 / .课文 / .表达句       ← 内容块
 #   词行：  单词 /音标/ 中文意思
 #   句行：  英文 || 中文
-import os as _os
-import json as _json
+# 解析/写回/原子保存在 yingyu_store.py；内存里保留原始行，写回时原样输出，
+# 因此 * 三会词标记、行内空格、|| 分隔等在存盘时绝不会被改写。
+try:
+    from yingyu import yingyu_store as _store
+except ImportError:  # 直接以脚本方式运行时
+    import yingyu_store as _store
 
-_DATA_PATH = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "yingyu_data.py")
+import os as _os
+
 
 # 单元名（前 6 个与学期字典的 Unit 1~6 对应；"全部单元" 为汇总项）
 UNIT_NAMES = ["Unit 1", "Unit 2", "Unit 3", "Unit 4", "Unit 5", "Unit 6", "全部单元"]
 
-_CACHE = {}
-
-
 def _reload():
-    """重新执行 yingyu_data.py，返回最新的 ENGLISH_DATA 字典（带缓存）。"""
-    ns = {}
-    src = open(_DATA_PATH, encoding="utf-8").read()
-    exec(compile(src, _DATA_PATH, "exec"), ns)
-    data = ns.get("ENGLISH_DATA", {})
-    _CACHE["data"] = data
-    return data
+    """从数据文件重新读取（yingyu/data/yingyu_data.txt），返回最新结构（带缓存）。
 
+    结构：{版本: {年级: {学期: {"Unit N": {"单词": [行...], "课文": [...], "表达句": [...]}}}}}
+    """
+    return _store.load(force=True)
 
 def _get_data():
-    return _CACHE.get("data") or _reload()
-
+    return _store.load()
 
 # 词行解析：
 #   带音标：  [可选*]单词（可含空格） /音标（可含空格）/ 中文意思
@@ -96,10 +95,8 @@ _PART_TITLE_RE = re.compile(
     r"^(Let's talk|Let's learn|Let's sing|Let's chant|Listen and do|Listen and chant|Look and match|Role-play|Ask and answer|Guess and check|Count and say|Do a survey|Play with hand shadows|Look and talk|Colour and say|Choose and role-play|Choose and say|Look, say and guess|Think and say|Play a guessing game|Let's play)\s+(Part\s*[A-Za-z0-9]+|[AB])$",
     re.I)
 
-
 def _is_part_header(en):
     return bool(_PART_RE.match(en or ""))
-
 
 def _is_section_header(en):
     # 归一化弯/直引号，兼容数据里混用两种 Let's 写法（否则板块标题会被误判为普通句子）
@@ -111,7 +108,6 @@ def _is_section_header(en):
     if _PART_TITLE_RE.match(en) or _PART_TITLE_RE.match(norm):
         return True
     return False
-
 
 def _parse_words(s):
     out = []
@@ -145,7 +141,6 @@ def _parse_words(s):
         out.append({"word": word.lstrip('*').strip(), "phonetic": phonetic, "meaning": meaning})
     return out
 
-
 def _parse_sentences(s):
     out = []
     for line in (s or "").splitlines():
@@ -160,17 +155,18 @@ def _parse_sentences(s):
         out.append({"en": en.strip(), "zh": zh.strip()})
     return out
 
-
 def _fmt_word(w):
     return f"{w.get('word','')} {w.get('phonetic','')} {w.get('meaning','')}".strip()
-
 
 def _fmt_sent(s):
     return f"{s.get('en','')} || {s.get('zh','')}"
 
-
 def _unit_list(semester_dict):
-    """学期字典 → 按序的单元 dict 列表（单元数随数据动态，不再写死 6）。"""
+    """学期字典 → 按序的单元 dict 列表（单元数随数据动态，不再写死 6）。
+
+    数据层存的是原始行列表，这里适配成上层一直使用的
+    {"words": 多行字符串, "课文": ..., "表达句": ...} 契约。
+    """
     def _num(k):
         try:
             return int(k.split()[1])
@@ -180,26 +176,17 @@ def _unit_list(semester_dict):
     for k in sorted(semester_dict.keys(), key=_num):
         if not k.startswith("Unit"):
             continue
-        u = semester_dict[k]
-        units.append({
-            "words": u.get("words", "") if isinstance(u, dict) else "",
-            "课文": u.get("课文", "") if isinstance(u, dict) else "",
-            "表达句": u.get("表达句", "") if isinstance(u, dict) else "",
-        })
+        units.append(_store.unit_to_legacy(semester_dict[k]))
     return units
-
 
 def get_versions():
     return list(_get_data().keys())
 
-
 def get_grades(version):
     return list(_get_data().get(version, {}).keys())
 
-
 def get_semesters(version, grade):
     return list(_get_data().get(version, {}).get(grade, {}).keys())
-
 
 def get_units(version=None, grade=None, semester=None, fallback=6):
     """返回单元下拉项：Unit 1 ~ Unit N + "全部单元"，N 取该版本/年级/学期实际单元数。"""
@@ -209,18 +196,16 @@ def get_units(version=None, grade=None, semester=None, fallback=6):
             n = len(get_units_data(version, grade, semester))
         except Exception:
             n = fallback
-    if n < 1:
-        n = 1
+    if n < fallback:
+        n = fallback  # 单元数不足常规 6 个时补足（新增版本后还没填内容也能正常选单元）
     names = [f"Unit {i+1}" for i in range(n)]
     names.append("全部单元")
     return names
-
 
 def get_units_data(version, grade, semester):
     vd = _get_data().get(version, {})
     sd = vd.get(grade, {})
     return _unit_list(sd.get(semester, {}))
-
 
 def get_unit_words(version, grade, semester, unit_index):
     units = get_units_data(version, grade, semester)
@@ -230,7 +215,6 @@ def get_unit_words(version, grade, semester, unit_index):
         return _parse_words(units[unit_index]["words"])
     return [w for u in units for w in _parse_words(u["words"])]
 
-
 def get_unit_sentences(version, grade, semester, unit_index):
     units = get_units_data(version, grade, semester)
     if not units or unit_index < 0:
@@ -238,7 +222,6 @@ def get_unit_sentences(version, grade, semester, unit_index):
     if unit_index < len(units):
         return _parse_sentences(units[unit_index]["课文"])
     return [s for u in units for s in _parse_sentences(u["课文"])]
-
 
 def get_unit_expressions(version, grade, semester, unit_index):
     """表达句（日常用语）取数，结构与课文一致（en/zh）。"""
@@ -249,13 +232,12 @@ def get_unit_expressions(version, grade, semester, unit_index):
         return _parse_sentences(units[unit_index]["表达句"])
     return [s for u in units for s in _parse_sentences(u["表达句"])]
 
-
 # ── 常用词句（分类词表，独立于 版本/年级/学期/单元） ──
 # 数据放在 yingyu_common.py（同款扁平格式），本文件负责加载与解析。
-# 与 yingyu_data.py 分开存放，避免 add_version/add_entry 重写 yingyu_data.py 时误删。
+# 独立文件存放：常用词表是固定资源，不与课内数据（yingyu/data/yingyu_data.txt）混在一起，
+# 这样编辑课内数据时不会碰到它。
 _COMMON_PATH = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "yingyu_common.py")
 _COMMON_CACHE = {}
-
 
 def _get_common():
     if "common" not in _COMMON_CACHE:
@@ -267,23 +249,19 @@ def _get_common():
         _COMMON_CACHE["common"] = ns.get("COMMON_WORDS", {})
     return _COMMON_CACHE["common"]
 
-
 def get_common_categories():
     """返回常用词句分类名列表（按 yingyu_common.py 中书写顺序）。"""
     return list(_get_common().keys())
 
-
 def get_common_words(category):
     """返回某分类下的单词列表（已解析为 dict 列表）。"""
     return _parse_words(_get_common().get(category, ""))
-
 
 # ── 国际音标表（内容→音标选项） ──
 # 数据放在 yingyu_phonetic.py（分组键：元音 / 辅音），行格式：
 #   音标 读法 中文读法 | 例词1 意思1；例词2 意思2；例词3 意思3
 _PHONETIC_PATH = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "yingyu_phonetic.py")
 _PHONETIC_CACHE = {}
-
 
 def _get_phonetic():
     if "phonetic" not in _PHONETIC_CACHE:
@@ -295,11 +273,9 @@ def _get_phonetic():
         _PHONETIC_CACHE["phonetic"] = ns.get("PHONETIC_GROUPS", {})
     return _PHONETIC_CACHE["phonetic"]
 
-
 def get_phonetic_groups():
     """返回音标一级分组名列表（元音 / 辅音，按书写顺序）。"""
     return list(_get_phonetic().keys())
-
 
 def get_phonetic_subgroups(group):
     """返回某一级分组下的二级分组名列表。"""
@@ -307,7 +283,6 @@ def get_phonetic_subgroups(group):
     if isinstance(data, dict):
         return list(data.keys())
     return []
-
 
 def _parse_phonetic_items(group_text):
     out = []
@@ -338,7 +313,6 @@ def _parse_phonetic_items(group_text):
         })
     return out
 
-
 def _parse_examples(examples_str):
     """把例词字符串解析为 (word, ph, meaning) 列表。
     支持两种格式：
@@ -362,7 +336,6 @@ def _parse_examples(examples_str):
             meaning = sp[1].strip() if len(sp) > 1 else ""
         res.append((word, ph, meaning))
     return res
-
 
 def _draw_info_line(c, x, y, item, sim_font, ipa_font, size, max_n=1):
     """混排绘制例词信息行：中文读音(zh) + 例词(单词 /音标/ 中文意思)。
@@ -425,7 +398,6 @@ def _draw_info_line(c, x, y, item, sim_font, ipa_font, size, max_n=1):
             cur += stringWidth(practice, ipa_font, psize)
     return cur
 
-
 def get_phonetic_items():
     """返回全部音标条目（dict 列表），每条含 group（级）和 sub（二级）字段。"""
     out = []
@@ -445,129 +417,87 @@ def get_phonetic_items():
                 out.append(it)
     return out
 
-
-def _dump(data):
-    """把扁平内存结构写回 yingyu_data.py（同款格式，安全全量重写）。"""
-    L = []
-    L.append('# yingyu_data.py — 英语单词/课文/表达句数据（扁平格式，可直接手改，风格同 zitie_data.py）')
-    L.append('#')
-    L.append('# 结构：ENGLISH_DATA[版本][年级][学期]["Unit N"] = {"words": 多行字符串, "课文": 多行字符串, "表达句": 多行字符串}')
-    L.append('# 单词每行：  单词 /音标/ 中文意思      例： team /tiːm/ 队；组')
-    L.append('# 课文/表达句每行：  英文 || 中文      例： Hello! || 你好！')
-    L.append('# 加一个词：在对应 Unit 的 words 三引号里加一行即可（不用懂 JSON、不用写括号）。')
-    L.append('# 加一个版本：直接在这里加一个顶级 [版本名] 段，或用软件「新增版本」按钮。')
-    L.append('')
-    L.append('ENGLISH_DATA = {')
-    for v, gdict in data.items():
-        L.append(f'    {_json.dumps(v, ensure_ascii=False)}: {{')
-        for g, sdict in gdict.items():
-            L.append(f'        {_json.dumps(g, ensure_ascii=False)}: {{')
-            for s, units in sdict.items():
-                L.append(f'            {_json.dumps(s, ensure_ascii=False)}: {{')
-                keys = sorted(units.keys(), key=lambda k: int(k.split()[1]) if k.split()[1].isdigit() else 99)
-                for uname in keys:
-                    unit = units[uname]
-                    L.append(f'                {_json.dumps(uname, ensure_ascii=False)}: {{')
-                    wl = unit.get("words", "")
-                    sl = unit.get("课文", "")
-                    if wl:
-                        L.append('                    "words": """')
-                        L.append(wl)
-                        L.append('                    """,')
-                    else:
-                        L.append('                    "words": "",')
-                    if sl:
-                        L.append('                    "课文": """')
-                        L.append(sl)
-                        L.append('                    """,')
-                    else:
-                        L.append('                    "课文": "",')
-                    el = unit.get("表达句", "")
-                    if el:
-                        L.append('                    "表达句": """')
-                        L.append(el)
-                        L.append('                    """,')
-                    else:
-                        L.append('                    "表达句": "",')
-                    L.append('                },')
-                L.append('            },')
-            L.append('        },')
-        L.append('    },')
-    L.append('}')
-    return "\n".join(L) + "\n"
-
-
 def add_version(name):
-    """新增版本：在 ENGLISH_DATA 加一个顶级段（空模板），写回 yingyu_data.py。"""
+    """新增版本：建一个只含占位单元的版本，原子写回数据文件。
+
+    占位单元会在文件里留下一行分节标题，用户照着补内容即可。
+    """
     name = (name or "").strip()
     if not name:
         return False, "版本名不能为空。"
+    if "[" in name or "]" in name:
+        return False, "版本名里不能包含 [ 或 ]（会与分节标题冲突）。"
     data = _get_data()
     if name in data:
         return False, f"版本「{name}」已存在，请勿重复添加。"
-    grades = ["三年级", "四年级", "五年级", "六年级"]
-    sems = ["上学期", "下学期"]
-    empty = {g: {s: {f"Unit {i+1}": {"words": "", "课文": "", "表达句": ""} for i in range(6)} for s in sems} for g in grades}
-    data[name] = empty
+    data[name] = {"三年级": {"上学期": {"Unit 1": _store.empty_unit()}}}
     try:
-        open(_DATA_PATH, "w", encoding="utf-8").write(_dump(data))
+        path = _store.save(data)
     except Exception as e:
-        return False, f"写回 yingyu_data.py 失败：{e}"
-    _CACHE.clear()
-    return True, f"已新增版本「{name}」，请在 yingyu_data.py 中对应的 Unit 下补充单词 / 课文 / 表达句。"
-
+        return False, f"写回数据文件失败：{e}"
+    return True, (
+        f"已新增版本「{name}」。\n"
+        f"请打开数据文件，找到这一节补充内容：\n"
+        f"    [{name}] 三年级 上学期 Unit 1\n\n"
+        f"    .单词\n    team /tiːm/ 队；组\n\n"
+        f"    .课文\n    Hello! || 你好！\n\n"
+        f"数据文件：{path}"
+    )
 
 def add_entry(version, grade, semester, unit_index, entry_type, **fields):
-    """新增一条单词或句子，写回 yingyu_data.py 并刷新缓存。"""
+    """新增一条单词或句子：只向目标内容块**追加一行**，然后原子写回。
+
+    与旧实现的关键区别：不再把整块「解析成结构 → 重新格式化」，所以同单元里
+    其它行的 * 三会词标记、无 || 的纯英文行、行内空格都原样保留。
+    """
     if unit_index < 0:
         return False, "请选择一个单元。"
     data = _get_data()
     if version not in data:
         return False, f"版本「{version}」不存在。"
-    gd = data.setdefault(version, {})
-    sd = gd.setdefault(grade, {})
-    ud = sd.setdefault(semester, {})
     uname = f"Unit {unit_index + 1}"
-    unit = ud.setdefault(uname, {"words": "", "课文": "", "表达句": ""})
+    unit = (data.setdefault(version, {})
+                .setdefault(grade, {})
+                .setdefault(semester, {})
+                .setdefault(uname, _store.empty_unit()))
+    for _k in _store.BLOCKS:
+        unit.setdefault(_k, [])
+
     if entry_type == "word":
         w = (fields.get("word") or "").strip()
         if not w:
             return False, "单词不能为空。"
-        words = _parse_words(unit.get("words", ""))
-        if any(x["word"] == w for x in words):
+        existing = _parse_words("\n".join(unit[_store.BLOCK_WORDS]))
+        if any(x["word"] == w for x in existing):
             return False, f"单词「{w}」在本单元已存在，无需重复添加。"
-        words.append({"word": w, "phonetic": (fields.get("phonetic") or "").strip(), "meaning": (fields.get("meaning") or "").strip()})
-        unit["words"] = "\n".join(_fmt_word(x) for x in words)
-    elif entry_type == "sentence":
+        unit[_store.BLOCK_WORDS].append(_fmt_word({
+            "word": w,
+            "phonetic": (fields.get("phonetic") or "").strip(),
+            "meaning": (fields.get("meaning") or "").strip(),
+        }))
+        label = w
+    elif entry_type in ("sentence", "expression"):
         en = (fields.get("en") or "").strip()
         if not en:
             return False, "英文句子不能为空。"
-        sents = _parse_sentences(unit.get("课文", ""))
-        if any(x["en"] == en for x in sents):
+        key = _store.BLOCK_TEXT if entry_type == "sentence" else _store.BLOCK_EXPR
+        existing = _parse_sentences("\n".join(unit[key]))
+        if any(x["en"] == en for x in existing):
             return False, f"句子「{en}」在本单元已存在，无需重复添加。"
-        sents.append({"en": en, "zh": (fields.get("zh") or "").strip()})
-        unit["课文"] = "\n".join(_fmt_sent(x) for x in sents)
-    elif entry_type == "expression":
-        en = (fields.get("en") or "").strip()
-        if not en:
-            return False, "英文句子不能为空。"
-        exps = _parse_sentences(unit.get("表达句", ""))
-        if any(x["en"] == en for x in exps):
-            return False, f"表达句「{en}」在本单元已存在，无需重复添加。"
-        exps.append({"en": en, "zh": (fields.get("zh") or "").strip()})
-        unit["表达句"] = "\n".join(_fmt_sent(x) for x in exps)
+        zh = (fields.get("zh") or "").strip()
+        unit[key].append(_fmt_sent({"en": en, "zh": zh}) if zh else en)
+        label = en
     else:
         return False, "未知的条目类型。"
+
     try:
-        open(_DATA_PATH, "w", encoding="utf-8").write(_dump(data))
+        _store.save(data)
     except Exception as e:
-        return False, f"写回 yingyu_data.py 失败：{e}"
-    _CACHE.clear()
-    return True, f"已添加至 {version} · {grade}{semester} · {uname}。"
+        return False, f"写回数据文件失败：{e}"
+    return True, f"已添加「{label}」→ {version} · {grade}{semester} · {uname}"
 
 # 导出可用英文字体（用于四线三格上的英文书写）
 FONT_OPTIONS = ["舒窈衡水体", "手写体", "Helvetica", "Courier", "Times-Roman"]
-
 
 def _resolve_en_font(name):
     """将下拉选项解析为 reportlab 可用的字体名。
@@ -596,7 +526,6 @@ def _resolve_en_font(name):
                 pass
     return "Helvetica"
 
-
 # ── 单词字号：让单词大致填满四线三格，但留些余量不顶满 ──
 # 基线落在第 3 线（top - 2/3·GRID_H）。各字体在 1em 内的 cap 高度比例不同，
 # 据此反推点阵大小。默认 cap 目标 5.0mm（手写体已调好）；衡水体单独调小一点。
@@ -610,7 +539,6 @@ _WORD_SIZE_BY_FONT = {
     "Times-Roman": 17,
 }
 
-
 def _word_size_for(font_option):
     if font_option in _WORD_SIZE_BY_FONT:
         return _WORD_SIZE_BY_FONT[font_option]
@@ -623,7 +551,6 @@ def _word_size_for(font_option):
         "Times-Roman": 0.662,
     }.get(font_option, 0.70)
     return int(round(_WORD_CAP_TARGET_MM / (cap_frac * _MM_PER_PT)))
-
 
 class YingyuGenerator:
     """英语练习生成器：支持 单词记忆 / 课文（课本句子）/ 表达句（日常用语）。"""
@@ -672,7 +599,7 @@ class YingyuGenerator:
     # ───────── 文本渲染（用于界面预览） ─────────
     def render_text(self, content, style, version, grade, semester, items, unit_name="", direction="汉译英"):
         if not items:
-            return "（当前选区的词/句数据为空，请在 yingyu_data.py 中补充。）"
+            return "（当前选区的词/句数据为空，请点「打开数据」补充。）"
         lines = []
         _last_phon_key = ("", "")
         if content == "单词":
