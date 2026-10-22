@@ -1,6 +1,9 @@
 # 忽略 Claude 配置文件
 .claude/
 
+# WorkBuddy 项目数据目录（参考素材/工作日志，不入库）
+.workbuddy/
+
 # 忽略打包产物
 build/
 dist/
