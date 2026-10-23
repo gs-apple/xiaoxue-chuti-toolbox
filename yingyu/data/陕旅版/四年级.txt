@@ -854,7 +854,8 @@ Tell your father to put on a coat and take an umbrella.
 We miss you very much.
 Hope to see you soon.
 Best wishes!
-Yours,  Grandpa &amp; Grandma
+Yours,
+Grandpa & Grandma
 How is the weather today?
 What do you plan to do on Sunday?
 Read and think
