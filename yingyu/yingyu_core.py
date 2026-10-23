@@ -941,7 +941,7 @@ class YingyuGenerator:
                     last_top = top
                 n = len(grid_lines)
                 # 音标用 Times New Roman（含完整 IPA 字形，修复缺字）；意思用宋体
-                y_cap = last_top - GRID_H - CAP_GAP - 1.5 * mm   # 音标+释义再下移 1mm（-0.5mm → -1.5mm）
+                y_cap = last_top - GRID_H - CAP_GAP - 1.45 * mm  # 音标+释义较原版下移 0.95mm（净上移 0.05mm）
                 c.setFillColor(colors.black)
                 if content == "单词":
                     if phonetic:
@@ -1028,7 +1028,7 @@ class YingyuGenerator:
                         slot += 1
                         last_top = top
                 # caption 区域（与字帖模式位置一致，不画线）
-                y_cap = last_top - GRID_H - CAP_GAP - 1.5 * mm
+                y_cap = last_top - GRID_H - CAP_GAP - 1.45 * mm
                 if d == "汉译英":
                     caption_text = meaning if content == "单词" else zh
                     if caption_text:
