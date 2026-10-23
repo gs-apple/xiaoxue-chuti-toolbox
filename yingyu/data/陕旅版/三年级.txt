@@ -81,7 +81,7 @@ I /aɪ/ 我
 am /æm; əm/ 是
 no /nəʊ/ 不；不是
 not /nɒt/ 不
-sorry /ˈsɒri/ 对不起
+sorry /'sɒri/ 对不起
 look /lʊk/ 看
 who /huː/ 谁
 the /ðə; ði/ （指已提到或易领会到的人或事物）
@@ -139,7 +139,7 @@ sit down /sɪt daʊn/ 坐下
 may /meɪ/ 可以
 come /kʌm/ 来
 come in /kʌm ɪn/ 进来
-afternoon /ˌɑːftəˈnuːn/ 下午
+afternoon /ˌɑːftə'nuːn/ 下午
 Mr. /ˈmɪstə(r)/ 先生
 evening /ˈiːvnɪŋ/ 傍晚；晚上
 dad /dæd/ 爸爸
@@ -178,14 +178,17 @@ Good night, Miss Moon.
 how /haʊ/ 怎样；怎么
 fine /faɪn/ 健康的
 thank /θæŋk/ 感谢；谢谢
-very /ˈveri/ 非常
-well /wel/ 健康的
-thanks /θæŋks/ 谢谢
-this /ðɪs/ 这个
-nice /naɪs/ 好的
-to /tuː; tə/ 给；对；向；到
-meet /miːt/ 遇见
-too /tuː/ 也；太
+pen /pen/ 钢笔
+pencil /ˈpensl/ 铅笔
+ruler /ˈruːlə(r)/ 直尺
+an /ən; æn/ 一；一个
+*eraser /ɪˈreɪzə(r)/ 橡皮
+book /bʊk/ 书
+marker /ˈmɑːkə(r)/ 马克笔
+don't = do not /dəʊnt/ （助动词do的否定形式）
+but /bʌt/ 但是
+That's OK. /ðæts əʊˈkeɪ/ 没关系。
+Here you are. /hɪə(r) juː ɑː(r)/ 给你。
 
 .课文
 Unit 4
@@ -224,18 +227,10 @@ box /bɒks/ 盒子
 pencil box /ˈpensl bɒks/ 文具盒
 wow /waʊ/ 哇；呀
 do /duː; də/ （助动词）
-in /ɪn/ 在…… 里面
-pen /pen/ 钢笔
-pencil /ˈpensl/ 铅笔
-ruler /ˈruːlə(r)/ 直尺
-an /ən; æn/ 一；一个
-*eraser /ɪˈreɪzə(r)/ 橡皮
-book /bʊk/ 书
-marker /ˈmɑːkə(r)/ 马克笔
-don't = do not /dəʊnt/ （助动词 do 的否定形式）
-but /bʌt/ 但是
-That's OK. /ðæts əʊˈkeɪ/ 没关系。
-Here you are. /hɪə(r) juː ɑː(r)/ 给你。
+in /ɪn/ 在……里面
+it /ɪt/ 它
+it's = it is /ɪts/ 它是
+for /fɔː(r)/ 为；给
 
 .课文
 Unit 5
@@ -277,25 +272,14 @@ Oh, no!
 many /ˈmeni/ 很多
 how many /haʊ ˈmeni/ 多少
 so /səʊ/ 这么；那么
-one /wʌn/ 一
-two /tuː/ 二
-three /θriː/ 三
-four /fɔː(r)/ 四
-let /let/ 让；使
-let's = let us /lets/ 让我们
-read /riːd/ 读
-*together /təˈɡeðə(r)/ 一起
-five /faɪv/ 五
-six /sɪks/ 六
-seven /ˈsevən/ 七
-eight /eɪt/ 八
-nine /naɪn/ 九
-ten /ten/ 十
-what about /wɒt əˈbaʊt/ 怎么样
-*only /ˈəʊnli/ 仅仅；只有
-it /ɪt/ 它
-it's = it is /ɪts/ 它是
-for /fɔː(r)/ 为；给
+very /ˈveri/ 非常
+well /wel/ 健康的
+thanks /θæŋks/ 谢谢
+this /ðɪs/ 这个
+nice /naɪs/ 好的
+to /tuː; tə/ 给；对；向；到
+meet /miːt/ 遇见
+too /tuː/ 也；太
 
 .课文
 Unit 6
@@ -340,7 +324,7 @@ You're great!
 
 .单词
 play /pleɪ/ 玩
-with /wɪð/ 和…… 一起
+with /wɪð/ 和……一起
 toy /tɔɪ/ 玩具
 plane /pleɪn/ 飞机
 toy plane /tɔɪ pleɪn/ 玩具飞机
@@ -351,6 +335,22 @@ ship /ʃɪp/ 轮船
 toy ship /tɔɪ ʃɪp/ 玩具轮船
 that /ðæt/ 那个
 kite /kaɪt/ 风筝
+one /wʌn/ 一
+two /tuː/ 二
+three /θriː/ 三
+four /fɔː(r)/ 四
+let /let/ 让；使
+let's = let us /lets/ 让我们
+read /riːd/ 读
+*together /tə'geðə(r)/ 一起
+five /faɪv/ 五
+six /sɪks/ 六
+seven /ˈsevn/ 七
+eight /eɪt/ 八
+nine /naɪn/ 九
+ten /ten/ 十
+what about /wɒt əˈbaʊt/ 怎么样
+*only /ˈəʊnli/ 仅仅；只有
 bear /beə(r)/ 熊
 toy bear /tɔɪ beə(r)/ 玩具熊
 doll /dɒl/ 洋娃娃
@@ -471,7 +471,7 @@ hair /heə(r)/ 头发
 big /bɪɡ/ 大的
 its /ɪts/ 它的
 small /smɔːl/ 小的
-has /hæz/ （have 的第三人称单数形式）
+has /hæz/ （have的第三人称单数形式）
 baby /ˈbeɪbi/ 婴儿
 
 .课文
@@ -512,14 +512,14 @@ Aha!
 
 .单词
 these /ðiːz/ 这些
+leg /leɡ/ 腿
 arm /ɑːm/ 胳膊；手臂
 hand /hænd/ 手
 long /lɒŋ/ 长的
 those /ðəʊz/ 那些
-leg /leɡ/ 腿
 short /ʃɔːt/ 短的
 we /wiː/ 我们
-feet /fiːt/ 脚（foot 的复数形式）
+feet /fiːt/ 脚（foot的复数形式）
 body /ˈbɒdi/ 身体
 foot /fʊt/ 脚
 *guess /ɡes/ 猜测
@@ -570,14 +570,14 @@ That is the moon.
 .单词
 love /lʌv/ 爱；热爱
 family /ˈfæməli/ 家；家庭
-photo /ˈfəʊtəʊ/ 照片；相片
+photo /'fəʊtəʊ/ 照片；相片
 mother /ˈmʌðə(r)/ 母亲；妈妈
 father /ˈfɑːðə(r)/ 父亲；爸爸
+brother /ˈbrʌðə(r)/ 哥哥；弟弟
 grandpa /ˈɡrænpɑː/ 爷爷；姥爷
 grandma /ˈɡrænmɑː/ 奶奶；姥姥
 happy /ˈhæpi/ 幸福的；开心的
 sister /ˈsɪstə(r)/ 姐姐；妹妹
-brother /ˈbrʌðə(r)/ 哥哥；弟弟
 his /hɪz/ 他的
 her /hɜː(r)/ 她的
 cute /kjuːt/ 可爱的
@@ -623,10 +623,10 @@ Are you my mom?
 [下学期] Unit 4
 
 .单词
-doctor /ˈdɒktə(r)/ 医生
+doctor /'dɒktə(r)/ 医生
 cook /kʊk/ 厨师
-busy /ˈbɪzi/ 繁忙的
-driver /ˈdraɪvə(r)/ 司机
+busy /'bɪzi/ 繁忙的
+driver /'draɪvə(r)/ 司机
 nurse /nɜːs/ 护士
 kind /kaɪnd/ 善良的
 student /ˈstjuːdnt/ 学生
@@ -685,13 +685,13 @@ like /laɪk/ 喜欢
 cake /keɪk/ 蛋糕
 bread /bred/ 面包
 milk /mɪlk/ 牛奶
-them /ðəm/ 他们；她们；它们（宾格形式）
+them /ðəm, ðem/ 他们；她们；它们（宾格形式宾格形式）
 juice /dʒuːs/ 果汁
 water /ˈwɔːtə(r)/ 水
 candy /ˈkændi/ 糖果
 ice cream /ˌaɪs ˈkriːm/ 冰激凌
 have /hæv/ 吃
-some /sʌm/ 一些
+some /səm, sʌm/ 一些
 
 .课文
 Unit 5
@@ -733,18 +733,17 @@ Haha!
 [下学期] Unit 6
 
 .单词
-does /dʌz/ （do 的第三人称单数形式）
 apple /ˈæpl/ 苹果
 *watermelon /ˈwɔːtəmelən/ 西瓜
+does /dʌz/ （do的第三人称单数形式）
 *pear /peə(r)/ 梨
 *strawberry /ˈstrɔːbəri/ 草莓
 orange /ˈɒrɪndʒ/ 橙子
 all /ɔːl/ 所有的
-be good for /biː ɡʊd fɔː(r)/ 对…… 有益
-us /ʌs/ 我们（宾格形式）
+be good for /biː ɡʊd fɔː(r)/ 对……有益
+us /ʌs/ 我们（宾格形式宾格形式）
 grape /ɡreɪp/ 葡萄
-banana /bəˈnɑːnə/ 香蕉
-doesn't = does not /ˈdʌznt/ （do 的第三人称单数否定形式）
+banana /bəˈnɑːnə/ 香蕉doesn’t = does not（do的第三人称单数否定形式）
 sure /ʃʊə(r)/ 确信的；有把握的
 
 .课文
@@ -786,8 +785,8 @@ fish /fɪʃ/ 鱼
 rabbit /ˈræbɪt/ 兔子
 swim /swɪm/ 游泳
 fast /fɑːst/ 快地；快速地
-well /wel/ 好；好地
-*high /haɪ/ 高地
+well /wel/ 好
+*high /haɪ/ 高
 
 .课文
 Unit 7
@@ -837,7 +836,7 @@ go /ɡəʊ/ 去
 zoo /zuː/ 动物园
 lion /ˈlaɪən/ 狮子
 tiger /ˈtaɪɡə(r)/ 老虎
-*bamboo /bæmˈbuː/ 竹子
+*bamboo /ˌbæmˈbuː/ 竹子
 meat /miːt/ 肉
 panda /ˈpændə/ 熊猫
 

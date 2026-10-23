@@ -17,26 +17,26 @@
 
 .单词
 our /ˈaʊə(r)/ 我们的
-classroom /ˈklɑːsruːm/ 教室
-can /kæn/ 可以；能
+classroom /'klɑːsruːm/ 教室
+can /kən, kæn/ 可以；能
 help /help/ 帮助
 where /weə(r)/ 哪儿；哪里
 map /mæp/ 地图
-near /nɪə(r)/ 在…… 附近
+near /nɪə(r)/ 在……附近
 schoolbag /ˈskuːlbæɡ/ 书包
 excuse me /ɪkˈskjuːz miː/ 打扰一下
-under /ˈʌndə(r)/ 在…… 下面
+under /ˈʌndə(r)/ 在……下面
 chair /tʃeə(r)/ 椅子
-blackboard /ˈblækbɔːd/ 黑板
+blackboard /'blækbɔːd/ 黑板
 door /dɔː(r)/ 门
-window /ˈwɪndəʊ/ 窗户
+window /'wɪndəʊ/ 窗户
 desk /desk/ 课桌
-on /ɒn/ 在…… 上面
-in /ɪn/ 在…… 里面
+on /ɒn/ 在……上面
+in /ɪn/ 在……里面
 welcome /ˈwelkəm/ 欢迎
 new /njuː/ 新的
 have a look /hæv ə lʊk/ 看一看
-there /ðeə(r)/ 有 (表示存在或发生)
+there be 有（表示某处有某物）
 much /mʌtʃ/ 很；非常
 
 .课文
@@ -73,14 +73,14 @@ Yes. Good night, dear!
 
 .单词
 house /haʊs/ 房子
-beautiful /ˈbjuːtɪfl/ 美丽的；漂亮的
-*bedroom /ˈbedruːm/ 卧室
+beautiful /'bjuːtɪfl/ 美丽的；漂亮的
+*bedroom /'bedruːm/ 卧室
 room /ruːm/ 房间
 living room /ˈlɪvɪŋ ruːm/ 客厅
-kitchen /ˈkɪtʃɪn/ 厨房
-*bathroom /ˈbɑːθruːm/ 浴室；洗手间
+kitchen /'kɪtʃɪn/ 厨房
+*bathroom /'bɑːθruːm/ 浴室；洗手间
 dining room /ˈdaɪnɪŋ ruːm/ 餐厅
-study /ˈstʌdi/ 书房
+study /'stʌdi/ 书房
 bed /bed/ 床
 clean /kliːn/ 干净的
 
@@ -119,7 +119,7 @@ No, there isn't. There is a brown toy bear.
 .单词
 school /skuːl/ 学校
 on foot /ɒn fʊt/ 步行
-by /baɪ/ （表交通方式）乘；骑
+by /baɪ/ （表交通方式）（表交通方式）乘；骑
 bus /bʌs/ 公交车
 by bus /baɪ bʌs/ 乘公交车
 how about /haʊ əˈbaʊt/ 怎么样
@@ -169,7 +169,7 @@ Good idea! Let's go.
 [上学期] Unit 4
 
 .单词
-*follow /ˈfɒləʊ/ 遵循；听从
+*follow /'fɒləʊ/ 遵循；听从
 *rule /ruːl/ 规则；规章
 *traffic /ˈtræfɪk/ 交通
 light /laɪt/ 灯
@@ -230,14 +230,14 @@ Thank you. I will!
 [上学期] Unit 5
 
 .单词
-Chinese /ˌtʃaɪˈniːz/ 语文
+Chinese /tʃaɪ'niːz/ 语文
 art /ɑːt/ 美术
 subject /ˈsʌbdʒɪkt/ 科目；学科
 science /ˈsaɪəns/ 科学
 PE (=physical education) /ˌpiː ˈiː/ 体育
 math /mæθ/ 数学
 English /ˈɪŋɡlɪʃ/ 英语
-music /ˈmjuːzɪk/ 音乐
+music /'mjuːzɪk/ 音乐
 favorite /ˈfeɪvərɪt/ 最喜欢的
 of course /ɒv kɔːs/ 当然
 interesting /ˈɪntrəstɪŋ/ 有趣的
@@ -290,12 +290,11 @@ Friday /ˈfraɪdeɪ/ 星期五
 be good at /biː ɡʊd æt/ 擅长
 Saturday /ˈsætədeɪ/ 星期六
 Sunday /ˈsʌndeɪ/ 星期日
-*homework /ˈhəʊmwɜːk/ 家庭作业
+*homework /'həʊmwɜːk/ 家庭作业
 do homework /duː ˈhəʊmwɜːk/ 做作业
 sport /spɔːt/ 体育运动
 do sports /duː spɔːts/ 做体育运动
-again /əˈɡen/ 再次
-any /ˈeni/ 任何
+any /'eni/ 任何
 class /klɑːs/ 课程；班级
 *weekend /ˌwiːkˈend/ 周末
 
@@ -343,8 +342,7 @@ All the animals enjoy the delicious food together on the weekend.
 
 .单词
 time /taɪm/ 时间
-get up /ɡet ʌp/ 起床
-o'clock /əˈklɒk/ …… 点钟（表示整点）
+get up /ɡet ʌp/ 起床……点钟（表示整点）
 now /naʊ/ 现在
 out /aʊt/ 向外；出来
 go out to play /ɡəʊ aʊt tuː pleɪ/ 出去玩
@@ -354,10 +352,10 @@ twelve /twelv/ 十二
 twenty /ˈtwenti/ 二十
 have a class /hæv ə klɑːs/ 上课
 thirty /ˈθɜːti/ 三十
-go to bed /ɡəʊ tuː bed/ 睡觉
+go to bed /ɡəʊ tuː bed/ 去睡觉
 wake /weɪk/ 睡醒；唤醒
 wake up /weɪk ʌp/ 醒来
-hurry /ˈhʌri/ 赶紧；匆忙
+hurry /'hʌri/ 赶快；匆忙
 hurry up /ˈhʌri ʌp/ 快点
 late /leɪt/ 迟的；晚的
 forty /ˈfɔːti/ 四十
@@ -427,11 +425,11 @@ It's 3:30 p.m. in China.
 
 .单词
 early /ˈɜːli/ 早
-*rise /raɪz/ 起床，起身
+*rise /raɪz/ 起床；起身
 breakfast /ˈbrekfəst/ 早餐
 have breakfast /hæv ˈbrekfəst/ 吃早餐
 when /wen/ 什么时候
-at /æt/ 在…… 时刻
+at /æt/ 在……时刻
 about /əˈbaʊt/ 大约
 fifteen /ˌfɪfˈtiːn/ 十五
 lunch /lʌntʃ/ 午餐
@@ -439,11 +437,11 @@ have lunch /hæv lʌntʃ/ 吃午餐
 half /hɑːf/ 半；一半
 *past /pɑːst/ 超过；超出
 half past six /hɑːf pɑːst sɪks/ 六点半
-dinner /ˈdɪnə(r)/ 晚餐；正餐
+dinner /'dɪnə(r)/ 晚餐；正餐
 have dinner /hæv ˈdɪnə(r)/ 吃晚餐
 *rest /rest/ 休息
 have a rest /hæv ə rest/ 休息一会儿
-game /ɡeɪm/ 游戏
+game /geɪm/ 游戏
 play games /pleɪ ɡeɪmz/ 玩游戏
 then /ðen/ 然后
 fifty /ˈfɪfti/ 五十
@@ -503,6 +501,23 @@ Yes, I see.
 
 [下学期] Unit 1
 
+.单词
+woman /ˈwʊmən/ 女人；妇女
+hospital /'hɒspɪtl/ 医院
+farmer /'fɑːmə(r)/ 农民
+farm /fɑːm/ 农场
+man /mæn/ 男人
+aunt /ɑːnt/ 阿姨
+kid /kɪd/ 小孩
+uncle /ˈʌŋkl/ 叔叔
+police /pə'liːs/ 警察
+*officer 官员；高级职员
+police officer 警察；警官
+*station 车站
+police station 警察局
+job /dʒɒb/ 工作
+hard /hɑːd/ 努力地
+
 .课文
 Unit 1
 Let's talk Part A
@@ -550,6 +565,23 @@ Why does Su Nan want to be a driver?
 What do you want to be?
 
 [下学期] Unit 2
+
+.单词
+horse /hɔːs/ 马
+look /lʊk/ 看起来
+strong /strɒŋ/ 强壮的
+cow /kaʊ/ 奶牛
+give /ɡɪv/ 提供；供应
+pig /pɪg/ 猪
+eighteen /ˌeɪˈtiːn/ 十八
+tree /triː/ 树
+bird /bɜːd/ 鸟
+duck /dʌk/ 鸭子
+sheep /ʃiːp/ 绵羊
+*hen 母鸡
+bee /biː/ 蜜蜂
+fourteen /ˌfɔːˈtiːn/ 十四
+thirteen /ˌθɜːˈtiːn/ 十三
 
 .课文
 Unit 2
@@ -607,6 +639,20 @@ What can we learn from the story?
 
 [下学期] Unit 3
 
+.单词
+back /bæk/ 回到原处
+cook /kʊk/ 烹饪；做饭
+watch /wɒtʃ/ 观看
+TV /tiː'viː/ 电视
+watch TV 看电视
+drink /drɪŋk/ 喝
+eat /iːt/ 吃
+*chess /tʃes/ 象棋
+play chess 下象棋
+read a book 读书
+sleep /sliːp/ 睡觉
+write 写
+
 .课文
 Unit 3
 Let's talk Part A
@@ -655,6 +701,18 @@ Do you know more about the inventors?
 
 [下学期] Unit 4
 
+.单词
+egg /eɡ/ 鸡蛋
+vegetable /ˈvedʒtəbl/ 蔬菜
+soup /suːp/ 汤
+rice /raɪs/ 米饭
+*dumpling /ˈdʌmplɪŋ/ 饺子
+fish /fɪʃ/ 鱼肉
+chicken /'tʃɪkɪn/ 鸡肉
+noodle /ˈnuːdl/ 面条
+children 孩子们
+*ready /'redi/ 准备好的
+
 .课文
 Unit 4
 Let's talk Part A
@@ -693,6 +751,25 @@ Does the boy like the Chinese hamburger?
 What do you often have for breakfast?
 
 [下学期] Unit 5
+
+.单词
+after /ˈɑːftə(r)/ 在……之后
+sometimes /ˈsʌmtaɪmz/ 有时
+sing /sɪŋ/ 唱；歌唱
+song /sɒŋ/ 歌曲
+sing songs 唱歌
+piano /piˈænəʊ/ 钢琴
+play the piano 弹钢琴
+take photos 拍照
+listen /ˈlɪsn/ 听
+listen to music 听音乐
+football /'fʊtbɔːl/ 足球
+play football 踢足球
+dance /dɑːns/ 跳舞
+draw /drɔː/ 绘画
+picture /ˈpɪktʃə(r)/ 图画
+draw pictures 画画
+best /best/ 最好的
 
 .课文
 Unit 5
@@ -751,6 +828,22 @@ Do you often do anything for your mom on Mother's Day?
 What do you do?
 
 [下学期] Unit 6
+
+.单词
+Children's Day 儿童节
+playground /'pleɪɡraʊnd/ 操场
+get ready for 为……做准备
+June 六月
+June 1st 六月一日
+party 晚会
+do kung fu 练功夫
+wonderful /ˈwʌndəfl/ 极好的；精彩的
+play erhu 拉二胡
+*aloud 大声地
+read aloud 大声朗诵
+*other 其他的；另外的
+usually /ˈjuːʒuəli/ 通常地
+a lot of 许多；大量
 
 .课文
 Unit 6
@@ -816,6 +909,39 @@ Can you guess?
 
 [下学期] Unit 7
 
+.单词
+weather /'weðə(r)/ 天气
+*bright 明亮的
+sun /sʌn/ 太阳
+sunny /'sʌni/ 晴朗的
+put on 穿上；戴上
+cap /kæp/ 帽子（有帽舌的）
+wear /weə(r)/ 穿着；戴着
+little /ˈlɪtl/ 一点
+a little 少量的；一些
+windy /'wɪndi/ 有风的
+coat /kəʊt/ 外套；大衣
+fly /flaɪ/ 飞；放飞
+fly a kite 放风筝
+cloudy /'klaʊdi/ 多云的
+rainy /'reɪni/ 下雨的
+snowy /'snəʊi/ 下雪的
+take /teɪk/ 拿；带
+umbrella /ʌmˈbrelə/ 雨伞
+take an umbrella 带上雨伞
+wear a cap 戴着帽子
+put on a coat 穿上外套
+*plan 计划
+want /wɒnt/ 想要；打算
+see /siː/ 看望；看见
+tomorrow /tə'mɒrəʊ/ 明天
+wish 希望；愿望
+letter 信件
+tell /tel/ 告诉
+*miss /mɪs/ 想念
+*hope 希望
+*soon /suːn/ 马上；不久
+
 .课文
 Unit 7
 Let's talk Part A
@@ -878,6 +1004,23 @@ Do you like the blue bird?
 Why?
 
 [下学期] Unit 8
+
+.单词
+season /'siːzn/ 季节
+flower /ˈflaʊə(r)/ 花
+spring /sprɪŋ/ 春天
+which /wɪtʃ/ 哪一个
+autumn /'ɔːtəm/ 秋天
+or /ɔː(r)/ 还是；或者
+warm /wɔːm/ 暖和的
+summer /'sʌmə(r)/ 夏天
+hot /hɒt/ 炎热的
+cool /kuːl/ 凉爽的
+winter /'wɪntə(r)/ 冬天
+cold /kəʊld/ 冷的
+*become 变成；成为
+fruit /fruːt/ 水果
+snow /snəʊ/ 雪
 
 .课文
 Unit 8

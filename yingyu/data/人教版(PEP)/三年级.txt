@@ -60,16 +60,15 @@ Am I a good friend? Yes, I am!
 I help and share. I play fair too.
 
 .表达句
-Hello! || 你好！
-Good morning! || 早上好！
-How are you? || 你好吗？
-I am fine, thank you. || 我很好，谢谢。
-What's your name? || 你叫什么名字？
-My name is Tom. || 我叫汤姆。
-Thank you! || 谢谢你！
-You're welcome. || 不客气。
-Goodbye! || 再见！
-See you! || 回头见！
+Hello! I'm Mike Black. || 你好！我是迈克。你好！我是迈克·布莱克。
+Hi! My name is Wu Binbin. || 嗨！我叫吴斌斌。
+Nice to meet you. || 见到你很高兴。
+Nice to meet you too. || 见到你（我）也很高兴。见到你（我）也很高兴。
+Oh no! || 噢，不！
+It's OK, Chen Jie. || 没关系，陈杰。
+Hey, Sarah! We can share. || 嘿，萨拉！我们可以分享。
+Thanks, Sarah. / Thank you, Chen Jie. || 谢谢，萨拉。/谢谢你，陈杰。
+I am nice to my friends. || 我对我的朋友们很好。
 
 [上学期] Unit 2
 
@@ -125,6 +124,13 @@ I have two cousins too.
 I have a brother,
 And a baby sister.
 They can play with me.
+
+.表达句
+This is my grandma. || 这是我的奶奶。
+Look! This is my family. || 看！这是我的家庭。
+Is that your brother? || 那是你弟弟吗？
+Yes, it is. || 对，是的。
+They love each other. || 他们相互关爱。
 
 [上学期] Unit 3
 
@@ -182,6 +188,19 @@ What's this? It's a lion!
 What's this? It's a tiger!
 Run!
 
+.表达句
+Good morning, Mike! || 早上好，迈克!
+Good morning! Come in. || 早上好!进来吧。
+Do you have a pet? || 你有宠物吗？
+No, I don't. || 不，我没有。
+Yes, I do. I have a cat. || 是的，我有。我有一只猫。
+Let's go to the zoo! || 我们一起去动物园吧！
+Great! || 太好了！
+What's this? || 这是什么？
+It's a fox. || 是只狐狸。
+Miss White, what's that? || 怀特老师，那是什么？
+It's a red panda. || 是只小熊猫。
+
 [上学期] Unit 4
 
 .单词
@@ -230,6 +249,15 @@ These can all help plants grow.
 Plant, water, cut and turn.
 These are some things I know.
 
+.表达句
+Mike, do you like apples? || 迈克，你喜欢苹果吗？
+Yes, I do. And you? || 是的，我喜欢。你呢？
+No, I don't. || 不，我不喜欢。
+Do you like the farm? || 你们喜欢农场吗？
+I like the fresh air. || 我喜欢新鲜的空气。
+We can plant new trees. || 我们可以新种些树。
+Plants can give us many things. || 植物能提供很多东西。
+
 [上学期] Unit 5
 
 .单词
@@ -276,6 +304,16 @@ Black, black, sit down.
 White, white, turn around.
 Pink and red, touch the ground.
 Orange and red, jump up and down.
+
+.表达句
+Use again! || 再次利用！
+Be careful！! || 小心！
+What colour is it? || 它是什么颜色？
+It's orange. || 它是橙红色。
+Red and blue make purple. || 红色加蓝色是紫色。
+What colours do you like? || 你喜欢什么颜色？
+I like red and pink. || 我喜欢红色和粉色。
+Let's draw some purple and brown birds. || 我们一起画一些紫色和棕色的鸟吧。
 
 [上学期] Unit 6
 
@@ -330,6 +368,18 @@ One head, eight eyes, eight legs.
 I am a spider.
 One head, four wings, six legs.
 I am a bee.
+
+.表达句
+How old are you? || 你几岁了？
+I'm five years old. || 我五岁了。
+Me too. || 我也是。
+How many apples? || 几个苹果？
+Two. || 两个。
+Great! Let's go to the shop!！ || 好极了！我们一起去商店吧！
+That's ten yuan, please. || （共）十元，谢谢。
+Here you are. || 给您。
+It's seven o'clock. Hurry！! || 七点了。快点！
+Happy birthday! || 生日快乐！为Oh,onemorecutforthedog.噢，再切一块给小狗。
 
 [下学期] Unit 1
 
@@ -389,6 +439,17 @@ How are you today?
 The girl is my neighbour.
 Let's go out and play!
 
+.表达句
+What's your name? || 你叫什么名字？
+My name's Amy Green. || 我叫埃米·格林。
+Where are you from? || 你是哪里人？
+I'm from the UK. || 我是英国人。
+Let me help. || 我来帮忙。
+After you! || 您先请！
+You're welcome. || 别客气。
+Who's that girl? || 那个女孩是谁？
+That's our new neighbour, Amy. || 是我们的新邻居埃米。
+
 [下学期] Unit 2
 
 .单词
@@ -446,6 +507,14 @@ Sing a song.
 Dance together.
 We all like to smile.
 
+.表达句
+It has a long body and short legs. || 它有长长的身体和短短的腿。
+Dogs are friendly. || 狗是友善的。
+Do you often say that to your mum? || 你经常对妈妈那么说吗？
+Yes, I do. || 是的。
+I often make her gifts. || 我经常给她做礼物。
+We express ourselves in many ways. || 我们用很多种方式表达自己。
+
 [下学期] Unit 3
 
 .单词
@@ -499,6 +568,14 @@ Taste an apple,
 Hear the sound.
 Take an orange,
 Smell the peel.
+
+.表达句
+Excuse me. || 劳驾。
+Can I use your eraser, please? || 我能用一下你的橡皮吗？
+Sure. Here you are. || 当然。给你。
+No problem. || 没问题。
+What are these? || 这些是什么？They'regrapes.这些是什么？是葡萄。
+What about this? || 这个呢？
 
 [下学期] Unit 4
 
@@ -598,6 +675,16 @@ Down, down, down. Put your boat under the bed.
 Up, up, up. Put your old things in a box.
 Down, down, down. Sit down and talk.
 
+.表达句
+Do you have old things? || 你有旧东西吗？
+Yes, I do. I have some old books. || 是的。我有些旧书。
+This boat is cool. || 这只船很酷。
+You can keep it. || 你可以留着它。
+Mum, where is my animal book? || 妈妈，我的动物书在哪儿？
+Is it on the shelf? || 在架子上吗？
+No, it isn't. || 不，不在。
+It's in the box. || 它在盒子里。
+
 [下学期] Unit 6
 
 .单词
@@ -647,3 +734,18 @@ Sixteen, seventeen, eighteen.
 Time goes slowly,
 Don't watch the clock.
 When you watch the clock!
+
+.表达句
+I'd like some bread and eggs, please. || 我想吃点儿面包和鸡蛋。
+Have some milk too. || 也喝点儿牛奶吧。
+Would you like some rice and meat? || 要吃点儿米饭和肉吗？
+Yes, please. || 好的，谢谢。
+Eat some every day! || 每天吃一些吧！
+How many books do we have? || 我们有多少本书？
+We have fifteen books. || 我们有十五本书。
+How many boxes do we need? || 我们需要多少个箱子？
+We need three boxes. || 我们需要三个箱子。
+How much is this bag? || 这个包多少钱？
+It's twenty yuan. || 二十元。
+Six yuan, or three for seventeen yuan. || 六元，或者十七元三本。
+How about three for sixteen yuan? || 十六元三本行吗？
