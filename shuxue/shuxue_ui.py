@@ -278,12 +278,11 @@ class ShuxueTabWidget:
             self.preview_text.insert("1.0", "请先勾选题型！")
             return
         use_bracket = self._bracket_var.get()
-        grade = self.grade_combo.current() + 1
 
         self.btn_generate.config(state="disabled", text="生成中...")
         self._gen_thread = threading.Thread(
             target=self._run_generate,
-            args=(generate_questions, selections, use_bracket, grade, False),
+            args=(generate_questions, selections, use_bracket),
             daemon=True
         )
         self._gen_thread.start()

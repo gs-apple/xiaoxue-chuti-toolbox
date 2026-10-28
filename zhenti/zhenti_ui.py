@@ -1,155 +1,170 @@
-# zhenti_ui.py — 真题下载标签页 (重新设计)
-import tkinter as tk
-from tkinter import ttk, messagebox
-import threading
-from widgets import GradientButton
-import queue
-import webbrowser
+# zhenti_ui.py — 真题下载标签页
 import json
 import os
+import queue
+import threading
+import tkinter as tk
+import webbrowser
+from tkinter import messagebox, ttk
 
-from constants import BG_COLOR, GRADES, GRADE_MAP, FAVORITES_FILE, HISTORY_FILE, GRADE_KEYWORDS, SUBJECT_KEYWORDS, ZHENTI_DIR
+from widgets import GradientButton
+from constants import (
+    BG_COLOR,
+    FAVORITES_FILE,
+    GRADE_KEYWORDS,
+    GRADE_MAP,
+    GRADES,
+    SUBJECT_KEYWORDS,
+    ZHENTI_DOWNLOAD_DIR,
+)
+from zhenti import zhenti_core
 
 BG = BG_COLOR
 
-# 平台配置
-PLATFORMS = {
-    "第一试卷网": "shijuan1",
-    "中小学试卷网": "szxuexiao",
-    "新一试卷": "yishijuan",
-    "试卷网": "shijuan_net",
-    "心标教育": "xbjy",
-}
 
-# 学科配置 - 根据年级动态显示
+# 平台清单：唯一来源是 zhenti_core.PLATFORM_CONFIGS（键=平台码，值=配置）。
+# 原先这里另有一份 PLATFORMS 字面量，加平台要改 7 处、漏改还是静默失败。
+PLATFORMS = {cfg.name: key for key, cfg in zhenti_core.PLATFORM_CONFIGS.items()}
+PLATFORM_NAMES = {key: name for name, key in PLATFORMS.items()}
+
+DEFAULT_GRADE = "五年级"
+DEFAULT_STATUS = "就绪 - 选好年级和学科后点搜索"
+YEAR_CHOICES = ["不限"] + [str(y) for y in range(2027, 2014, -1)]
+
+# 学科配置 - 按年级递进，年级越高科目越多（不是从一年级就把九科全列出来）。
+# 口径以"站上真能搜到"为准（第一试卷网 2026-10-28 逐栏目实测）：
+#   语文/数学/英语 1~12 年级都有；科学三年级起；
+#   生物/历史/地理/政治 七年级起；物理八年级起；化学九年级起。
+# 注意"政治"一并代表初中的「道德与法治」（站内只有 sjzz 一个栏目）。
 SUBJECTS_BY_GRADE = {
     # 小学
-    "一年级": ["全部", "语文", "数学"],
-    "二年级": ["全部", "语文", "数学"],
-    "三年级": ["全部", "语文", "数学", "英语"],
+    "一年级": ["全部", "语文", "数学", "英语"],
+    "二年级": ["全部", "语文", "数学", "英语"],
+    "三年级": ["全部", "语文", "数学", "英语", "科学"],
     "四年级": ["全部", "语文", "数学", "英语", "科学"],
     "五年级": ["全部", "语文", "数学", "英语", "科学"],
     "六年级": ["全部", "语文", "数学", "英语", "科学"],
     # 初中
-    "七年级": ["全部", "语文", "数学", "英语", "科学", "物理", "化学", "历史", "地理", "生物", "道德与法治"],
-    "八年级": ["全部", "语文", "数学", "英语", "物理", "化学", "历史", "地理", "生物", "道德与法治"],
-    "九年级": ["全部", "语文", "数学", "英语", "物理", "化学", "历史", "地理", "生物", "道德与法治"],
+    "七年级": ["全部", "语文", "数学", "英语", "生物", "历史", "地理", "政治"],
+    "八年级": ["全部", "语文", "数学", "英语", "物理", "生物", "历史", "地理", "政治"],
+    "九年级": ["全部", "语文", "数学", "英语", "物理", "化学", "历史", "政治"],
     # 高中
-    "高一": ["全部", "语文", "数学", "英语", "物理", "化学", "历史", "地理", "生物", "政治"],
-    "高二": ["全部", "语文", "数学", "英语", "物理", "化学", "历史", "地理", "生物", "政治"],
-    "高三": ["全部", "语文", "数学", "英语", "物理", "化学", "历史", "地理", "生物", "政治"],
+    "高一": ["全部", "语文", "数学", "英语", "物理", "化学", "生物", "历史", "地理", "政治"],
+    "高二": ["全部", "语文", "数学", "英语", "物理", "化学", "生物", "历史", "地理", "政治"],
+    "高三": ["全部", "语文", "数学", "英语", "物理", "化学", "生物", "历史", "地理", "政治"],
 }
 
-# 年级配置
-GRADES = ["一年级", "二年级", "三年级", "四年级", "五年级", "六年级",
-          "七年级", "八年级", "九年级", "高一", "高二", "高三"]
 
-# 快捷搜索年级
-QUICK_GRADES = ["一年级", "二年级", "三年级", "四年级", "五年级", "六年级",
-                "七年级", "八年级", "九年级", "高一", "高二", "高三"]
+def subject_choices(grade):
+    """该年级学科下拉的全集。
 
-# 学科内部映射
-SUBJECT_MAP = {
-    "语文": {"shijuan1": "yuwen", "szxuexiao": "语文", "yishijuan": "yuwen", "shijuan_net": "yuwen", "xbjy": "yuwen"},
-    "数学": {"shijuan1": "shuxue", "szxuexiao": "数学", "yishijuan": "shuxue", "shijuan_net": "shuxue", "xbjy": "shuxue"},
-    "英语": {"shijuan1": "yingyu", "szxuexiao": "英语", "yishijuan": "yingyu", "shijuan_net": "yingyu", "xbjy": ""},
-    "科学": {"shijuan1": "", "szxuexiao": "科学", "yishijuan": "kexue", "shijuan_net": "kexue", "xbjy": ""},
-    "物理": {"shijuan1": "wuli", "szxuexiao": "", "yishijuan": "wuli", "shijuan_net": "", "xbjy": ""},
-    "化学": {"shijuan1": "huaxue", "szxuexiao": "", "yishijuan": "huaxue", "shijuan_net": "", "xbjy": ""},
-    "历史": {"shijuan1": "lishi", "szxuexiao": "", "yishijuan": "lishi", "shijuan_net": "", "xbjy": ""},
-    "地理": {"shijuan1": "dili", "szxuexiao": "", "yishijuan": "dili", "shijuan_net": "", "xbjy": ""},
-    "生物": {"shijuan1": "shengwu", "szxuexiao": "", "yishijuan": "shengwu", "shijuan_net": "", "xbjy": ""},
-    "道德与法治": {"shijuan1": "daode", "szxuexiao": "", "yishijuan": "daode", "shijuan_net": "", "xbjy": ""},
-    "政治": {"shijuan1": "daode", "szxuexiao": "", "yishijuan": "daode", "shijuan_net": "", "xbjy": ""},
-}
+    只按课程表给，**不按当前平台裁**：三年级本来就有科学，第一试卷网没有
+    科学栏目不代表软件里不该出现这一项。平台缺的科目由 core 在搜索时提示、
+    UI 在开搜前问要不要换平台。
+    """
+    return list(SUBJECTS_BY_GRADE.get(grade, ["全部"]))
 
 
 class ZhentiTabWidget:
+    # 状态栏固定像素宽度：700px 窗口下按钮区占 3×70+边距≈224px，这里留足余量
+    STATUS_WIDTH = 380
+    # 该宽度下大约能放下的汉字数，超出用省略号，完整内容存在 _status_full
+    STATUS_MAX_CHARS = 27
+
     def __init__(self, parent):
         self.frame = tk.Frame(parent, bg=BG)
         self.search_results = []
         self.search_worker = None
         self._queue = queue.Queue()
         self.result_count = 0
-        self.favorites = self._load_json(FAVORITES_FILE, [])
-        self.history = self._load_json(HISTORY_FILE, [])
+        self._skipped_count = 0
+
+        # 结果行的稳定标识：iid 单调计数器 + 映射表。
+        # 不能用标题/url 反查（同名结果很常见，会把动作作用到别的行），
+        # 也不能直接拿 url 当 iid（重复或空串会让 Tk 抛 TclError）。
+        self._by_iid = {}
+        self._next_iid = 0
+
+        self._downloading = False
+        self._dl_queue = queue.Queue()
+        self._status_full = ""
+        self._view_mode = "search"          # search / favorites
+        self._capability_hint = False        # 状态栏当前显示的是不是"本平台没这科"的提示
+        self._deferred_warnings = []
+
+        self.favorites = [fav for fav in self._load_json(FAVORITES_FILE, [])
+                          if isinstance(fav, dict) and fav.get("url")]
         self._init_ui()
 
+        for warning in self._deferred_warnings:
+            messagebox.showwarning("配置文件读取失败", warning)
+        self._deferred_warnings.clear()
+
+    # ══════════════════════════════════════════════════════
+    #  持久化
+    # ══════════════════════════════════════════════════════
+
     def _load_json(self, path, default):
+        """读 JSON。文件不存在=正常首次运行；文件损坏=备份并留一条待提示警告。"""
+        if not os.path.exists(path):
+            return default
         try:
-            if os.path.exists(path):
-                with open(path, 'r', encoding='utf-8') as f:
-                    return json.load(f)
-        except Exception:
-            pass
-        return default
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except (OSError, ValueError) as e:
+            backup = path + ".corrupt"
+            try:
+                os.replace(path, backup)
+            except OSError:
+                backup = ""
+            note = f"（已备份为 {os.path.basename(backup)}）" if backup else ""
+            self._deferred_warnings.append(f"{os.path.basename(path)} 解析失败：{e}{note}")
+            return default
+        if not isinstance(data, list):
+            self._deferred_warnings.append(f"{os.path.basename(path)} 内容格式不对，已忽略")
+            return default
+        return data
 
     def _save_json(self, path, data):
+        """原子写 JSON。返回 bool —— 调用方必须据此决定要不要报成功。"""
+        tmp_path = path + ".tmp"
         try:
-            with open(path, 'w', encoding='utf-8') as f:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(tmp_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
-        except Exception:
-            pass
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(tmp_path, path)
+            return True
+        except (OSError, TypeError, ValueError):
+            try:
+                os.remove(tmp_path)
+            except OSError:
+                pass
+            return False
+
+    # ══════════════════════════════════════════════════════
+    #  界面构建
+    # ══════════════════════════════════════════════════════
 
     def _init_ui(self):
         main = tk.Frame(self.frame, bg=BG)
         main.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
-        # ========== 快捷搜索区 ==========
-        quick_frame = ttk.LabelFrame(main, text="快捷搜索")
-        quick_frame.pack(fill=tk.X, pady=(0, 5))
+        self._build_custom_search(main)
+        self._build_result_tree(main)
+        self._build_func_bar(main)
+        self._create_context_menu()
+        self._on_grade_changed()          # 初始学科下拉也要按平台能力裁一次
 
-        quick_inner = tk.Frame(quick_frame, bg=BG)
-        quick_inner.pack(fill=tk.X, padx=5, pady=3)
-
-        # 一排显示所有年级，平均分配宽度
-        grades = ["一年级", "二年级", "三年级", "四年级", "五年级", "六年级",
-                  "七年级", "八年级", "九年级", "高一", "高二", "高三"]
-
-        # 配置列权重，使按钮平均分配
-        for i in range(len(grades)):
-            quick_inner.columnconfigure(i, weight=1)
-
-        # 不同年级的颜色样式
-        grade_styles = {
-            # 小学：浅蓝色
-            "一年级": {"bg": "#bbdefb", "activebackground": "#90caf9"},
-            "二年级": {"bg": "#bbdefb", "activebackground": "#90caf9"},
-            "三年级": {"bg": "#bbdefb", "activebackground": "#90caf9"},
-            "四年级": {"bg": "#bbdefb", "activebackground": "#90caf9"},
-            "五年级": {"bg": "#bbdefb", "activebackground": "#90caf9"},
-            "六年级": {"bg": "#bbdefb", "activebackground": "#90caf9"},
-            # 初中：浅绿色
-            "七年级": {"bg": "#c8e6c9", "activebackground": "#a5d6a7"},
-            "八年级": {"bg": "#c8e6c9", "activebackground": "#a5d6a7"},
-            "九年级": {"bg": "#c8e6c9", "activebackground": "#a5d6a7"},
-            # 高中：浅橙色
-            "高一": {"bg": "#ffe0b2", "activebackground": "#ffcc80"},
-            "高二": {"bg": "#ffe0b2", "activebackground": "#ffcc80"},
-            "高三": {"bg": "#ffe0b2", "activebackground": "#ffcc80"},
-        }
-
-        # 统一样式的按钮
-        for i, grade in enumerate(grades):
-            style = grade_styles.get(grade, {"bg": "#e0e0e0", "activebackground": "#d0d0d0"})
-            btn = tk.Button(quick_inner, text=grade,
-                           font=("Microsoft YaHei", 9),
-                           bg=style["bg"],
-                           activebackground=style["activebackground"],
-                           relief="raised",
-                           bd=1,
-                           height=1,
-                           command=lambda g=grade: self._quick_search(g))
-            btn.grid(row=0, column=i, padx=1, sticky="ew")
-
-        # ========== 自定义搜索区 ==========
-        custom_frame = ttk.LabelFrame(main, text="自定义搜索")
+    def _build_custom_search(self, parent):
+        custom_frame = ttk.LabelFrame(parent, text="搜索条件")
         custom_frame.pack(fill=tk.X, pady=(0, 5))
 
         custom_inner = tk.Frame(custom_frame, bg=BG)
         custom_inner.pack(fill=tk.X, padx=5, pady=5)
 
-        # 第一行：平台 + 学科
+        # 第一行：平台 + 年级 + 学科 + 年份
         row1 = tk.Frame(custom_inner, bg=BG)
         row1.pack(fill=tk.X, pady=2)
 
@@ -157,20 +172,25 @@ class ZhentiTabWidget:
         self.platform_combo = ttk.Combobox(row1, width=12, state="readonly",
                                            values=list(PLATFORMS.keys()))
         self.platform_combo.current(0)
-        self.platform_combo.pack(side=tk.LEFT, padx=(0, 10))
+        self.platform_combo.pack(side=tk.LEFT, padx=(0, 8))
+        self.platform_combo.bind("<<ComboboxSelected>>", lambda e: self._on_platform_changed())
 
         tk.Label(row1, text="年级:", font=("Microsoft YaHei", 10), width=5).pack(side=tk.LEFT)
-        self.grade_combo = ttk.Combobox(row1, width=8, state="readonly",
-                                        values=GRADES)
-        self.grade_combo.set("四年级")  # 默认四年级
-        self.grade_combo.pack(side=tk.LEFT, padx=(0, 10))
+        self.grade_combo = ttk.Combobox(row1, width=8, state="readonly", values=GRADES)
+        self.grade_combo.set(DEFAULT_GRADE)
+        self.grade_combo.pack(side=tk.LEFT, padx=(0, 8))
         self.grade_combo.bind("<<ComboboxSelected>>", lambda e: self._on_grade_changed())
 
         tk.Label(row1, text="学科:", font=("Microsoft YaHei", 10), width=5).pack(side=tk.LEFT)
-        self.subject_combo = ttk.Combobox(row1, width=10, state="readonly",
-                                          values=SUBJECTS_BY_GRADE.get("四年级", ["全部"]))
-        self.subject_combo.set("全部")  # 默认选中全部
-        self.subject_combo.pack(side=tk.LEFT, padx=(0, 10))
+        self.subject_combo = ttk.Combobox(row1, width=9, state="readonly",
+                                          values=subject_choices(DEFAULT_GRADE))
+        self.subject_combo.set("全部")
+        self.subject_combo.pack(side=tk.LEFT, padx=(0, 8))
+
+        tk.Label(row1, text="年份:", font=("Microsoft YaHei", 10), width=5).pack(side=tk.LEFT)
+        self.year_combo = ttk.Combobox(row1, width=7, state="readonly", values=YEAR_CHOICES)
+        self.year_combo.set("不限")
+        self.year_combo.pack(side=tk.LEFT)
 
         # 第二行：关键词 + 按钮
         row2 = tk.Frame(custom_inner, bg=BG)
@@ -189,25 +209,26 @@ class ZhentiTabWidget:
                                        command=self.stop_search, state="disabled")
         self.btn_stop.pack(side=tk.LEFT, padx=2)
 
-        # ========== 搜索结果区 ==========
-        result_frame = ttk.LabelFrame(main, text="搜索结果")
+    def _build_result_tree(self, parent):
+        result_frame = ttk.LabelFrame(parent, text="搜索结果")
         result_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 5))
 
         result_inner = tk.Frame(result_frame, bg=BG)
         result_inner.pack(fill=tk.BOTH, expand=True, padx=3, pady=5)
 
-        # 结果列表
-        columns = ("platform", "title", "subject", "grade")
+        columns = ("platform", "title", "subject", "grade", "year", "answer")
         self.result_tree = ttk.Treeview(result_inner, columns=columns,
                                         show="headings", selectmode="browse")
-        self.result_tree.heading("platform", text="平台", anchor="w")
-        self.result_tree.heading("title", text="标题", anchor="w")
-        self.result_tree.heading("subject", text="学科", anchor="w")
-        self.result_tree.heading("grade", text="年级", anchor="w")
-        self.result_tree.column("platform", width=80, minwidth=60, stretch=False)
-        self.result_tree.column("title", width=350, minwidth=150, stretch=True)
-        self.result_tree.column("subject", width=60, minwidth=50, stretch=False)
-        self.result_tree.column("grade", width=70, minwidth=50, stretch=False)
+        for col, text, width, minwidth, stretch in (
+            ("platform", "平台", 80, 60, False),
+            ("title", "标题", 255, 150, True),
+            ("subject", "学科", 55, 45, False),
+            ("grade", "年级", 60, 50, False),
+            ("year", "年份", 62, 50, False),
+            ("answer", "答案", 44, 40, False),
+        ):
+            self.result_tree.heading(col, text=text, anchor="w")
+            self.result_tree.column(col, width=width, minwidth=minwidth, stretch=stretch)
 
         tree_scroll = ttk.Scrollbar(result_inner, orient=tk.VERTICAL,
                                     command=self.result_tree.yview)
@@ -215,38 +236,22 @@ class ZhentiTabWidget:
         self.result_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
 
-        # 双击打开
         self.result_tree.bind("<Double-1>", lambda e: self._open_selected())
 
-        # 右键菜单
-        self._create_context_menu()
-
-        # ========== 底部功能区 ==========
-        func_group = ttk.LabelFrame(main, text="功能区")
+    def _build_func_bar(self, parent):
+        func_group = ttk.LabelFrame(parent, text="功能区")
         func_group.pack(side=tk.BOTTOM, fill=tk.X, pady=(3, 0))
         func_inner = tk.Frame(func_group, bg=BG)
         func_inner.pack(fill=tk.X, padx=5, pady=3)
 
-        # 左侧状态区
-        status_frame = tk.Frame(func_inner, bg="#e8e8e8", relief="sunken", bd=1)
-        status_frame.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
-
-        self.status_label = tk.Label(status_frame, text="就绪 - 选择年级快速搜索或右键操作",
-                                     bg="#e8e8e8", fg="#333", font=("Microsoft YaHei", 9),
-                                     anchor="w", padx=5, pady=2)
-        self.status_label.pack(fill=tk.X)
-
-        # 右侧按钮区
+        # 右侧按钮区先 pack，保证按钮永远优先拿到自己的宽度；
+        # 否则状态文字一长就把按钮挤出可视区。
         btn_frame = tk.Frame(func_inner, bg=BG)
         btn_frame.pack(side=tk.RIGHT)
 
         self.btn_favorites = GradientButton(btn_frame, text="收藏夹", width=70, height=28,
                                             command=self._show_favorites)
         self.btn_favorites.pack(side=tk.LEFT, padx=2)
-
-        self.btn_history = GradientButton(btn_frame, text="历史", width=70, height=28,
-                                          command=self._show_history)
-        self.btn_history.pack(side=tk.LEFT, padx=2)
 
         self.btn_download = GradientButton(btn_frame, text="下载试卷", width=70, height=28,
                                            command=self._download_selected)
@@ -256,15 +261,17 @@ class ZhentiTabWidget:
                                         command=self.clear_results)
         self.btn_clear.pack(side=tk.LEFT, padx=2)
 
-    def _on_grade_changed(self):
-        """年级变化时更新学科下拉框"""
-        grade = self.grade_combo.get()
-        subjects = SUBJECTS_BY_GRADE.get(grade, ["全部"])
-        self.subject_combo.config(values=subjects)
-        self.subject_combo.set("全部")
+        status_frame = tk.Frame(func_inner, bg="#e8e8e8", relief="sunken", bd=1,
+                                width=self.STATUS_WIDTH, height=28)
+        status_frame.pack(side=tk.LEFT, padx=(0, 10))
+        status_frame.pack_propagate(False)
+
+        self.status_label = tk.Label(status_frame, text=DEFAULT_STATUS,
+                                     bg="#e8e8e8", fg="#333", font=("Microsoft YaHei", 9),
+                                     anchor="w", padx=5, pady=2)
+        self.status_label.pack(fill=tk.BOTH, expand=True)
 
     def _create_context_menu(self):
-        """创建右键菜单"""
         self.context_menu = tk.Menu(self.frame, tearoff=0)
         self.context_menu.add_command(label="打开链接", command=self._open_selected)
         self.context_menu.add_command(label="复制链接", command=self._copy_link)
@@ -274,30 +281,84 @@ class ZhentiTabWidget:
         self.context_menu.add_separator()
         self.context_menu.add_command(label="取消收藏", command=self._remove_favorite)
 
-        # 绑定右键事件
         self.result_tree.bind("<Button-3>", self._show_context_menu)
 
     def _show_context_menu(self, event):
-        """显示右键菜单"""
-        # 选中右键点击的行
         item = self.result_tree.identify_row(event.y)
         if item:
             self.result_tree.selection_set(item)
             self.context_menu.post(event.x_root, event.y_root)
 
+    # ══════════════════════════════════════════════════════
+    #  状态栏 / 下拉联动
+    # ══════════════════════════════════════════════════════
+
+    def _set_status(self, text, color="#333"):
+        """统一写状态栏：固定宽度内放不下就截断加省略号。"""
+        full = str(text)
+        self._status_full = full
+        if len(full) > self.STATUS_MAX_CHARS:
+            shown = full[:self.STATUS_MAX_CHARS - 1] + "…"
+        else:
+            shown = full
+        self.status_label.config(text=shown, fg=color)
+
+    def _current_platform_key(self):
+        return PLATFORMS.get(self.platform_combo.get(), "")
+
+    def _on_platform_changed(self):
+        self._on_grade_changed()
+
+    def _on_grade_changed(self):
+        """年级/平台变化时重建学科下拉。
+
+        下拉按**课程**给全集，不按当前平台裁。三年级本来就有科学，
+        第一试卷网没有科学栏目不代表这一项不该出现在软件里（用户明确要求）；
+        平台缺的科目选中后，搜索时会问要不要换到有这科的平台。
+        """
+        grade = self.grade_combo.get()
+        if grade not in GRADES:
+            grade = DEFAULT_GRADE
+            self.grade_combo.set(grade)
+
+        subjects = subject_choices(grade)
+        current = self.subject_combo.get()
+        self.subject_combo.config(values=subjects)
+        self.subject_combo.set(current if current in subjects else "全部")
+
+        platform_key = self._current_platform_key()
+        platform_name = self.platform_combo.get()
+        if not zhenti_core.platform_supports_grade(platform_key, grade):
+            supported = zhenti_core.platform_grade_names(platform_key)
+            scope = f"{supported[0]}～{supported[-1]}" if len(supported) > 1 else "无"
+            self._capability_hint = True
+            self._set_status(f"{platform_name}没有{grade}（仅{scope}）", "#d97706")
+            return
+
+        missing = [s for s in subjects
+                   if s != "全部" and s not in zhenti_core.platform_subjects(platform_key, grade)]
+        if missing:
+            self._capability_hint = True
+            self._set_status(
+                f"{platform_name}没有{'、'.join(missing)}栏目，选中后会提示换平台", "#d97706")
+        elif self._capability_hint:
+            # 换到有这科的平台后，上一条"某平台没有科学"的提示会一直挂着，
+            # 用户会以为新平台也没有。这类提示只在说它的时候有効。
+            self._capability_hint = False
+            self._set_status(DEFAULT_STATUS, "#666")
+
+    # ══════════════════════════════════════════════════════
+    #  搜索
+    # ══════════════════════════════════════════════════════
+
     def _parse_keyword(self, keyword):
-        """解析关键词中的年级和学科信息
+        """解析关键词开头自带的年级/学科。
 
-        支持格式：
-        - "一年级数学" -> grade=1, subject=数学, keyword=""
-        - "三年级语文试卷" -> grade=3, subject=语文, keyword="试卷"
-        - "高一物理" -> grade=10, subject=物理, keyword=""
-        - "七年级英语期末" -> grade=7, subject=英语, keyword="期末"
-        - "数学" -> grade=None, subject=数学, keyword=""
-        - "试卷" -> grade=None, subject=None, keyword="试卷"
+        - "一年级数学" -> grade="1", subject="数学", remaining=""
+        - "三年级语文试卷" -> grade="3", subject="语文", remaining="试卷"
+        - "数学" -> grade=None, subject="数学", remaining=""
 
-        Returns:
-            tuple: (grade, subject, remaining_keyword)
+        返回的 grade 是 GRADE_MAP 的数字码**字符串**（不是 int）。
         """
         if not keyword:
             return None, None, ""
@@ -306,14 +367,12 @@ class ZhentiTabWidget:
         subject = None
         remaining = keyword
 
-        # 尝试匹配年级
         for grade_kw, grade_val in GRADE_KEYWORDS.items():
             if remaining.startswith(grade_kw):
                 grade = grade_val
                 remaining = remaining[len(grade_kw):].strip()
                 break
 
-        # 尝试匹配学科
         for subj_kw, subj_val in SUBJECT_KEYWORDS.items():
             if remaining.startswith(subj_kw):
                 subject = subj_val
@@ -322,81 +381,99 @@ class ZhentiTabWidget:
 
         return grade, subject, remaining
 
-    def _quick_search(self, grade):
-        """快捷搜索指定年级"""
-        # 设置搜索条件
-        self.grade_combo.set(grade)
-        self.keyword_edit.delete(0, tk.END)
-
-        # 更新学科下拉框
-        self._on_grade_changed()
-
-        # 自动选择平台和学科（全部搜索）
-        self.start_search(all_platforms=True, all_subjects=True)
-
-    def start_search(self, all_platforms=False, all_subjects=False):
-        """开始搜索"""
+    def start_search(self):
+        """开始搜索。"""
         if self.search_worker and self.search_worker.is_running_thread():
+            # 不能静默 return：用户点了按钮毫无反应，会以为程序卡死
+            self._set_status("上一次搜索还没结束，请稍候", "#d97706")
             return
 
-        # 获取搜索条件
-        if all_platforms:
-            platforms = list(PLATFORMS.values())
-        else:
-            platform_name = self.platform_combo.get()
-            platforms = [PLATFORMS.get(platform_name, "shijuan1")]
+        platform_names = [self.platform_combo.get()]
 
-        # 处理学科选择
-        subject_name = self.subject_combo.get()
-        if all_subjects or subject_name == "全部":
-            subjects = [None]  # None表示全部学科
-        else:
-            subjects = [SUBJECT_MAP.get(subject_name, {}).get(p, "") for p in platforms]
-
+        # 年级必须落在值域内。Combobox 的 readonly 只挡键入、不挡程序 .set()，
+        # 脏值（如旧配置里的"高中"）会让 core 收到非法年级。
         grade_name = self.grade_combo.get()
-        grade = GRADE_MAP.get(grade_name, "")
-        keyword = self.keyword_edit.get().strip()
+        if grade_name not in GRADES:
+            grade_name = DEFAULT_GRADE
+            self.grade_combo.set(grade_name)
+            self._on_grade_changed()
+        grade = GRADE_MAP[grade_name]
 
-        # 解析关键词中的年级和学科
-        parsed_grade, parsed_subject, remaining_keyword = self._parse_keyword(keyword)
+        keyword = self.keyword_edit.get().strip()
+        parsed_grade, parsed_subject, remaining = self._parse_keyword(keyword)
         if parsed_grade:
             grade = parsed_grade
-            grade_name = [k for k, v in GRADE_MAP.items() if v == parsed_grade][0] if parsed_grade else grade_name
+            grade_name = next((k for k, v in GRADE_MAP.items() if v == parsed_grade), grade_name)
+        if parsed_grade or parsed_subject:
+            # 前缀被消费掉之后就只留剩余部分做标题过滤。
+            # 原先只在 remaining 非空时回填，导致关键词正好是"一年级数学"时
+            # 仍拿整串去比标题，必然 0 条。
+            keyword = remaining.strip()
+
+        if self.subject_combo.get() == "全部":
+            subjects = [None]
+        else:
+            subjects = [self.subject_combo.get()]
         if parsed_subject:
-            subjects = [SUBJECT_MAP.get(parsed_subject, {}).get(p, "") for p in platforms]
-        if remaining_keyword:
-            keyword = remaining_keyword
+            subjects = [parsed_subject]
 
-        # 清空结果
-        for item in self.result_tree.get_children():
-            self.result_tree.delete(item)
-        self.search_results = []
-        self.result_count = 0
+        # 只搜支持该年级的平台；一个都不支持就明确告诉用户，而不是"搜索完成 0 条"
+        skipped = [name for name in platform_names
+                   if not zhenti_core.platform_supports_grade(PLATFORMS[name], grade_name)]
+        platform_keys = [PLATFORMS[name] for name in platform_names if name not in skipped]
+        if not platform_keys:
+            messagebox.showinfo("提示", f"所选平台都没有{grade_name}的栏目，请换平台或换年级。")
+            return
 
-        # 更新UI状态
+        # 学科可用性：当前平台没有这科时当场问要不要换平台。
+        # 三年级科学只有中小学试卷网有（第一试卷网 9 个栏目里根本没有科学），
+        # 只丢一句"没有科学栏目"，用户下一步还得自己挨个试平台。
+        subject = subjects[0]
+        if subject:
+            current_key = platform_keys[0]
+            usable = zhenti_core.platforms_with_subject(subject, grade_name)
+            if usable and current_key not in usable:
+                alt_names = [PLATFORM_NAMES.get(key, key) for key in usable]
+                if messagebox.askyesno(
+                        "该平台没有这个学科",
+                        f"{self.platform_combo.get()} 没有{grade_name}{subject}栏目。\n\n"
+                        f"有这科的平台：{'、'.join(alt_names)}\n\n"
+                        f"是否切到 {alt_names[0]} 搜索？"):
+                    platform_keys = [usable[0]]
+                    self.platform_combo.set(alt_names[0])
+                    self._on_platform_changed()      # 新平台学科表重新裁一次
+                    self.subject_combo.set(subject)  # 别被重置成"全部"
+                else:
+                    self._set_status(
+                        f"{self.platform_combo.get()}没有{subject}栏目，已取消搜索", "#d97706")
+                    return
+
+        year = self.year_combo.get()
+        year = "" if year in ("", "不限") else year
+
+        self._reset_results()
+        self._skipped_count = len(skipped)
         self.btn_search.config(state="disabled")
         self.btn_stop.config(state="normal")
-        self.status_label.config(text="正在搜索...", fg="#2563eb")
+        self.btn_download.config(state="normal")
+        hint = f"正在搜索 {grade_name}..."
+        if skipped:
+            hint = f"跳过{len(skipped)}个无此年级的平台，正在搜索..."
+        self._set_status(hint, "#2563eb")
 
-        # 记录搜索历史
-        self._add_to_history(grade_name, keyword)
-
-        # 启动搜索线程
         self.search_worker = SearchWorker(
-            self._queue, platforms, subjects, grade, keyword
-        )
+            self._queue, platform_keys, subjects, grade, keyword, year)
         self.search_worker.start()
         self._poll_queue()
 
     def _poll_queue(self):
-        """轮询消息队列"""
         try:
             while True:
                 msg_type, data = self._queue.get_nowait()
                 if msg_type == "result":
                     self._on_result_found(data)
                 elif msg_type == "progress":
-                    self.status_label.config(text=data)
+                    self._set_status(data, "#2563eb")
                 elif msg_type == "finished":
                     self._on_search_finished(data)
                     return
@@ -408,281 +485,292 @@ class ZhentiTabWidget:
         if self.search_worker and self.search_worker.is_running_thread():
             self.frame.after(100, self._poll_queue)
 
-    def _on_result_found(self, item):
-        """单个结果找到"""
-        self.result_count += 1
+    def _add_result(self, item):
+        """插入一行结果，并登记 iid -> item 映射。"""
+        iid = str(self._next_iid)
+        self._next_iid += 1
+        self._by_iid[iid] = item
         self.search_results.append(item)
+        self.result_count += 1
+        self.result_tree.insert("", tk.END, iid=iid, values=(
+            item.get("platform", ""),
+            item.get("title", ""),
+            item.get("subject", ""),
+            item.get("grade", ""),
+            item.get("year", ""),
+            "有" if item.get("has_answer") else "",
+        ))
 
-        platform = item.get("platform", "")
-        title = item.get("title", "")
-        subject = item.get("subject", "")
-        grade = item.get("grade", "")
-
-        self.result_tree.insert("", tk.END, values=(platform, title, subject, grade))
-        self.status_label.config(text=f"已找到 {self.result_count} 个结果...", fg="#2563eb")
+    def _on_result_found(self, item):
+        self._view_mode = "search"
+        self._add_result(item)
+        self._set_status(f"已找到 {self.result_count} 个结果...", "#2563eb")
 
     def _on_search_finished(self, results):
-        """搜索完成"""
         self.btn_search.config(state="normal")
         self.btn_stop.config(state="disabled")
-        self.status_label.config(text=f"搜索完成，共 {len(self.search_results)} 个结果", fg="#16a34a")
+        text = f"搜索完成，共 {len(self.search_results)} 个结果"
+        if self._skipped_count:
+            text += f"（跳过{self._skipped_count}个平台）"
+        self._set_status(text, "#16a34a")
         self.search_worker = None
 
     def _on_search_error(self, error_msg):
-        """搜索出错"""
         self.btn_search.config(state="normal")
         self.btn_stop.config(state="disabled")
-        self.status_label.config(text=f"出错: {error_msg}", fg="#dc2626")
+        self._set_status(f"出错: {error_msg}", "#dc2626")
         self.search_worker = None
 
     def stop_search(self):
-        """停止搜索"""
         if self.search_worker and self.search_worker.is_running_thread():
-            self.status_label.config(text="正在停止...", fg="#d97706")
+            self._set_status("正在停止...", "#d97706")
             self.search_worker.stop()
             self.btn_stop.config(state="disabled")
-            self.frame.after(1000, self._on_search_stopped)
+            self._wait_worker_exit()
 
-    def _on_search_stopped(self):
-        """搜索停止后"""
-        if self.search_worker:
-            self.search_worker.wait(2)
-            self.btn_search.config(state="normal")
-            self.btn_stop.config(state="disabled")
-            self.status_label.config(text=f"已停止，共 {len(self.search_results)} 个结果", fg="#d97706")
-            self.search_worker = None
+    def _wait_worker_exit(self, tries=0):
+        """等旧线程真正退出再放行搜索按钮。
 
-    def _get_selected_item(self):
-        """获取选中的结果项"""
-        sel = self.result_tree.selection()
-        if not sel:
-            return None
-
-        item_vals = self.result_tree.item(sel[0], "values")
-        if not item_vals:
-            return None
-
-        title = item_vals[1]
-        for item in self.search_results:
-            if item.get("title") == title:
-                return item
-        return None
-
-    def _download_selected(self):
-        """下载选中的试卷"""
-        selected_item = self._get_selected_item()
-        if not selected_item:
-            messagebox.showinfo("提示", "请先选择一个结果")
+        requests 阻塞在 read 上，stop() 只是置标志位，线程可能还要几秒才返回；
+        原先固定 after(1000) 后就把 worker 置 None，若线程仍活着，再点搜索会
+        被 start_search 静默挡掉（用户点按钮没反应）。
+        """
+        worker = self.search_worker
+        if worker is None:
             return
-
-        url = selected_item.get("url", "")
-        if not url:
-            messagebox.showinfo("提示", "该试卷没有链接")
+        if worker.is_running_thread() and tries < 60:      # 最多再等 18 秒
+            self.frame.after(300, lambda: self._wait_worker_exit(tries + 1))
             return
+        still_alive = worker.is_running_thread()
+        self.search_worker = None
+        self.btn_search.config(state="normal")
+        self.btn_stop.config(state="disabled")
+        suffix = "（仍有请求在收尾）" if still_alive else ""
+        self._set_status(f"已停止，共 {len(self.search_results)} 个结果{suffix}", "#d97706")
 
-        # 在新线程中执行下载
-        self.status_label.config(text="正在获取下载链接...", fg="#2563eb")
-        self.btn_download.config(state="disabled")
+    # ══════════════════════════════════════════════════════
+    #  结果项操作
+    # ══════════════════════════════════════════════════════
 
-        def download_thread():
-            from zhenti.zhenti_core import _get_scraper
-            scraper = _get_scraper()
+    def _require_selected(self):
+        """取选中行对应的结果项；没选中就提示一次并返回 None。"""
+        selection = self.result_tree.selection()
+        item = self._by_iid.get(selection[0]) if selection else None
+        if item is None:
+            messagebox.showinfo("提示", "请先在列表里选择一个结果")
+        return item
 
-            # 获取下载信息
-            info = scraper.get_download_info(url)
+    def _reset_results(self):
+        """清空结果列表（三件套 + iid 映射，少清一处就会残留旧映射）。"""
+        children = self.result_tree.get_children()
+        if children:
+            self.result_tree.delete(*children)
+        self.search_results = []
+        self._by_iid = {}
+        self._next_iid = 0
+        self.result_count = 0
+        self._skipped_count = 0
+        self._view_mode = "search"
 
-            if info["type"] == "direct":
-                # 直接下载
-                save_dir = ZHENTI_DIR
-                result = scraper.download_file(info["url"], save_dir)
-
-                self.frame.after(0, lambda: self._on_download_complete(result))
-            elif info["type"] == "cloud":
-                # 网盘链接，打开浏览器
-                webbrowser.open(info["url"])
-                self.frame.after(0, lambda: self._on_download_cloud(info["url"]))
-            else:
-                # 没有下载链接，打开原页面
-                webbrowser.open(url)
-                self.frame.after(0, lambda: self._on_download_no_link())
-
-        threading.Thread(target=download_thread, daemon=True).start()
-
-    def _on_download_complete(self, result):
-        """下载完成回调"""
-        self.btn_download.config(state="normal")
-        if result["success"]:
-            self.status_label.config(text=f"下载成功: {os.path.basename(result['filepath'])}", fg="#16a34a")
-            messagebox.showinfo("下载成功",
-                                f"文件已保存到:\n{result['filepath']}")
-        else:
-            self.status_label.config(text=f"下载失败: {result['message']}", fg="#dc2626")
-            messagebox.showwarning("下载失败", result["message"])
-
-    def _on_download_cloud(self, cloud_url):
-        """网盘链接回调"""
-        self.btn_download.config(state="normal")
-        self.status_label.config(text="已打开网盘链接", fg="#16a34a")
-        messagebox.showinfo("网盘下载", f"已打开网盘链接:\n{cloud_url}\n\n请在浏览器中下载文件")
-
-    def _on_download_no_link(self):
-        """无下载链接回调"""
-        self.btn_download.config(state="normal")
-        self.status_label.config(text="已打开试卷页面", fg="#16a34a")
-        messagebox.showinfo("提示", "该试卷需要在网页中下载，已为您打开页面")
+    def clear_results(self):
+        self._reset_results()
+        self._set_status("已清空结果", "#666")
 
     def _open_selected(self):
-        """打开选中的链接"""
-        selected_item = self._get_selected_item()
-        if not selected_item:
-            messagebox.showinfo("提示", "请先选择一个结果")
+        item = self._require_selected()
+        if not item:
             return
-
-        url = selected_item.get("url", "")
-        if url:
-            webbrowser.open(url)
-            self.status_label.config(text=f"正在打开: {selected_item.get('title', '')[:30]}...", fg="#16a34a")
+        url = item.get("url", "")
+        if not url:
+            messagebox.showinfo("提示", "该条目没有链接")
+            return
+        webbrowser.open(url)
+        self._set_status(f"正在打开: {item.get('title', '')[:20]}...", "#16a34a")
 
     def _copy_link(self):
-        """复制选中链接"""
-        selected_item = self._get_selected_item()
-        if not selected_item:
-            messagebox.showinfo("提示", "请先选择一个结果")
+        item = self._require_selected()
+        if not item:
+            return
+        url = item.get("url", "")
+        if not url:
+            messagebox.showinfo("提示", "该条目没有链接")
+            return
+        self.frame.clipboard_clear()
+        self.frame.clipboard_append(url)
+        self._set_status(f"已复制链接: {item.get('title', '')[:20]}...", "#16a34a")
+
+    # ══════════════════════════════════════════════════════
+    #  下载
+    # ══════════════════════════════════════════════════════
+
+    def _download_selected(self):
+        if self._downloading:
+            # 右键菜单和底部按钮是同一个 handler：只用按钮 state 挡不住右键二次触发
+            self._set_status("正在下载上一个文件，请稍候", "#d97706")
             return
 
-        url = selected_item.get("url", "")
-        if url:
-            self.frame.clipboard_clear()
-            self.frame.clipboard_append(url)
-            self.status_label.config(text=f"已复制链接: {selected_item.get('title', '')[:30]}...", fg="#16a34a")
+        item = self._require_selected()
+        if not item:
+            return
+        url = item.get("url", "")
+        if not url:
+            messagebox.showinfo("提示", "该条目没有链接")
+            return
+
+        platform_key = PLATFORMS.get(item.get("platform", ""), "")
+        if zhenti_core.platform_download_kind(platform_key) == "none":
+            answer = messagebox.askyesno(
+                "该平台不提供直链",
+                f"{item.get('platform', '该平台')}的试卷只能在网页里查看/手动保存，\n"
+                "程序拿不到直链文件。\n\n要打开试卷页面吗？")
+            if answer:
+                webbrowser.open(url)
+                self._set_status("已打开网页（无直链可下）", "#d97706")
+            else:
+                self._set_status("该平台无直链可下", "#d97706")
+            return
+
+        self._downloading = True
+        self.btn_download.config(state="disabled")
+        self._set_status("正在获取下载链接...", "#2563eb")
+
+        # 下载线程只往队列里塞消息，界面更新一律在主线程的 _poll_download 里做。
+        # 从子线程直接调 frame.after() 是不可靠的（主循环没起来时会直接抛
+        # RuntimeError: main thread is not in main loop，下载成功了界面也不知道）。
+        self._dl_queue = queue.Queue()
+
+        def worker():
+            try:
+                scraper = zhenti_core._get_scraper()
+                info = scraper.get_download_info(url)
+                if info["type"] == "direct":
+                    result = scraper.download_file(
+                        info["url"], ZHENTI_DOWNLOAD_DIR,
+                        referer=info.get("referer") or url,
+                        progress_callback=lambda msg: self._dl_queue.put(("progress", msg)))
+                    self._dl_queue.put(("result", result))
+                elif info["type"] == "page":
+                    self._dl_queue.put(("page", (url, info.get("message", ""))))
+                else:
+                    self._dl_queue.put(("no_link", (url, info.get("message", ""))))
+            except Exception as e:
+                self._dl_queue.put(("result", {"success": False, "filepath": "",
+                                               "message": str(e)}))
+
+        threading.Thread(target=worker, daemon=True).start()
+        self._poll_download()
+
+    def _poll_download(self):
+        while True:
+            try:
+                kind, data = self._dl_queue.get_nowait()
+            except queue.Empty:
+                break
+            if kind == "progress":
+                self._set_status(data, "#2563eb")
+            elif kind == "result":
+                self._on_download_complete(data)
+            elif kind == "page":
+                self._on_download_page(*data)
+            elif kind == "no_link":
+                self._on_download_no_link(*data)
+        if self._downloading:
+            self.frame.after(100, self._poll_download)
+
+    def _finish_download(self):
+        self._downloading = False
+        self.btn_download.config(state="normal")
+
+    def _on_download_complete(self, result):
+        self._finish_download()
+        if result.get("success"):
+            filepath = result.get("filepath", "")
+            self._set_status(f"下载成功: {os.path.basename(filepath)}", "#16a34a")
+            messagebox.showinfo("下载成功", f"文件已保存到:\n{filepath}")
+        else:
+            message = result.get("message", "未知错误")
+            self._set_status(f"下载失败: {message}", "#dc2626")
+            messagebox.showwarning("下载失败", message)
+
+    def _on_download_page(self, page_url, message):
+        """网盘/提取码类站点：打开试卷详情页，让用户在页面里扫码拿码、自己下载。"""
+        self._finish_download()
+        webbrowser.open(page_url)
+        self._set_status("已打开试卷页面", "#16a34a")
+        messagebox.showinfo(
+            "试卷页面",
+            f"已打开试卷页面:\n{page_url}\n\n"
+            "如果页面提示需要提取码：扫页面上的二维码关注公众号，"
+            "把页面显示的文章编号发给它，公众号会回你提取码，"
+            "再到网盘页面输入即可下载。")
+
+    def _on_download_no_link(self, page_url, message):
+        self._finish_download()
+        self._set_status("没有找到直链", "#d97706")
+        # 不再谎称"页面里可以下载"——找不到就是找不到，只问要不要去看一眼
+        if messagebox.askyesno("提示", f"{message or '页面里没有找到可用的下载链接'}\n\n要打开试卷页面吗？"):
+            webbrowser.open(page_url)
+
+    # ══════════════════════════════════════════════════════
+    #  收藏夹
+    # ══════════════════════════════════════════════════════
 
     def _add_favorite(self):
-        """添加到收藏夹"""
-        selected_item = self._get_selected_item()
-        if not selected_item:
-            messagebox.showinfo("提示", "请先选择一个结果")
+        """收藏选中的这条。判重用 URL（同名试卷很常见，按标题判会误判）。"""
+        item = self._require_selected()
+        if not item:
             return
-
-        # 检查是否已收藏
-        for fav in self.favorites:
-            if fav.get("url") == selected_item.get("url"):
-                messagebox.showinfo("提示", "该试卷已在收藏夹中")
-                return
-
-        # 添加到收藏
-        self.favorites.append(selected_item)
+        url = item.get("url", "")
+        if any(fav.get("url") == url for fav in self.favorites):
+            messagebox.showinfo("提示", "该试卷已在收藏夹中")
+            return
+        self.favorites.append(item)
         self._save_json(FAVORITES_FILE, self.favorites)
-        self.status_label.config(text=f"已收藏: {selected_item.get('title', '')[:30]}...", fg="#16a34a")
-        messagebox.showinfo("收藏成功", f"已添加到收藏夹")
+        self._set_status(f"已收藏: {item.get('title', '')[:20]}...", "#16a34a")
 
     def _remove_favorite(self):
-        """取消收藏"""
-        selected_item = self._get_selected_item()
-        if not selected_item:
+        """取消收藏。当前正在看收藏夹的话顺手把列表刷一遍。"""
+        item = self._require_selected()
+        if not item:
             return
-
-        # 查找并移除
-        for i, fav in enumerate(self.favorites):
-            if fav.get("url") == selected_item.get("url"):
-                self.favorites.pop(i)
-                self._save_json(FAVORITES_FILE, self.favorites)
-                self.status_label.config(text=f"已取消收藏: {selected_item.get('title', '')[:30]}...", fg="#d97706")
-                # 如果当前显示的是收藏夹，刷新显示
-                return
+        url = item.get("url", "")
+        kept = [fav for fav in self.favorites if fav.get("url") != url]
+        if len(kept) == len(self.favorites):
+            messagebox.showinfo("提示", "这条不在收藏夹里")
+            return
+        self.favorites = kept
+        self._save_json(FAVORITES_FILE, self.favorites)
+        self._set_status(f"已取消收藏: {item.get('title', '')[:20]}...", "#d97706")
+        if self._view_mode == "favorites":
+            self._show_favorites()
 
     def _show_favorites(self):
-        """显示收藏夹"""
+        """把收藏夹填进结果列表，并把视图切成 favorites。"""
         if not self.favorites:
             messagebox.showinfo("收藏夹", "收藏夹为空")
             return
-
-        # 清空当前结果
-        for item in self.result_tree.get_children():
-            self.result_tree.delete(item)
-        self.search_results = []
-        self.result_count = 0
-
-        # 显示收藏
+        self._reset_results()                        # 它内部会把 _view_mode 摆回 search
+        self._view_mode = "favorites"
         for fav in self.favorites:
-            self.result_count += 1
-            self.search_results.append(fav)
-            platform = fav.get("platform", "")
-            title = fav.get("title", "")
-            subject = fav.get("subject", "")
-            grade = fav.get("grade", "")
-            self.result_tree.insert("", tk.END, values=(platform, title, subject, grade))
-
-        self.status_label.config(text=f"收藏夹: 共 {len(self.favorites)} 个", fg="#2563eb")
-
-    def _show_history(self):
-        """显示搜索历史"""
-        if not self.history:
-            messagebox.showinfo("搜索历史", "暂无搜索历史")
-            return
-
-        # 创建历史窗口
-        hist_win = tk.Toplevel(self.frame)
-        hist_win.title("搜索历史")
-        hist_win.geometry("400x300")
-        hist_win.transient(self.frame)
-
-        # 历史列表
-        listbox = tk.Listbox(hist_win, font=("Microsoft YaHei", 10))
-        listbox.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-
-        for h in reversed(self.history[-50:]):  # 最近50条
-            text = f"{h.get('grade', '')} - {h.get('keyword', '') or '全部'}"
-            listbox.insert(tk.END, text)
-
-        def on_select(event):
-            sel = listbox.curselection()
-            if sel:
-                idx = len(self.history) - 1 - sel[0]
-                if 0 <= idx < len(self.history):
-                    h = self.history[idx]
-                    self.grade_combo.set(h.get("grade", "三年级"))
-                    self.keyword_edit.delete(0, tk.END)
-                    self.keyword_edit.insert(0, h.get("keyword", ""))
-                    hist_win.destroy()
-
-        listbox.bind("<Double-1>", on_select)
-
-        # 提示
-        tk.Label(hist_win, text="双击选择历史搜索", fg="#666",
-                font=("Microsoft YaHei", 9)).pack(pady=5)
-
-    def _add_to_history(self, grade, keyword):
-        """添加搜索历史"""
-        record = {
-            "grade": grade,
-            "keyword": keyword,
-            "time": __import__('datetime').datetime.now().strftime("%Y-%m-%d %H:%M")
-        }
-        self.history.append(record)
-        # 只保留最近100条
-        if len(self.history) > 100:
-            self.history = self.history[-100:]
-        self._save_json(HISTORY_FILE, self.history)
-
-    def clear_results(self):
-        """清空结果"""
-        for item in self.result_tree.get_children():
-            self.result_tree.delete(item)
-        self.search_results = []
-        self.result_count = 0
-        self.status_label.config(text="已清空结果", fg="#666")
+            self._add_result(fav)
+        self._set_status(f"收藏夹: 共 {len(self.favorites)} 个", "#2563eb")
 
 
 class SearchWorker:
-    """搜索工作线程"""
+    """搜索工作线程。
 
-    def __init__(self, queue_ref, platforms, subjects, grade, keyword):
+    线程只往队列里塞四种消息（result / progress / finished / error），
+    界面更新一律交给主线程的 _poll_queue —— 子线程直接碰 Tk 控件，
+    轻则不刷新、重则整个 GUI 卡死。
+    """
+
+    def __init__(self, queue_ref, platforms, subjects, grade, keyword, year=""):
         self._queue = queue_ref
         self.platforms = platforms
         self.subjects = subjects
         self.grade = grade
         self.keyword = keyword
-        self.is_running = True
+        self.year = year or ""
         self.stop_event = threading.Event()
         self.thread = None
 
@@ -693,43 +781,34 @@ class SearchWorker:
     def _run(self):
         try:
             def result_callback(item):
-                if self.is_running:
+                if not self.stop_event.is_set():
                     self._queue.put(("result", item))
 
             def progress_callback(msg):
-                if self.is_running:
+                if not self.stop_event.is_set():
                     self._queue.put(("progress", msg))
 
-            from zhenti.zhenti_core import search_papers
-
             all_results = []
-
             for platform in self.platforms:
-                if not self.is_running:
+                if self.stop_event.is_set():
                     break
-
                 for subject in self.subjects:
-                    if not self.is_running:
+                    if self.stop_event.is_set():
                         break
-
-                    results = search_papers(
-                        platform, subject, self.grade, "",
-                        self.keyword, result_callback,
+                    all_results.extend(zhenti_core.search_papers(
+                        platform, subject or "", self.grade, self.year,
+                        self.keyword,
+                        result_callback=result_callback,
                         stop_event=self.stop_event,
-                        progress_callback=progress_callback
-                    )
-                    all_results.extend(results)
-
-            if self.is_running:
+                        progress_callback=progress_callback))
+            if not self.stop_event.is_set():
                 self._queue.put(("finished", all_results))
         except Exception as e:
-            if self.is_running:
+            if not self.stop_event.is_set():
                 self._queue.put(("error", str(e)))
 
     def stop(self):
-        self.is_running = False
-        if self.stop_event:
-            self.stop_event.set()
+        self.stop_event.set()
 
     def is_running_thread(self):
         return self.thread is not None and self.thread.is_alive()

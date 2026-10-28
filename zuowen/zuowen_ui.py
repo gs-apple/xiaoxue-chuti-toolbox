@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from constants import BASE_DIR
 from zuowen.zuowen_core import ZuowenEngine, open_ai_web, get_ai_web_urls, export_worksheet
+from zuowen.zuowen_data import GAOKAO, ZHONGKAO, XIAOSHENGCHU, MANFEN
 from widgets import GradientButton
 
 BG = "#f0f0f0"
@@ -120,7 +121,7 @@ class ZuowenTabWidget:
         # 保存原始值
         self._original_grades = grades
         self._original_semesters = ["上学期", "下学期"]
-        # 中高考作文的年份列表
+        # 中高考作文的年份列表（按实际有数据的年份生成，含 2001 满分作文）
         self._custom_years = [str(y) for y in range(2000, 2027)]
 
         self.filter_label = tk.Label(filter_row, text="", font=FONT, bg=BG, fg="#2563eb")
@@ -164,9 +165,13 @@ class ZuowenTabWidget:
 
         req_frame = tk.Frame(right, bg="white", relief=tk.SUNKEN, bd=1)
         req_frame.pack(fill=tk.BOTH, expand=True)
+        req_scroll = tk.Scrollbar(req_frame)
+        req_scroll.pack(side=tk.RIGHT, fill=tk.Y)
         self.req_text = tk.Text(req_frame, bg="white", font=FONT, wrap=tk.WORD,
-                                height=7, state="disabled")  # 和左侧item_list高度完全一致
-        self.req_text.pack(fill=tk.BOTH, expand=True)
+                                height=7, state="disabled",
+                                yscrollcommand=req_scroll.set)  # 和左侧item_list高度完全一致
+        self.req_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        req_scroll.config(command=self.req_text.yview)
 
         # --- 下排：例文内容（3号点，彻底消除和上排的缝隙）---
         content_group = ttk.LabelFrame(mid, text="例文内容")
@@ -207,21 +212,42 @@ class ZuowenTabWidget:
         elif mode == "中高考作文":
             # 切换为小升初/中考/高考 + 年份
             self.grade_label.config(text="类型:")
-            self.grade_combo.config(values=["小升初", "中考作文", "高考作文"], state="readonly")
+            self.grade_combo.config(
+                values=["小升初", "中考作文", "高考作文", "满分原文"],
+                state="readonly")
             self.grade_var.set("小升初")
             self.sem_label.config(text="年份:")
-            years = [str(y) for y in range(2020, 2027)]
-            self.sem_combo.config(values=years, state="readonly")
-            self.sem_var.set("2025")
+            self._refresh_years("小升初")
             self.filter_label.config(text="")
             self.btn_add.grid()  # 显示
             self._load_custom()
+
+    def _years_of(self, exam_type):
+        """按类型返回实际有数据的年份（倒序）。没有数据的年份不再列出。"""
+        if exam_type == "小升初":
+            data = XIAOSHENGCHU
+        elif exam_type == "中考作文":
+            data = ZHONGKAO
+        elif exam_type == "满分原文":
+            data = MANFEN
+        else:
+            data = GAOKAO
+        ys = [y for y, v in data.items() if v]
+        return sorted(ys, key=lambda x: int(x), reverse=True)
+
+    def _refresh_years(self, exam_type):
+        """切换类型时刷新「年份」下拉。"""
+        years = self._years_of(exam_type)
+        self.sem_combo.config(values=years, state="readonly")
+        if years and self.sem_var.get() not in years:
+            self.sem_var.set(years[0])
 
     def _on_grade_changed(self):
         mode = self.mode_var.get()
         if mode == "课本作文":
             self._load_textbook()
         elif mode == "中高考作文":
+            self._refresh_years(self.grade_var.get())
             self._load_custom()
 
     def _on_filter_changed(self):
@@ -262,7 +288,8 @@ class ZuowenTabWidget:
         for t in topics:
             label = t["title"]
             if t.get("paper"):
-                label += f"（{t['paper']}）"
+                # 标题本身已带括号，再用（）包一层会出现「（二选一）（平凉卷）」的嵌套
+                label += f" · {t['paper']}"
             self.item_list.insert(tk.END, label)
         # 默认选中第一个
         if self._cache:
@@ -303,7 +330,14 @@ class ZuowenTabWidget:
         # 要求 + 字数 + 写作思路
         wc = self._WORD_COUNT.get(grade, "")
         req = item["requires"]
-        if wc:
+        # 应用文、口语交际不能按年级作文区间要求：留言条写清事由即可，
+        # 口语交际本来就不成篇，标成「100-150字」会让孩子以为自己写少了
+        note = item.get("wc_note", "")
+        if not note and item.get("type") == "口语交际":
+            note = "口语交际不写成篇作文，能大大方方说清楚就行"
+        if note:
+            req = f"{req}\n字数说明：{note}"
+        elif wc:
             req = f"{req}\n字数要求：{wc}"
         # 添加写作思路
         tip = item.get("tip", "")
@@ -314,7 +348,7 @@ class ZuowenTabWidget:
         self.req_text.insert("1.0", req)
         self.req_text.config(state="disabled")
         # 例文 + 写作提示
-        example = self.engine.get_example_essay(item["title"])
+        example = self.engine.get_example_essay(item["title"], grade, self.sem_var.get())
         self.content_text.delete("1.0", tk.END)
         if example:
             self.content_text.insert("1.0", example.get("content", ""))
@@ -331,13 +365,23 @@ class ZuowenTabWidget:
         year = self.sem_var.get()
         self.search_var.set(item["title"])
         self.detail_title.config(text=item["title"])
-        meta = f"{exam_type} {year}年"
+        # 「满分原文」不是考试类型，单独叫「历年满分原文」，避免写成「满分原文 2001年」
+        label = "历年满分原文" if exam_type == "满分原文" else exam_type
+        meta = f"{label} {year}年"
         if item.get("paper"):
-            meta += f" {item['paper']}"
+            meta += f" · {item['paper']}"
+        kind = item.get("essay_kind")
+        if kind == "考场满分原文":
+            meta += "　【考场满分原文】"
+        elif kind:
+            meta += f"　【{kind}·非考场原文】"
         self.detail_meta.config(text=meta)
         self.req_text.config(state="normal")
         self.req_text.delete("1.0", tk.END)
-        self.req_text.insert("1.0", item.get("requires", ""))
+        body = item.get("requires", "")
+        if item.get("essay_note"):
+            body += "\n\n【例文性质】" + item["essay_note"].strip()
+        self.req_text.insert("1.0", body)
         self.req_text.config(state="disabled")
         self.content_text.delete("1.0", tk.END)
         # 加载例文（如果存在）
@@ -471,12 +515,12 @@ class ZuowenTabWidget:
         row0.pack(fill=tk.X, padx=15, pady=(15, 5))
         tk.Label(row0, text="类型:", font=FONT, bg=BG).pack(side=tk.LEFT)
         type_var = tk.StringVar(value=exam_type)
-        ttk.Combobox(row0, textvariable=type_var, values=["小升初", "中考作文", "高考作文"],
+        ttk.Combobox(row0, textvariable=type_var, values=["小升初", "中考作文", "高考作文", "满分原文"],
                      state="readonly", width=10, font=FONT).pack(side=tk.LEFT, padx=(4, 15))
         tk.Label(row0, text="年份:", font=FONT, bg=BG).pack(side=tk.LEFT)
         year_var = tk.StringVar(value=year)
         ttk.Combobox(row0, textvariable=year_var,
-                     values=[str(y) for y in range(2020, 2027)],
+                     values=[str(y) for y in range(2000, 2027)],
                      state="readonly", width=6, font=FONT).pack(side=tk.LEFT, padx=4)
 
         # 试卷名称（高考用）
@@ -514,9 +558,10 @@ class ZuowenTabWidget:
                 messagebox.showinfo("提示", "作文要求不能为空", parent=dialog)
                 return
 
-            json_key = {"小升初": "XIAOSHENGCHU", "中考作文": "ZHONGKAO", "高考作文": "GAOKAO"}[etype]
+            json_key = {"小升初": "XIAOSHENGCHU", "中考作文": "ZHONGKAO",
+                        "高考作文": "GAOKAO", "满分原文": "MANFEN"}[etype]
             new_topic = {"title": title, "requires": requires}
-            if json_key == "GAOKAO" and paper:
+            if paper:
                 new_topic["paper"] = paper
 
             # 读取 JSON

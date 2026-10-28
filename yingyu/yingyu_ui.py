@@ -29,10 +29,26 @@ BG = "#f0f0f0"
 
 
 class YingyuTabWidget:
+    # 目前没有可用课本数据的三册（详见 英语课本对照报告.md）
+    MISSING_BOOK_TIPS = {
+        ("人教版(PEP)", "六年级", "下学期"):
+            "当前数据库没有本册任何内容：\n单词、课文、表达句全部为空，暂时无法生成字帖。\n\n"
+            "缺失原因：人教版英语六年级下册课本尚未获得（新版电子教材未上架）。",
+        ("陕旅版", "五年级", "下学期"):
+            "当前数据库本册只录入了课文，单词表（Unit 2～Unit 8）尚未录入，\n"
+            "生成单词描红时会没有内容。\n\n"
+            "缺失原因：陕旅版英语五年级下册课本尚未获得。",
+        ("陕旅版", "六年级", "下学期"):
+            "当前数据库本册只录入了课文，单词表（Unit 2～Unit 8）尚未录入，\n"
+            "生成单词描红时会没有内容。\n\n"
+            "缺失原因：陕旅版英语六年级下册课本尚未获得。",
+    }
+
     def __init__(self, parent):
         self.frame = tk.Frame(parent, bg=BG)
         self.gen = YingyuGenerator()
         self._last_items = None
+        self._missing_key = None
         self._init_ui()
 
     def _init_ui(self):
@@ -72,7 +88,7 @@ class YingyuTabWidget:
                                            values=get_semesters(first_version, self.grade_var.get()),
                                            textvariable=self.semester_var)
         self.semester_combo.grid(row=0, column=5, padx=(4, 0), sticky="w")
-        self.semester_combo.bind("<<ComboboxSelected>>", lambda e: (self._reset_common(), self._refresh_units(), self._update_preview()))
+        self.semester_combo.bind("<<ComboboxSelected>>", lambda e: (self._reset_common(), self._refresh_units(), self._update_preview(), self._check_missing_book()))
 
         tk.Label(inner, text="单元:", bg=BG, font=("Microsoft YaHei", 10)).grid(row=1, column=0, sticky="w")
         self.unit_var = tk.StringVar(value=get_units(self.version_var.get(),
@@ -260,6 +276,7 @@ class YingyuTabWidget:
         self.semester_var.set(sems[0] if sems else "")
         self._refresh_units()
         self._update_preview()
+        self._check_missing_book()
 
     def _on_grade_changed(self):
         # 切换年级：刷新学期 / 单元下拉
@@ -271,6 +288,17 @@ class YingyuTabWidget:
         self.semester_var.set(sems[0] if sems else "")
         self._refresh_units()
         self._update_preview()
+        self._check_missing_book()
+
+    def _check_missing_book(self):
+        """切到没有可用课本数据的那三册时弹窗提醒；同一册只弹一次。"""
+        key = (self.version_var.get(), self.grade_var.get(), self.semester_var.get())
+        if key == self._missing_key:
+            return
+        self._missing_key = key
+        msg = self.MISSING_BOOK_TIPS.get(key)
+        if msg:
+            messagebox.showwarning("课本缺失提醒", msg)
 
     def on_open_data(self):
         """打开「数据编辑」窗口，直接改当前 版本/年级 的那一个文本文件。

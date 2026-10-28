@@ -20,8 +20,11 @@ FONTS_DIR = os.path.join(BASE_DIR, 'assets', 'fonts')
 # 数据文件
 STROKE_DATA_FILE = os.path.join(BASE_DIR, 'assets', 'stroke_data.json')
 
-# 真题下载目录（保存到项目根目录）
-ZHENTI_DIR = BASE_DIR
+# 真题下载目录：落主程序根目录（用户按需求指定，下完就在程序旁边能找到）。
+# 文件名由远端 Content-Disposition 决定，所以源码文件的防线不在这里，
+# 而在 zhenti_core 的扩展名白名单：ALLOWED_EXTENSIONS 里没有 .py/.exe/.bat，
+# 覆盖 constants.py 这类攻击在落盘前就被拒（测试 test_download_refuses_disallowed_extension）。
+ZHENTI_DOWNLOAD_DIR = BASE_DIR
 
 # ══════════════════════════════════════════════════════════
 #  UI 常量
@@ -78,7 +81,9 @@ SUBJECT_KEYWORDS = {
     "语文": "语文", "数学": "数学", "英语": "英语",
     "物理": "物理", "化学": "化学", "生物": "生物",
     "历史": "历史", "地理": "地理", "政治": "政治",
-    "道德与法治": "道德与法治", "道法": "道德与法治",
+    # 站内只有一个政治类栏目（第一试卷网 /a/sjzz*/），初中叫「道德与法治」、
+    # 高中叫「思想政治」，统一归到「政治」，否则下拉表和平台声明永远对不上。
+    "道德与法治": "政治", "道法": "政治", "思想政治": "政治",
     "科学": "科学",
 }
 
@@ -105,22 +110,15 @@ BUILTIN_FONTS = [
 # ══════════════════════════════════════════════════════════
 #  爬虫常量
 # ══════════════════════════════════════════════════════════
-
-# 爬虫平台 URL
-CRAWLER_URLS = {
-    "shijuan1": "https://www.shijuan1.com",
-    "szxuexiao": "https://appsj.szxuexiao.com",
-    "yishijuan": "https://www.yishijuan.com",
-    "shijuan_net": "https://www.shijuan.net",
-    "xbjy": "https://www.xbjy.com",
-}
+# 平台清单的唯一来源是 zhenti_core.PLATFORM_CONFIGS（带能力声明），
+# 这里不再重复维护一份 CRAWLER_URLS —— 原先那张表全仓零引用。
 
 # 请求头
 DEFAULT_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
 }
 
-# 请求超时（秒）
+# 页面请求超时（秒）
 REQUEST_TIMEOUT = 15
 
 # ══════════════════════════════════════════════════════════
@@ -129,9 +127,6 @@ REQUEST_TIMEOUT = 15
 
 # 收藏夹文件
 FAVORITES_FILE = os.path.join(BASE_DIR, "zhenti", ".zhenti_favorites.json")
-
-# 搜索历史文件
-HISTORY_FILE = os.path.join(BASE_DIR, "zhenti", ".zhenti_history.json")
 
 # 题目缓存文件
 QUESTION_CACHE_FILE = os.path.join(BASE_DIR, "shuxue", ".question_cache.json")

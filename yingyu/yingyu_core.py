@@ -79,6 +79,9 @@ _SECTION_HEADERS = {
     "Do you have healthy habits?",
     "The lotus plant",
     "Things you should know before mountain hiking",
+    # 五下（2024 新版）Read and write 短文标题
+    "Helpful Mr Lu", "The Green Project",
+    "Choosing a summer holiday tour",
     # 陕旅版板块标题
     "Let's read", "Let's learn more",
     "Read and think", "Read and discuss", "Read and act",
@@ -90,7 +93,9 @@ _PARAGRAPH_TITLES = {"My best friend", "Helping hands in class", "Rules",
                      "Join us for the school talent show!",
                      "Do you have healthy habits?",
                      "The lotus plant",
-                     "Things you should know before mountain hiking"}
+                     "Things you should know before mountain hiking",
+                     "Helpful Mr Lu", "The Green Project",
+                     "Choosing a summer holiday tour"}
 
 # 组合板块标题：子板块名 + Part 后缀（如 "Let's talk PartA" / "Let's talk Part A" / "Do a survey A" / "Listen and chant B"）
 _PART_TITLE_RE = re.compile(

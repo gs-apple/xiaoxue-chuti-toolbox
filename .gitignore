@@ -10,8 +10,18 @@ dist/
 
 # 运行时数据文件
 .question_cache.json
-.zhenti_history.json
 .zhenti_favorites.json
+.zhenti_favorites.json.corrupt
+
+# 真题下载的文件（落盘在主程序根目录，只忽略白名单里的卷子类型）
+/*.rar
+/*.zip
+/*.7z
+/*.pdf
+/*.doc
+/*.docx
+/*.xls
+/*.xlsx
 
 # 其他常见的 Python 项目忽略项
 *.log

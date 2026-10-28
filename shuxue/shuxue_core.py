@@ -182,6 +182,20 @@ CATEGORY_NAMES = {
     "cb_logic": "推理问题", "cb_arrange": "统筹问题", "cb_best": "最优化",
     "cb_draw": "抽屉问题", "cb_container": "容斥问题",
     "cb_assign": "分配问题", "cb_measure": "测量计算",
+    # 2022 版新课标教材补充题型
+    "cb_letter": "用字母表示数", "cb_equation": "解方程",
+    "cb_percent": "百分数", "cb_negative": "负数",
+    "cb_angle": "角与线", "cb_transform": "图形的运动",
+    "cb_position": "确定位置", "cb_probability": "可能性",
+    "cb_statistics": "统计与数据", "cb_date": "年、月、日",
+}
+
+# 2022 版新课标教材有、老教材没有（或不是独立单元）的题型：
+# 它们都是"填空/判断"型，既不是裸算式也不是解决问题，组卷时单独成板块。
+FILL_TYPES = {
+    "cb_letter", "cb_equation", "cb_percent", "cb_negative",
+    "cb_angle", "cb_transform", "cb_position", "cb_probability",
+    "cb_statistics", "cb_date",
 }
 
 ADVANCE_TYPES = {
@@ -532,10 +546,35 @@ class MathProblemGenerator:
         return f"{a_val} ÷ {b_val} =", q_val
 
     def gen_div_decimal(self):
+        """小数除法：先定除数和商，再乘出被除数 —— 保证一定除得尽。
+
+        老写法是"随机被除数 ÷ 随机一位小数"，九成除不尽（10÷7.7=1.2987…），
+        答案只能四舍五入成 1.3：孩子列竖式会发现除不完，参考答案还是错的。
+        小数除法单元整册都靠这个生成器，所以这里必须靠构造保证精确。
+        """
+        def _dec(x):
+            """1.0 → 1，2.60 → 2.6：卷面上不写成 21.0 这种样子。"""
+            x = round(float(x), 2)
+            text = f"{x:.2f}".rstrip("0").rstrip(".")
+            return text or "0"
+
         def _once():
-            a_val = random.randint(1, 9) * 10
-            b_val = round(random.uniform(0.5, 9.9), 1)
-            return f"{a_val} ÷ {b_val} =", round(a_val / b_val, 2)
+            style = random.choice(("by_int", "by_dec", "small_dec"))
+            if style == "by_int":
+                # 除数是整数：9.6 ÷ 3 = 3.2（被除数压在 99 以内，五年级卷面口径）
+                b = random.randint(2, 9)
+                q = round(random.randint(11, max(11, int(99 / b * 10))) / 10.0, 1)
+                return f"{_dec(q * b)} ÷ {b} =", q
+            if style == "by_dec":
+                # 被除数、除数都是一位小数，商是整数：21.6 ÷ 7.2 = 3
+                b = round(random.randint(11, 89) / 10.0, 1)
+                q = random.randint(2, max(2, int(99 / b)))
+                return f"{_dec(q * b)} ÷ {_dec(b)} =", q
+            # 除数是零点几：5.4 ÷ 0.6 = 9
+            b = round(random.randint(2, 9) / 10.0, 1)
+            q = random.randint(2, 60)
+            return f"{_dec(q * b)} ÷ {_dec(b)} =", q
+
         return self._safe_gen(_once)
 
     def gen_div_fraction(self):
@@ -682,6 +721,11 @@ class MathProblemGenerator:
             return result
 
     def gen_mix_decimal(self, use_bracket=False):
+        """小数四则混合。两道硬约束：不出负数、不出无限小数。
+
+        小学阶段还没学负数运算，卷面上出现 "-0.8" 这种答案家长会直接判定软件有问题；
+        除法必须整除，否则答案被 round 截断成了错答案。
+        """
         for _ in range(500):
             try:
                 a_val = round(random.uniform(0.1, 10), 1)
@@ -689,14 +733,26 @@ class MathProblemGenerator:
                 c_val = round(random.uniform(0.1, 10), 1)
                 op1 = random.choice(['+', '-', '×', '÷'])
                 op2 = random.choice(['+', '-'])
-                if op1 == '÷' and b_val == 0:
-                    continue
+                if op1 == '÷':
+                    # 让被除数是除数的整数倍：商是一位整数，写在小数位上也除得尽
+                    b_val = round(random.uniform(0.1, 5), 1)
+                    a_val = round(b_val * random.randint(2, 9), 1)
+                    if a_val > 20:
+                        continue
+                if op1 == '-' and a_val <= b_val:
+                    a_val, b_val = b_val, a_val
+                if a_val == b_val:
+                    continue                       # 「6.1-6.1」这种题没有练习价值
+                temp = self._calc(a_val, op1, b_val)
+                if op2 == '-' and temp <= c_val:
+                    op2 = '+'                     # 不够减就改加法，不让结果变负
                 if use_bracket:
                     expr = f"({a_val} {op1} {b_val}) {op2} {c_val} ="
                 else:
                     expr = f"{a_val} {op1} {b_val} {op2} {c_val} ="
-                temp = self._calc(a_val, op1, b_val)
                 ans = self._calc(temp, op2, c_val)
+                if ans < 0:
+                    continue
                 return expr, round(ans, 2)
             except Exception:
                 continue
@@ -709,6 +765,8 @@ class MathProblemGenerator:
                 b_frac = _make_frac()
                 c_frac = _make_frac()
                 op1 = random.choice(['+', '-'])
+                if op1 == '-' and a_frac < b_frac:
+                    a_frac, b_frac = b_frac, a_frac      # 不够减就交换，避免负分数
                 if use_bracket:
                     expr = f"({_frac(a_frac)} {op1} {_frac(b_frac)}) × {_frac(c_frac)} ="
                 else:
@@ -2057,6 +2115,284 @@ class MathProblemGenerator:
             diff = abs(total1 - total2)
             return f"甲买了{n1}本单价{p1}元的书，乙买了{n2}本单价{p2}元的书，甲比乙多花多少元？", diff
 
+    # ══════════════════════════════════════════════════════════
+    #  2022 版新课标教材补充题型
+    #  人教版/北师大版 2026 修订版有这些单元，但原来的 57 个 gen_* 里没有对应题型，
+    #  导致「按课本目录出题」时这些单元只能跳过。以下 10 个题型把它们补上。
+    # ══════════════════════════════════════════════════════════
+
+    def gen_letter(self):
+        """用字母表示数：写含字母的式子 + 代入求值。"""
+        v = random.randint(1, 6)
+        x = random.randint(2, 20)
+        if v == 1:
+            a = random.randint(2, 9)
+            b = random.randint(2, 12)
+            return (f"每本笔记本{a}元，买x本需要（    ）元；当x={b}时，需要（    ）元。",
+                    f"{a}x，{a * b}")
+        elif v == 2:
+            a = random.randint(5, 20)
+            return (f"比a多{a}的数是（    ）；当a={x}时，这个数是（    ）。",
+                    f"a+{a}，{x + a}")
+        elif v == 3:
+            a, b = random.randint(3, 15), random.randint(2, 14)
+            return (f"长方形的长是a厘米、宽是b厘米，周长是（    ）厘米；"
+                    f"当a={a}、b={b}时，周长是（    ）厘米。",
+                    f"2(a+b)，{2 * (a + b)}")
+        elif v == 4:
+            a = random.randint(2, 6)
+            b = random.randint(1, 15)
+            return (f"当x={x}时，{a}x+{b}的值是（    ）。", a * x + b)
+        elif v == 5:
+            a = random.randint(2, 8)
+            b = random.randint(2, 9)
+            return (f"当a={a}、b={b}时，ab+a的值是（    ）。", a * b + a)
+        else:
+            a = random.randint(2, 5)
+            b = random.randint(a + 1, 12)
+            return (f"当x={b}、y={a}时，x²-y的值是（    ）。", b * b - a)
+
+    def gen_equation(self):
+        """解方程：只问"解是多少"，答案是一个数，方便直接判对错。"""
+        v = random.randint(1, 5)
+        x = random.randint(2, 20)
+        if v == 1:
+            a = random.randint(2, 30)
+            return f"方程 x+{a}={x + a} 的解是 x=（    ）。", x
+        elif v == 2:
+            a = random.randint(2, 20)
+            return f"方程 x-{a}={x} 的解是 x=（    ）。", x + a
+        elif v == 3:
+            a = random.randint(2, 9)
+            return f"方程 {a}x={a * x} 的解是 x=（    ）。", x
+        elif v == 4:
+            a = random.randint(2, 9)
+            b = random.randint(1, 20)
+            return f"方程 {a}x+{b}={a * x + b} 的解是 x=（    ）。", x
+        else:
+            a = random.randint(2, 9)
+            return f"方程 x÷{a}={x} 的解是 x=（    ）。", a * x
+
+    def gen_percent(self):
+        """百分数：互化、求百分率、求一个数的百分之几。"""
+        v = random.randint(1, 6)
+        if v == 1:
+            n = random.randint(1, 99)
+            return f"{n / 100:.2f}".rstrip("0").rstrip(".") + " 化成百分数是（    ）。", f"{n}%"
+        elif v == 2:
+            n = random.choice([5, 8, 12, 15, 20, 25, 36, 45, 60, 75, 80, 90])
+            return f"{n}% 化成小数是（    ）。", round(n / 100, 2)
+        elif v == 3:
+            b = random.choice([20, 25, 40, 50, 80, 100])
+            a = b // random.choice([2, 4, 5])
+            return f"六年级有学生{b}人，其中女生{a}人，女生占全班的（    ）%。", round(a * 100 / b, 1)
+        elif v == 4:
+            p = random.choice([10, 20, 25, 30, 40, 50, 60, 75, 80])
+            base = random.choice([40, 60, 80, 100, 120, 200])
+            return f"{base}的{p}%是（    ）。", round(base * p / 100, 2)
+        elif v == 5:
+            p = random.choice([80, 85, 90, 95])
+            price = random.choice([100, 200, 300, 400, 500])
+            return f"一件商品原价{price}元，打{p}折（即原价的{p}%）出售，现价（    ）元。", price * p / 100
+        else:
+            a = random.choice([3, 4, 5, 6, 8])
+            b = random.choice([5, 8, 10, 12, 20])
+            if b <= a:
+                b = a + random.randint(1, 5)
+            return f"{a}是{b}的（    ）%（百分号前保留一位小数）。", round(a * 100 / b, 1)
+
+    def gen_negative(self):
+        """负数：比大小、温差、海拔记法、数轴距离。"""
+        v = random.randint(1, 4)
+        if v == 1:
+            a = random.randint(1, 20)
+            b = a + random.randint(1, 15)
+            return f"在 -{a} 、-{b} 、0 三个数中，最大的数是（    ）。", "0"
+        elif v == 2:
+            hi = random.randint(1, 25)
+            lo = random.randint(1, 20)
+            return f"某天最高气温是{hi}℃，最低气温是-{lo}℃，这天的温差是（    ）℃。", hi + lo
+        elif v == 3:
+            h = random.randint(50, 500)
+            return (f"海平面以上{h}米记作+{h}米，那么海平面以下{h}米记作（    ）米。",
+                    f"-{h}")
+        else:
+            a = random.randint(1, 15)
+            b = random.randint(1, 15)
+            return (f"数轴上表示-{a}的点到原点的距离是（    ）个单位长度，"
+                    f"表示+{b}的点到原点的距离是（    ）个单位长度。",
+                    f"{a}，{b}")
+
+    def gen_angle(self):
+        """线与角：余角补角、三角形内角、角的分类、钟面夹角。"""
+        v = random.randint(1, 5)
+        if v == 1:
+            a = random.randint(10, 80)
+            return f"一个角是{a}°，它的余角是（    ）°，补角是（    ）°。", f"{90 - a}°，{180 - a}°"
+        elif v == 2:
+            a = random.randint(20, 100)
+            b = random.randint(20, 180 - a - 10)
+            return f"三角形中两个角分别是{a}°和{b}°，第三个角是（    ）°。", 180 - a - b
+        elif v == 3:
+            a = random.choice([25, 45, 60, 75, 89, 90, 91, 100, 120, 135, 150, 179])
+            kind = "直角" if a == 90 else ("锐角" if a < 90 else "钝角")
+            return f"{a}° 的角是（    ）。", kind
+        elif v == 4:
+            h = random.randint(1, 6)
+            m = random.choice([0, 30])
+            deg = abs(h * 30 + m * 0.5 - m * 6)
+            deg = min(deg, 360 - deg)
+            if deg == int(deg):
+                deg = int(deg)
+            return f"{h}时{'整' if m == 0 else '30分'}，钟面上时针和分针的夹角是（    ）°。", deg
+        else:
+            a = random.choice([2, 4, 5, 10])
+            return f"1个平角是（    ）°，它的{a}分之一是（    ）°。", f"180°，{180 // a}°"
+
+    def gen_transform(self):
+        """图形的运动：对称轴条数、平移净格数、旋转角度、点平移后的坐标。"""
+        v = random.randint(1, 5)
+        if v == 1:
+            shape, n = random.choice([("正方形", 4), ("长方形", 2), ("等边三角形", 3),
+                                      ("等腰三角形", 1), ("圆", "无数")])
+            return f"{shape}有（    ）条对称轴。", f"{n}条"
+        elif v == 2:
+            a, b = random.randint(2, 8), random.randint(1, 6)
+            return (f"一个图形先向右平移{a}格，再向左平移{b}格，相当于向（    ）"
+                    f"平移了（    ）格。", f"右，{a - b}" if a > b else f"左，{b - a}")
+        elif v == 3:
+            a, b = random.randint(1, 5), random.randint(6, 12)
+            return (f"钟面上的分针从数字{a}走到数字{b}，转过的角度是（    ）°。", (b - a) * 30)
+        elif v == 4:
+            x, y = random.randint(0, 8), random.randint(0, 8)
+            dx, dy = random.randint(1, 4), random.randint(1, 3)
+            return (f"点A在（{x}，{y}），向右平移{dx}格、向上平移{dy}格后，"
+                    f"新的位置是（    ）。", f"（{x + dx}，{y + dy}）")
+        else:
+            a = random.choice([90, 180, 270, 360])
+            return f"一个图形绕某点顺时针旋转{a}°，相当于旋转了（    ）个直角。", a // 90
+
+    def gen_position(self):
+        """确定位置：数对、行列、方向。"""
+        v = random.randint(1, 5)
+        if v == 1:
+            c, r = random.randint(1, 8), random.randint(1, 8)
+            return f"小明坐在第{c}列第{r}行，用数对表示是（    ）。", f"（{c}，{r}）"
+        elif v == 2:
+            c, r = random.randint(1, 8), random.randint(1, 8)
+            return f"数对（{c}，{r}）表示的位置是第（    ）列第（    ）行。", f"{c}，{r}"
+        elif v == 3:
+            r = random.randint(2, 9)
+            return (f"同学们排队做操，小红站在第{r}行，她前面一行是第（    ）行，"
+                    f"后面一行是第（    ）行。", f"{r - 1}，{r + 1}")
+        elif v == 4:
+            c = random.randint(2, 8)
+            return (f"小军在教室的第{c}列，他左边一列是第（    ）列，右边一列是第（    ）列。",
+                    f"{c - 1}，{c + 1}")
+        else:
+            d = random.choice([("东", "西"), ("南", "北"), ("东南", "西北"), ("东北", "西南")])
+            return f"与「{d[0]}」相反的方向是（    ）。", d[1]
+
+    def gen_probability(self):
+        """可能性：可能性大小、几分之几、一定/可能/不可能。"""
+        v = random.randint(1, 5)
+        if v == 1:
+            a, b = random.randint(3, 9), random.randint(1, 2)
+            if a <= b:
+                a = b + 3
+            return (f"袋子里有{a}个红球、{b}个白球，任意摸一个，摸到（    ）球的可能性大。",
+                    "红")
+        elif v == 2:
+            a, b = random.randint(2, 6), random.randint(2, 6)
+            if a == b:
+                return (f"袋子里有{a}个红球、{b}个白球，任意摸一个，摸到红球和白球的可能性（    ）。",
+                        "相等")
+            big = "红" if a > b else "白"
+            return (f"袋子里有{a}个红球、{b}个白球，任意摸一个，摸到（    ）球的可能性大。", big)
+        elif v == 3:
+            n = random.randint(4, 10)
+            k = random.randint(1, n - 1)
+            return (f"袋子里有{n}个球，其中{k}个是红球。任意摸一个，摸到红球的可能性是（    ）。",
+                    Fraction(k, n))
+        elif v == 4:
+            return random.choice([
+                ("太阳从东方升起，这件事是（    ）的。", "一定"),
+                ("盒子里全是白球，摸出一个红球，这件事是（    ）的。", "不可能"),
+                ("明天会下雨，这件事是（    ）的。", "可能"),
+                ("抛一枚硬币，正面朝上，这件事是（    ）的。", "可能"),
+            ])
+        else:
+            n = random.choice([6, 8, 10, 12])
+            # 排除 k=n：十张全是星星时"抽到星星的可能性是1"读起来像脑筋急转弯
+            faces = [i for i in range(1, n) if n % i == 0]
+            k = random.choice(faces)
+            return (f"把{n}张相同的卡片（其中{k}张画着星星）洗匀后抽一张，"
+                    f"抽到星星的可能性是（    ）。", Fraction(k, n))
+
+    def gen_statistics(self):
+        """统计：平均数、最多最少、合计、条形统计图读数。"""
+        v = random.randint(1, 5)
+        if v == 1:
+            n = random.randint(3, 5)
+            avg = random.randint(10, 40)
+            data = [avg] * n
+            for _ in range(random.randint(1, 3)):
+                i, j = random.randrange(n), random.randrange(n)
+                step = random.randint(1, 5)
+                data[i] += step
+                data[j] -= step
+            return (f"{n}次数学测验成绩分别是 {'、'.join(map(str, data))} 分，"
+                    f"平均分是（    ）分。", sum(data) / n)
+        elif v == 2:
+            names = ["一班", "二班", "三班", "四班"]
+            data = [random.randint(20, 60) for _ in names]
+            top = names[data.index(max(data))]
+            low = names[data.index(min(data))]
+            return (f"四个班植树的棵数分别是 {'、'.join(f'{n}{d}棵' for n, d in zip(names, data))}，"
+                    f"植树最多的是（    ），最少的是（    ）。", f"{top}，{low}")
+        elif v == 3:
+            data = [random.randint(5, 30) for _ in range(4)]
+            return (f"某商店四天卖出饮料 {'、'.join(map(str, data))} 箱，这四天共卖出（    ）箱。",
+                    sum(data))
+        elif v == 4:
+            data = [random.randint(10, 50) for _ in range(5)]
+            return (f"五名同学跳绳成绩是 {'、'.join(map(str, data))} 个，"
+                    f"最多的比最少的多（    ）个。", max(data) - min(data))
+        else:
+            n = random.randint(3, 6)
+            avg = random.randint(6, 20)
+            data = [avg] * n
+            data[0] += random.randint(1, 4)
+            data[-1] -= random.randint(1, 4)
+            return (f"一组数据 {'、'.join(map(str, data))} 的平均数是（    ）。", sum(data) / n)
+
+    def gen_date(self):
+        """年、月、日：平闰年、月天数、经过天数、星期推算。"""
+        v = random.randint(1, 5)
+        if v == 1:
+            y = random.choice([2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028])
+            leap = (y % 4 == 0 and y % 100 != 0) or y % 400 == 0
+            return (f"{y}年是（    ）年，全年有（    ）天。",
+                    "闰，366" if leap else "平，365")
+        elif v == 2:
+            m = random.choice([1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+            days = {1: 31, 3: 31, 4: 30, 5: 31, 6: 30, 7: 31,
+                    8: 31, 9: 30, 10: 31, 11: 30, 12: 31}[m]
+            return f"{m}月有（    ）天。", days
+        elif v == 3:
+            return "2月有28天的年份是（    ）年，2月有29天的年份是（    ）年。", "平，闰"
+        elif v == 4:
+            m1 = random.randint(1, 5)
+            d1 = random.randint(1, 20)
+            gap = random.randint(3, 20)
+            return (f"从{m1}月{d1}日到{m1}月{d1 + gap}日，一共经过了（    ）天。", gap)
+        else:
+            w = random.choice(["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"])
+            n = random.randint(1, 6)
+            idx = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"].index(w)
+            return f"今天是{w}，再过{n}天是星期（    ）。", ["一", "二", "三", "四", "五", "六", "日"][(idx + n) % 7]
+
+
 
 # ══════════════════════════════════════════════════════════
 #  题型 → 生成方法映射
@@ -2086,6 +2422,12 @@ _GENERATOR_MAP = {
     "cb_logic": "gen_logic", "cb_arrange": "gen_arrange", "cb_best": "gen_best",
     "cb_draw": "gen_draw", "cb_container": "gen_container",
     "cb_assign": "gen_assign", "cb_measure": "gen_measure",
+    # 2022 版新课标教材补充题型
+    "cb_letter": "gen_letter", "cb_equation": "gen_equation",
+    "cb_percent": "gen_percent", "cb_negative": "gen_negative",
+    "cb_angle": "gen_angle", "cb_transform": "gen_transform",
+    "cb_position": "gen_position", "cb_probability": "gen_probability",
+    "cb_statistics": "gen_statistics", "cb_date": "gen_date",
 }
 
 _BRACKET_TYPES = {"cb_mix_addsub", "cb_mix_addmul", "cb_mix_addmulsub", "cb_mix_dec", "cb_mix_frac"}
@@ -2093,38 +2435,19 @@ _BRACKET_TYPES = {"cb_mix_addsub", "cb_mix_addmul", "cb_mix_addmulsub", "cb_mix_
 _gen = MathProblemGenerator()
 
 
-def generate_questions(selections, use_bracket=False, grade=None, use_spider=True, spider_ratio=0.5):
+def generate_questions(selections, use_bracket=False):
     """
     生成题目
     
     Args:
         selections: 题型选择
         use_bracket: 是否使用括号
-        grade: 年级 (1-6)，用于从爬虫题库获取真题
-        use_spider: 是否使用爬虫题库
-        spider_ratio: 爬虫题占比 (0-1)
+
+    注：原先这里还有一条"从爬虫题库取一半真题"的支路（grade/use_spider/spider_ratio 三个
+    参数），已随题库子系统一并删除——写入端 add_question 全仓零调用方，读取端年级键
+    ('3年级' vs '三年级') 不匹配，三重断裂从未通过电。需要真题请用「真题」标签页搜索。
     """
     basic, advance = [], []
-    
-    # 尝试从爬虫题库获取提升题
-    spider_questions = []
-    if use_spider and grade and grade in range(1, 7):
-        try:
-            from zhenti.zhenti_core import get_spider_questions
-            advance_types = [t for t in selections.keys() if t in ADVANCE_TYPES]
-            spider_count = int(sum(selections.get(t, 0) for t in advance_types) * spider_ratio)
-            if spider_count > 0:
-                spider_questions = get_spider_questions(
-                    grade=grade,
-                    q_types=advance_types if advance_types else None,
-                    count=spider_count
-                )
-                print(f"[Spider] 从题库获取 {len(spider_questions)} 道真题")
-        except Exception as e:
-            print(f"[Spider] 获取真题失败: {e}")
-    
-    # 添加爬虫题目到提升题列表
-    advance.extend(spider_questions)
 
     # 每次指定题型生成前清空跨历史去重缓存，避免历史累积题（尤其小题池的10以内）
     # 导致新题几乎全部被判重复、连续重复触发提前退出而生成0道。
@@ -2800,9 +3123,16 @@ def _build_filename(questions_data, mode="export", grade="", use_bracket=False, 
 def _frac_to_text_export(s):
     return FRAC_RE.sub(lambda m: f"{m.group(1)}/{m.group(2)}", s)
 
+# 平铺写法的分数（"1/4"）。生成器用 FRAC[1,4] 标记，题库原文是平铺的，
+# 判断题的题干里还会把答案按"10/9"写进句子；绘制层统一认这两种写法，
+# 否则同一张卷子上会出现"漂亮的上下分数"和"1/4"混排。
+_PLAIN_FRAC_RE = re.compile(r"(?<![\d/.\[])(\d{1,2})\s*/\s*(\d{1,2})(?![\d/.])")
+
+
 def _split_frac_parts(s):
     parts = []
     last = 0
+    s = _PLAIN_FRAC_RE.sub(lambda m: f"FRAC[{m.group(1)},{m.group(2)}]", s or "")
     for m in FRAC_RE.finditer(s):
         if m.start() > last:
             parts.append(('text', s[last:m.start()]))

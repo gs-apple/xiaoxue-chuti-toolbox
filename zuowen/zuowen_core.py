@@ -6,7 +6,8 @@ import subprocess
 import platform
 from datetime import datetime
 from constants import BASE_DIR
-from zuowen.zuowen_data import TEXTBOOK_COMPS, EXAMPLE_ESSAYS, XIAOSHENGCHU, ZHONGKAO, GAOKAO
+from zuowen.zuowen_data import (
+    TEXTBOOK_COMPS, EXAMPLE_ESSAYS, XIAOSHENGCHU, ZHONGKAO, GAOKAO, MANFEN)
 
 
 class ZuowenEngine:
@@ -35,19 +36,29 @@ class ZuowenEngine:
     # ========== 中考/高考作文 ==========
 
     def get_exam_topics(self, exam_type, year):
-        """获取小升初/中考/高考作文题目列表"""
+        """获取小升初/中考/高考/满分原文的作文题目列表"""
         if exam_type == "小升初":
             data = XIAOSHENGCHU
         elif exam_type == "中考作文":
             data = ZHONGKAO
+        elif exam_type == "满分原文":
+            data = MANFEN
         else:
             data = GAOKAO
         return data.get(str(year), [])
 
     # ========== 例文 ==========
 
-    def get_example_essay(self, title):
-        """根据标题获取例文"""
+    def get_example_essay(self, title, grade="", semester=""):
+        """根据标题获取例文
+
+        部分题目在不同年级/学期重名（如二年级上下册都有「看图写故事」），
+        因此优先用「年级/学期/标题」精确匹配，找不到再退回按标题匹配。
+        """
+        if grade and semester:
+            hit = EXAMPLE_ESSAYS.get("%s/%s/%s" % (grade, semester, title))
+            if hit:
+                return hit
         return EXAMPLE_ESSAYS.get(title)
 
 

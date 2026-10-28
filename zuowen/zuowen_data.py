@@ -25,3 +25,6 @@ PICTURE_WRITING = _data.get('PICTURE_WRITING', [])
 XIAOSHENGCHU = _data.get('XIAOSHENGCHU', {})
 ZHONGKAO = _data.get('ZHONGKAO', {})
 GAOKAO = _data.get('GAOKAO', {})
+# 历年考场满分原文（2001 赤兔之死、2020 生活在树上），单独成一类，
+# 不混进「最近三年」的年份下拉
+MANFEN = _data.get('MANFEN', {})

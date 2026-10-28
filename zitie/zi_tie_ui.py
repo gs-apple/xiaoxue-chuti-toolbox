@@ -193,6 +193,8 @@ class ZiTieTabWidget:
                                                  "四年级", "五年级", "六年级"])
         self.grade_combo.current(0)
         self.grade_combo.pack(side=tk.LEFT)
+        self.grade_combo.bind("<<ComboboxSelected>>",
+                              lambda e: self._check_oldbook_tip())
 
         # 版本
         row2 = tk.Frame(left_frame, bg=BG)
@@ -222,6 +224,10 @@ class ZiTieTabWidget:
                                                   command=self.on_semester_changed,
                                                   font=("Microsoft YaHei", 10))
         self.cb_second_semester.pack(side=tk.LEFT, padx=(8, 0))
+
+        # 四下 / 五下 / 六下 的数据库内容仍是 2019 版课本（新版尚未启用），
+        # 选中这三册的下册时弹窗提醒；界面上不加任何控件。
+        self._oldbook_key = None
 
         # 内容 (生字/词语)
         self.content_widget = tk.Frame(left_frame, bg=BG)
@@ -641,10 +647,32 @@ class ZiTieTabWidget:
         self._content_var.set("")
         self.text_content.delete("1.0", tk.END)
         self.update_grid_type_enabled()
+        self._check_oldbook_tip()
 
     def on_semester_changed(self):
         self.text_content.delete("1.0", tk.END)
         self.update_grid_type_enabled()
+        self._check_oldbook_tip()
+
+    # 这三册课本仍是「教育部审定 2019」版（其余 9 册已是 2022 修订新版）
+    OLD_BOOK_GRADES = ("四年级", "五年级", "六年级")
+
+    def _check_oldbook_tip(self):
+        """选中 四下 / 五下 / 六下 时弹窗提醒数据版本。"""
+        grade = self.grade_combo.get()
+        is_renjiao = self.version_combo.get() == "人教版"
+        sem_on = str(self.cb_second_semester.cget("state")) != "disabled"
+        hit = (is_renjiao and sem_on and grade in self.OLD_BOOK_GRADES
+               and bool(self._second_sem_var.get()))
+
+        # 只在「进入某一册」时弹一次：同一册内切换生字/词语等不重复弹，
+        # 换年级（四下→五下）或重新勾选下册会再提醒一次。
+        key = grade if hit else None
+        if key and key != self._oldbook_key:
+            messagebox.showwarning(
+                "版本提醒",
+                "当前数据库内容为 2019 版本数据，非 2024 新版本数据。")
+        self._oldbook_key = key
 
     def on_content_radio_changed(self):
         val = self._content_var.get()
@@ -694,6 +722,7 @@ class ZiTieTabWidget:
         sem_state = "normal" if need_semester else "disabled"
         self.cb_first_semester.config(state=sem_state)
         self.cb_second_semester.config(state=sem_state)
+        self._check_oldbook_tip()
 
     def _set_content_widgets_state(self, state):
         """设置文字内容区域控件的状态（古书模式下禁用其他内容，但保留古书单选框）"""
