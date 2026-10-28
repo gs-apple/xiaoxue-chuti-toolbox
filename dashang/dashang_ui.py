@@ -102,6 +102,6 @@ class DashangTabWidget:
         g3 = tk.LabelFrame(self.frame, text=" ⚠️ 安全提醒 ",
                            font=TITLE_FONT, bg=BG_COLOR, fg=SAFE_COLOR)
         g3.pack(fill="x", padx=16, pady=(4, 8))
-        tk.Label(g3, text="本软件纯免费，不收任何费用！",
+        tk.Label(g3, text="本软件纯AI编写，免费分享，不收任何费用，谨防被骗！",
                  font=SAFE_FONT, bg=BG_COLOR, fg=SAFE_COLOR,
                  ).pack(pady=(2, 6))
