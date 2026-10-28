@@ -23,10 +23,9 @@ from constants import (
     ZHENTI_DOWNLOAD_DIR,
 )
 
-try:
-    import requests
-except ImportError:                                   # 缺依赖时不拖垮整个程序
-    requests = None
+# requests 导入要 0.5s（拖慢整个软件启动），而它只在真正联网搜索/下载时才用
+# 得上 —— 延迟到 _get_session() 首次调用时再导入；缺依赖时保持 None 不拖垮程序。
+requests = None
 
 
 # ══════════════════════════════════════════════════════════
@@ -99,10 +98,24 @@ def download_dir() -> str:
 _SESSION = None
 
 
+def _load_requests():
+    """延迟导入 requests（导入要 0.5s，拖慢启动）。成功返回 True。"""
+    global requests
+    if requests is None:
+        try:
+            import requests as _requests
+            requests = _requests
+        except ImportError:
+            return False
+    return True
+
+
 def _get_session():
     """模块级 Session：复用连接，握手开销从 548ms/次 降到 98ms/次。"""
     global _SESSION
     if _SESSION is None:
+        if not _load_requests():
+            raise RuntimeError("缺少 requests 依赖")
         session = requests.Session()
         session.headers.update(DEFAULT_HEADERS)
         _SESSION = session
@@ -558,7 +571,7 @@ class PaperScraper:
     def _safe_get(self, url: str, timeout: int = REQUEST_TIMEOUT,
                   declared_encoding: str = "") -> Tuple[Optional[str], Optional[str]]:
         """取页面，返回 (html, error)。"""
-        if requests is None:
+        if not _load_requests():
             return None, "缺少 requests 依赖"
         try:
             resp = _get_session().get(url, timeout=timeout)
@@ -1003,7 +1016,7 @@ class PaperScraper:
         referer 传详情页 URL：第一试卷网等站的 /uploads 目录有防盗链，
         不带 Referer 会回一张 JPEG 占位图（HTTP 200、长度正常），落盘就是坏压缩包。
         """
-        if requests is None:
+        if not _load_requests():
             return {"success": False, "filepath": "", "message": "缺少 requests 依赖"}
 
         # URL 里带明确扩展名且不在白名单的，先拒掉（省一次请求）。

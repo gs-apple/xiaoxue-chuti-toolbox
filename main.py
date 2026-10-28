@@ -66,24 +66,29 @@ class MathGeneratorApp:
         self.root.title(APP_TITLE)
         self.root.geometry("700x700")
         self.root.resizable(False, False)
-        self.root.withdraw()  # 先隐藏，避免窗口从左上角滑入
-        self._init_ui()
-        self._center()  # UI 构建完成后再居中
-        self.root.deiconify()  # 居中后再显示
-
-    def _center(self):
-        self.root.update_idletasks()
-        w = self.root.winfo_width()
-        h = self.root.winfo_height()
-        sw = self.root.winfo_screenwidth()
-        sh = self.root.winfo_screenheight()
-        x = (sw - w) // 2
-        y = (sh - h) // 2
-        self.root.geometry(f"+{x}+{y}")
-
-    def _init_ui(self):
         self.root.configure(bg=BG_COLOR)
 
+        # 尺寸固定，可以直接在屏幕中央出现，不会"从左上角滑入"
+        sw = self.root.winfo_screenwidth()
+        sh = self.root.winfo_screenheight()
+        self.root.geometry(f"700x700+{(sw - 700) // 2}+{(sh - 700) // 2}")
+
+        # 先显示"正在加载"（窗口 ~0.2s 内可见），再逐个构建标签页，
+        # 每建完一个刷新一次界面，避免白屏 3 秒的卡顿感
+        loading = tk.Label(self.root, text="正在加载，请稍候…",
+                           font=("Microsoft YaHei", 16, "bold"), bg=BG_COLOR)
+        loading.pack(expand=True)
+        self.root.update_idletasks()
+        self.root.deiconify()
+        self.root.update()
+
+        self._init_ui()
+
+        loading.destroy()
+        self.notebook.pack(fill=tk.BOTH, expand=True, padx=6, pady=6)
+        self.root.update()
+
+    def _init_ui(self):
         # 配置选项卡样式
         style = ttk.Style()
         style.configure("TNotebook",
@@ -98,38 +103,24 @@ class MathGeneratorApp:
                   background=[("selected", "#3b82f6"), ("active", "#60a5fa")],
                   foreground=[("selected", "#000000"), ("active", "#000000")])
 
-        # 使用 ttk.Notebook
-        notebook = ttk.Notebook(self.root)
-        notebook.pack(fill=tk.BOTH, expand=True, padx=6, pady=6)
+        # 使用 ttk.Notebook（构建完成后由 __init__ 统一 pack）
+        self.notebook = ttk.Notebook(self.root)
 
-        # 数学标签页
-        self.math_tab = ShuxueTabWidget(notebook)
-        notebook.add(self.math_tab.frame, text=" 数 学 ")
-
-        # 字帖标签页
-        self.zitie_tab = ZiTieTabWidget(notebook)
-        notebook.add(self.zitie_tab.frame, text=" 字 帖 ")
-
-        # 作文标签页
-        self.zuowen_tab = ZuowenTabWidget(notebook)
-        notebook.add(self.zuowen_tab.frame, text=" 作 文 ")
-
-        # 真题下载标签页
-        self.zhenti_tab = ZhentiTabWidget(notebook)
-        notebook.add(self.zhenti_tab.frame, text=" 真 题 ")
-
-        # 英语标签页
-        self.yingyu_tab = YingyuTabWidget(notebook)
-        notebook.add(self.yingyu_tab.frame, text=" 英 语 ")
-
-        # 趣味标签页（简笔画 / 迷宫运笔 / 数独 / 幻方）
-        self.quwei_tab = QuweiTabWidget(notebook)
-        notebook.add(self.quwei_tab.frame, text=" 趣 味 ")
-
-        # 打赏标签页
-        self.dashang_tab = DashangTabWidget(notebook)
-        notebook.add(self.dashang_tab.frame, text=" 打 赏 ")
-
+        # 各标签页：每建完一个刷新一次，加载提示持续可见
+        tabs = (
+            ("math_tab", ShuxueTabWidget, " 数 学 "),
+            ("zitie_tab", ZiTieTabWidget, " 字 帖 "),
+            ("zuowen_tab", ZuowenTabWidget, " 作 文 "),
+            ("zhenti_tab", ZhentiTabWidget, " 真 题 "),
+            ("yingyu_tab", YingyuTabWidget, " 英 语 "),
+            ("quwei_tab", QuweiTabWidget, " 趣 味 "),
+            ("dashang_tab", DashangTabWidget, " 打 赏 "),
+        )
+        for attr, cls, text in tabs:
+            widget = cls(self.notebook)
+            setattr(self, attr, widget)
+            self.notebook.add(widget.frame, text=text)
+            self.root.update()
     def run(self):
         self.root.mainloop()
 
