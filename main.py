@@ -16,6 +16,7 @@ from constants import BG_COLOR
 # 版本信息（每10位进1，如 V1.0.10 -> V1.1.0）
 VERSION = "V1.2.5"
 APP_NAME = "小学出题工具箱"
+APP_TITLE = f"{APP_NAME} {VERSION} —by:Shaowei"
 
 # ---------- 禁止多开（Windows 命名互斥体） ----------
 _MUTEX_NAME = "Local\\XiaoxueChutiToolbox_SingleInstance"
@@ -34,7 +35,7 @@ def acquire_single_instance():
 def activate_existing_window():
     """找到已运行实例的主窗口并激活到前台。返回是否成功。"""
     user32 = ctypes.windll.user32
-    hwnd = user32.FindWindowW(None, f"{APP_NAME} {VERSION}")
+    hwnd = user32.FindWindowW(None, APP_TITLE)
     if not hwnd:
         # 标题可能因版本不同而变化，按前缀模糊查找
         found = []
@@ -62,7 +63,7 @@ def activate_existing_window():
 class MathGeneratorApp:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title(f"{APP_NAME} {VERSION}")
+        self.root.title(APP_TITLE)
         self.root.geometry("700x700")
         self.root.resizable(False, False)
         self.root.withdraw()  # 先隐藏，避免窗口从左上角滑入
