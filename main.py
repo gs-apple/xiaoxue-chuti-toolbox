@@ -72,19 +72,12 @@ class MathGeneratorApp:
         sw = self.root.winfo_screenwidth()
         sh = self.root.winfo_screenheight()
         self.root.geometry(f"700x700+{(sw - 700) // 2}+{(sh - 700) // 2}")
-
-        # 先显示"正在加载"（窗口 ~0.2s 内可见），再逐个构建标签页，
-        # 每建完一个刷新一次界面，避免白屏 3 秒的卡顿感
-        loading = tk.Label(self.root, text="正在加载，请稍候…",
-                           font=("Microsoft YaHei", 16, "bold"), bg=BG_COLOR)
-        loading.pack(expand=True)
         self.root.update_idletasks()
         self.root.deiconify()
         self.root.update()
 
         self._init_ui()
 
-        loading.destroy()
         self.notebook.pack(fill=tk.BOTH, expand=True, padx=6, pady=6)
         self.root.update()
 
@@ -106,15 +99,15 @@ class MathGeneratorApp:
         # 使用 ttk.Notebook（构建完成后由 __init__ 统一 pack）
         self.notebook = ttk.Notebook(self.root)
 
-        # 各标签页：每建完一个刷新一次，加载提示持续可见
+        # 各标签页：「说明」放最前面，软件打开默认显示它
         tabs = (
+            ("dashang_tab", DashangTabWidget, " 说 明 "),
             ("math_tab", ShuxueTabWidget, " 数 学 "),
             ("zitie_tab", ZiTieTabWidget, " 字 帖 "),
             ("zuowen_tab", ZuowenTabWidget, " 作 文 "),
             ("zhenti_tab", ZhentiTabWidget, " 真 题 "),
             ("yingyu_tab", YingyuTabWidget, " 英 语 "),
             ("quwei_tab", QuweiTabWidget, " 趣 味 "),
-            ("dashang_tab", DashangTabWidget, " 打 赏 "),
         )
         for attr, cls, text in tabs:
             widget = cls(self.notebook)
