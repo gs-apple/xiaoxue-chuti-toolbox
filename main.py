@@ -68,17 +68,20 @@ class MathGeneratorApp:
         self.root.resizable(False, False)
         self.root.configure(bg=BG_COLOR)
 
-        # 尺寸固定，可以直接在屏幕中央出现，不会"从左上角滑入"
+        # 构建期间窗口保持隐藏（withdrawn），全部就绪、选中「说明」页后
+        # 再一次性居中显示 —— 消除启动时约 0.5 秒的空白界面
+        self.root.withdraw()
+
+        self._init_ui()
+
+        self.notebook.pack(fill=tk.BOTH, expand=True, padx=6, pady=6)
+        self.notebook.select(0)                     # 打开默认显示「说明」
+        # 尺寸固定，直接算好屏幕中央坐标再显示，不会"从左上角滑入"
         sw = self.root.winfo_screenwidth()
         sh = self.root.winfo_screenheight()
         self.root.geometry(f"700x700+{(sw - 700) // 2}+{(sh - 700) // 2}")
         self.root.update_idletasks()
         self.root.deiconify()
-        self.root.update()
-
-        self._init_ui()
-
-        self.notebook.pack(fill=tk.BOTH, expand=True, padx=6, pady=6)
         self.root.update()
 
     def _init_ui(self):
