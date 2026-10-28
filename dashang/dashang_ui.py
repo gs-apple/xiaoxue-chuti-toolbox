@@ -1,10 +1,9 @@
 # dashang/dashang_ui.py — 打赏标签页 UI（纯展示，无交互按钮）
-import os
 import tkinter as tk
 from tkinter import ttk
 
 from constants import BG_COLOR
-from dashang.dashang_core import WECHAT_QR_PATH, DEFAULT_THANKS, load_qr_image
+from dashang.dashang_core import DEFAULT_THANKS, load_qr_image
 
 TITLE_FONT = ("Microsoft YaHei", 18, "bold")
 THANKS_FONT = ("Microsoft YaHei", 15, "bold")
@@ -30,22 +29,16 @@ class DashangTabWidget:
                  bg=BG_COLOR, fg="#333333", justify="center",
                  wraplength=460).pack(pady=(0, 18))
 
-        # 微信收款码
-        img = load_qr_image(WECHAT_QR_PATH)
+        # 微信收款码（内嵌在软件里，无需外部图片文件）
+        img = load_qr_image()
         if img:
             self._wechat_img = img
             qr_label = tk.Label(self.frame, image=img, bg="#ffffff",
                                 relief="groove", bd=2)
         else:
-            if os.path.exists(WECHAT_QR_PATH):
-                # 文件存在但加载失败：多半是 JPG 且未安装 Pillow
-                reason = ("无法显示该 JPG 收款码\n请先安装 Pillow：\n"
-                          "pip install pillow")
-            else:
-                reason = "未找到收款码图片：\n" + WECHAT_QR_PATH
-            qr_label = tk.Label(self.frame, text=reason, bg="#ffffff",
-                                relief="groove", bd=2, justify="center",
-                                font=("Microsoft YaHei", 11),
+            qr_label = tk.Label(self.frame, text="收款码加载失败\n请重新安装或反馈",
+                                bg="#ffffff", relief="groove", bd=2,
+                                justify="center", font=("Microsoft YaHei", 11),
                                 width=26, height=14)
         qr_label.pack(pady=(0, 6))
         tk.Label(self.frame, text="微信赞赏码", bg=BG_COLOR,
