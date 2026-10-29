@@ -2,6 +2,11 @@
 
 给小学家长和老师用的一套本地小工具：**出数学题、印字帖、找作文、下真题、练英语、做趣味题**，六件事都在一个窗口里，导出 PDF 直接打印。
 
+> **这个软件能干什么 / 你可能在搜：**
+> 小学数学口算题生成器 · 小学练习题自动出卷打印 · 一年级到六年级数学计算题 · 田字格字帖制作 · 汉字描红练字模板 · 生字抄写练习纸 · 四线三格英语单词字帖 · 英语单词默写表 · 人教版 PEP 小学英语单词表 · 陕旅版英语单词 · 小学作文范文 · 单元作文题目 · 小学语文数学英语期末真题试卷下载 · Windows 免安装出题软件
+>
+> 一句话：**不用买练习册，自己出题、自己排版、自己打印。**
+
 Windows + Python + tkinter，单窗口 700×700，绿色免安装、无后台服务、不收集任何数据。除「真题」需要联网抓取公开网页外，其余功能全部离线运行。
 
 当前版本 **V1.2.5**（标题栏显示 `小学出题工具箱 V1.2.5 —by:Shaowei`）。
@@ -28,7 +33,7 @@ Windows + Python + tkinter，单窗口 700×700，绿色免安装、无后台服
 
 ### 方式一：直接下 exe（推荐给家长）
 
-到 [Releases](https://github.com/gs-apple/xiaoxue-tool/releases) 页面下载最新的
+到 [Releases](https://github.com/gs-apple/xiaoxue-chuti-toolbox/releases) 页面下载最新的
 `xiaoxue-chuti-toolbox_V1.2.5_win64.zip`，**解压到任意文件夹**（不要在压缩包里直接双击），然后双击里面的 `小学出题工具箱.exe`。
 
 - 无需安装 Python，无需联网下载依赖；
@@ -38,8 +43,8 @@ Windows + Python + tkinter，单窗口 700×700，绿色免安装、无后台服
 ### 方式二：跑源码（推荐给想改数据的老师）
 
 ```bash
-git clone https://github.com/gs-apple/xiaoxue-tool.git
-cd xiaoxue-tool
+git clone https://github.com/gs-apple/xiaoxue-chuti-toolbox.git
+cd xiaoxue-chuti-toolbox
 pip install -r requirements.txt
 python main.py
 ```
