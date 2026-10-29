@@ -93,6 +93,3 @@ class GradientButton(tk.Canvas):
         else:
             self._draw(*self._colors)
             self.configure(cursor="hand2")
-
-    def set_enabled(self):
-        self.set_disabled(False)

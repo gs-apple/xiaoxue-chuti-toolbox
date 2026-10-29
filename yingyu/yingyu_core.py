@@ -28,13 +28,6 @@ import os as _os
 # 单元名（前 6 个与学期字典的 Unit 1~6 对应；"全部单元" 为汇总项）
 UNIT_NAMES = ["Unit 1", "Unit 2", "Unit 3", "Unit 4", "Unit 5", "Unit 6", "全部单元"]
 
-def _reload():
-    """从数据文件重新读取（yingyu/data/<版本>/<年级>.txt），返回最新结构。
-
-    结构：{版本: {年级: {学期: {"Unit N": {"单词": [行...], "课文": [...], "表达句": [...]}}}}}
-    """
-    return _store.load(force=True)
-
 def _get_data():
     return _store.load()
 
@@ -279,17 +272,6 @@ def _get_phonetic():
             ns = {}
         _PHONETIC_CACHE["phonetic"] = ns.get("PHONETIC_GROUPS", {})
     return _PHONETIC_CACHE["phonetic"]
-
-def get_phonetic_groups():
-    """返回音标一级分组名列表（元音 / 辅音，按书写顺序）。"""
-    return list(_get_phonetic().keys())
-
-def get_phonetic_subgroups(group):
-    """返回某一级分组下的二级分组名列表。"""
-    data = _get_phonetic().get(group, {})
-    if isinstance(data, dict):
-        return list(data.keys())
-    return []
 
 def _parse_phonetic_items(group_text):
     out = []

@@ -128,12 +128,6 @@ def data_path():
     return data_root()
 
 
-def data_path_kind():
-    """返回 (数据根目录, 'program' 或 'appdata')，UI 上用来提示用户去哪改数据。"""
-    root = data_root()
-    return root, ("program" if root.startswith(BASE_DIR) else "appdata")
-
-
 def version_dir(version):
     """某版本的数据文件夹，如 yingyu/data/人教版PEP。"""
     return os.path.join(data_root(), _safe_name(version))
@@ -285,15 +279,6 @@ def serialize_grade(version, grade, sems):
                 out.extend(lines)
                 out.append("")
     return "\n".join(out).rstrip("\n") + "\n"
-
-
-def serialize(data):
-    """整份结构 → 单文件文本（仅用于导出/调试，运行期按年级分别写）。"""
-    out = []
-    for ver, gd in data.items():
-        for grade, sd in gd.items():
-            out.append(serialize_grade(ver, grade, sd))
-    return "\n".join(out)
 
 
 # ── 文件遍历 / 读写 ─────────────────────────────────────────
@@ -480,12 +465,6 @@ def save_grade_text(version, grade, text):
     return p
 
 
-def save_grade(version, grade, sems):
-    """把某个年级的结构写回文件（内部用）。"""
-    return _atomic_write(data_file(version, grade),
-                         serialize_grade(version, grade, sems))
-
-
 # ── 写入 ────────────────────────────────────────────────────
 def save(data=None):
     """整份写回。按 (版本, 年级) 拆开，只重写内容有变化的文件。
@@ -506,11 +485,6 @@ def save(data=None):
     return written
 
 
-def clear_cache():
-    _CACHE.pop("data", None)
-    _CACHE.pop("sig", None)
-
-
 # ── 对外兼容层：旧的 words/课文/表达句 字符串 ───────────────
 def unit_to_legacy(unit_blocks):
     """单元块 → 旧结构 {"words": str, "课文": str, "表达句": str}。
@@ -524,56 +498,3 @@ def unit_to_legacy(unit_blocks):
         "课文": "\n".join(b.get(BLOCK_TEXT) or []),
         "表达句": "\n".join(b.get(BLOCK_EXPR) or []),
     }
-
-
-def legacy_to_lines(text):
-    """旧的多行字符串 → 行列表（用于迁移与批量导入）。"""
-    return [ln.strip() for ln in (text or "").splitlines() if ln.strip()]
-
-
-def block_of(unit_blocks, key):
-    """按 "words" / "单词" / "课文" / "表达句" 取对应块的行列表。"""
-    k = _KEY_ALIASES.get(key, key)
-    return (unit_blocks or {}).get(k) or []
-
-
-# ── 从旧 yingyu_data.py 迁移（历史遗留，已无调用方） ────────
-def migrate_from_py(py_path=None):
-    """把更旧的 yingyu_data.py（ENGLISH_DATA 大字面量）转成新的分文件结构。
-
-    返回 (数据根目录, 单元数, 单词数, 句子数)。仅在一次性迁移时使用。
-    """
-    if py_path is None:
-        py_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                               "yingyu_data.py")
-    ns = {}
-    with open(py_path, encoding="utf-8") as f:
-        src = f.read()
-    exec(compile(src, py_path, "exec"), ns)  # noqa: S102 —— 仅迁移时读一次本地旧数据
-    old = ns.get("ENGLISH_DATA") or {}
-
-    new = {}
-    n_unit = n_word = n_sent = 0
-    for ver, gd in old.items():
-        for grade, sd in gd.items():
-            for semester, ud in sd.items():
-                for uname, unit in ud.items():
-                    wl = legacy_to_lines(unit.get("words", ""))
-                    tl = legacy_to_lines(unit.get("课文", ""))
-                    el = legacy_to_lines(unit.get("表达句", ""))
-                    # 空单元也保留：这样「六年级」这类纯占位的年级/学期不会从
-                    # 下拉框里消失，用户随时可以往里补内容。
-                    bucket = (new.setdefault(ver, {})
-                                 .setdefault(grade, {})
-                                 .setdefault(semester, {}))
-                    bucket[uname] = {
-                        BLOCK_WORDS: wl,
-                        BLOCK_TEXT: tl,
-                        BLOCK_EXPR: el,
-                    }
-                    if wl or tl or el:
-                        n_unit += 1
-                    n_word += len(wl)
-                    n_sent += len(tl) + len(el)
-    save(new)
-    return data_root(), n_unit, n_word, n_sent

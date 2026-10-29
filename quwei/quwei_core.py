@@ -103,11 +103,6 @@ def _scan_images():
     return images
 
 
-def get_jianbihua_names():
-    """UI 下拉用：全部可用图案名（内置 74 幅 + 用户自加图片）。"""
-    return list(_scan_images().keys())
-
-
 _APP_DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app_data.json")
 
 
@@ -335,18 +330,6 @@ def generate_pdf_compare(images_data, output_path):
         if idx < len(images_data):
             c.showPage()
     c.save()
-
-
-def get_jianbihua_items(category):
-    """UI 下拉框用：该分类下的具体图案名单（首项固定「全部」）。
-    随机/全部 → 所有可用图案。"""
-    avail = sorted(_scan_images().keys())
-    if category in ("随机", "全部", ""):
-        return ["全部"] + avail
-    data = _load_app_data()
-    names = set(data["drawing_category_map"].get(category, [])) & \
-        set(_scan_images().keys())
-    return ["全部"] + sorted(names)
 
 
 def get_jianbihua_filtered(category, item="全部"):
