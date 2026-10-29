@@ -1,5 +1,4 @@
 # zuowen_ui.py — 作文标签页
-import datetime
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -19,6 +18,13 @@ MODES = ["课本作文", "中高考作文"]
 # 外地用不上，2026-10-29 已把那些题目和例文清空；但选项仍保留——
 # 各地卷子不同，用户可以用「添加题目」自己往这两个类型里录本地题。
 EXAM_TYPES = ["小升初", "中考作文", "高考作文", "满分原文"]
+
+# 「中高考作文」的年份下拉：固定列出 2023–2030（默认 2026），
+# 不管有没有题目，方便用户直接往未来年份里录本地卷。
+# 实际下拉还要并上该类型已有的年份——满分原文收的是 2001/2020 的老文，
+# 只按固定区间列会把它们彻底藏掉。
+EXAM_YEARS = [str(y) for y in range(2030, 2022, -1)]   # 2030 … 2023
+DEFAULT_EXAM_YEAR = "2026"
 
 
 class ZuowenTabWidget:
@@ -127,8 +133,6 @@ class ZuowenTabWidget:
         # 保存原始值
         self._original_grades = grades
         self._original_semesters = ["上学期", "下学期"]
-        # 中高考作文的年份列表（按实际有数据的年份生成，含 2001 满分作文）
-        self._custom_years = [str(y) for y in range(2000, 2028)]
 
         self.filter_label = tk.Label(filter_row, text="", font=FONT, bg=BG, fg="#2563eb")
         self.filter_label.pack(side=tk.LEFT, padx=(10, 0))
@@ -226,6 +230,7 @@ class ZuowenTabWidget:
                 (t for t in EXAM_TYPES if self._years_of(t)), EXAM_TYPES[0])
             self.grade_var.set(default_type)
             self.sem_label.config(text="年份:")
+            self.sem_var.set(DEFAULT_EXAM_YEAR)   # 默认 2026
             self._refresh_years(default_type)
             self.filter_label.config(text="")
             self.btn_add.grid()  # 显示
@@ -244,17 +249,18 @@ class ZuowenTabWidget:
         ys = [y for y, v in data.items() if v]
         return sorted(ys, key=lambda x: int(x), reverse=True)
 
+    def _year_options(self, exam_type):
+        """年份下拉的选项：固定 2023–2030 + 该类型已有题目的年份（倒序）。"""
+        years = set(EXAM_YEARS) | set(self._years_of(exam_type))
+        return sorted(years, key=int, reverse=True)
+
     def _refresh_years(self, exam_type):
         """切换类型时刷新「年份」下拉。"""
-        years = self._years_of(exam_type)
+        years = self._year_options(exam_type)
         self.sem_combo.config(values=years, state="readonly")
-        if years:
-            if self.sem_var.get() not in years:
-                self.sem_var.set(years[0])
-        else:
-            # 这个类型还没有任何题目（如刚清空的小升初/中考）：
-            # 年份留上一个类型的值会让「添加题目」预填错年份，直接落到今年
-            self.sem_var.set(str(datetime.date.today().year))
+        if self.sem_var.get() not in years:
+            self.sem_var.set(DEFAULT_EXAM_YEAR if DEFAULT_EXAM_YEAR in years
+                             else years[0])
 
     def _on_grade_changed(self):
         mode = self.mode_var.get()
@@ -311,14 +317,11 @@ class ZuowenTabWidget:
             self.item_list.selection_set(0)
             self._on_item_selected()
         else:
-            # 小升初/中考等类型清空后是空的，提示一句可以自己录入，
+            # 年份是固定列出的，选了空年份也会到这里，提示一句可以自己录入，
             # 否则空列表看着像软件出问题
-            if not self._years_of(exam_type):
-                self.filter_label.config(
-                    fg="#d97706",
-                    text=f"「{exam_type}」暂无题目，可点下方「添加题目」录入本地卷")
-            else:
-                self.filter_label.config(fg="#2563eb", text="")
+            self.filter_label.config(
+                fg="#d97706",
+                text=f"「{exam_type} {year} 年」暂无题目，可点下方「添加题目」录入")
             self._clear_detail()
 
     # ============================================================
@@ -517,9 +520,9 @@ class ZuowenTabWidget:
         import os
         import tempfile
 
-        # 预填当前选择
+        # 预填当前选择（年份默认 2026，与题目选择区一致）
         exam_type = self.grade_var.get()
-        year = self.sem_var.get()
+        year = self.sem_var.get() or DEFAULT_EXAM_YEAR
 
         # 弹窗
         dialog = tk.Toplevel(self.frame)
@@ -538,13 +541,23 @@ class ZuowenTabWidget:
         row0.pack(fill=tk.X, padx=15, pady=(15, 5))
         tk.Label(row0, text="类型:", font=FONT, bg=BG).pack(side=tk.LEFT)
         type_var = tk.StringVar(value=exam_type)
-        ttk.Combobox(row0, textvariable=type_var, values=EXAM_TYPES,
-                     state="readonly", width=10, font=FONT).pack(side=tk.LEFT, padx=(4, 15))
+        type_combo = ttk.Combobox(row0, textvariable=type_var, values=EXAM_TYPES,
+                                  state="readonly", width=10, font=FONT)
+        type_combo.pack(side=tk.LEFT, padx=(4, 15))
         tk.Label(row0, text="年份:", font=FONT, bg=BG).pack(side=tk.LEFT)
         year_var = tk.StringVar(value=year)
-        ttk.Combobox(row0, textvariable=year_var,
-                     values=[str(y) for y in range(2000, 2028)],
-                     state="readonly", width=6, font=FONT).pack(side=tk.LEFT, padx=4)
+        year_combo = ttk.Combobox(row0, textvariable=year_var,
+                                  values=self._year_options(exam_type),
+                                  state="readonly", width=6, font=FONT)
+        year_combo.pack(side=tk.LEFT, padx=4)
+
+        def on_type_changed(_event=None):
+            # 换类型时年份选项也跟着变（满分原文会多出 2001/2020），
+            # 选中的年份落到默认的 2026
+            year_combo.config(values=self._year_options(type_var.get()))
+            year_var.set(DEFAULT_EXAM_YEAR)
+
+        type_combo.bind("<<ComboboxSelected>>", on_type_changed)
 
         # 试卷名称（高考用）
         row1 = tk.Frame(dialog, bg=BG)
