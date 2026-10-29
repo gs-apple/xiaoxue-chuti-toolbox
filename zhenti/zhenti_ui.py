@@ -311,6 +311,55 @@ class ZhentiTabWidget:
     #  状态栏 / 下拉联动
     # ══════════════════════════════════════════════════════
 
+    # ══════════════════════════════════════════════════════
+    #  弹窗
+    # ══════════════════════════════════════════════════════
+
+    DIALOG_TITLE_SIZE = 14       # 弹窗标题字号
+    DIALOG_BODY_SIZE = 13        # 弹窗正文字号（messagebox 大概 9，看不清）
+    DIALOG_WRAP_PX = 470         # 正文折行宽度：一行放不下就折行，不硬挤
+
+    def _show_dialog(self, title, body, tone="info"):
+        """自绘提示框。
+
+        messagebox 的字号跟系统走、改不了，文件路径一长就挤成一行，
+        批量下载的汇总信息更是小到看不清。这里用 Toplevel 自己排版：
+        标题 13 号加粗带色条，正文 12 号按 440px 折行。
+        tone: ok=绿 / warn=橙 / info=蓝
+        """
+        color = {"ok": "#16a34a", "warn": "#d97706", "info": "#2563eb"}.get(tone, "#2563eb")
+
+        dlg = tk.Toplevel(self.frame)
+        dlg.title(title)
+        dlg.configure(bg="white")
+        dlg.resizable(False, False)
+        dlg.transient(self.frame.winfo_toplevel())
+
+        body_frame = tk.Frame(dlg, bg="white", padx=20, pady=16)
+        body_frame.pack(fill=tk.BOTH, expand=True)
+
+        tk.Label(body_frame, text=title, bg="white", fg=color, anchor="w",
+                 font=("Microsoft YaHei", self.DIALOG_TITLE_SIZE, "bold")).pack(fill=tk.X)
+        tk.Frame(body_frame, bg=color, height=2).pack(fill=tk.X, pady=(6, 12))
+
+        tk.Label(body_frame, text=body, bg="white", fg="#222", anchor="w",
+                 justify=tk.LEFT, wraplength=self.DIALOG_WRAP_PX,
+                 font=("Microsoft YaHei", self.DIALOG_BODY_SIZE)).pack(fill=tk.BOTH, expand=True)
+
+        GradientButton(body_frame, text="知道了", width=96, height=32,
+                       font=("Microsoft YaHei", 11, "bold"),
+                       command=dlg.destroy).pack(pady=(18, 0))
+
+        dlg.update_idletasks()
+        w, h = dlg.winfo_reqwidth(), dlg.winfo_reqheight()
+        root = self.frame.winfo_toplevel()
+        x = root.winfo_rootx() + max((root.winfo_width() - w) // 2, 0)
+        y = root.winfo_rooty() + max((root.winfo_height() - h) // 3, 0)
+        dlg.geometry(f"+{x}+{y}")
+        dlg.bind("<Escape>", lambda e: dlg.destroy())
+        dlg.grab_set()
+        dlg.wait_window()
+
     def _set_status(self, text, color="#333"):
         """统一写状态栏：固定宽度内放不下就截断加省略号。"""
         full = str(text)
@@ -818,23 +867,24 @@ class ZhentiTabWidget:
         if result.get("success"):
             filepath = result.get("filepath", "")
             self._set_status(f"下载成功: {os.path.basename(filepath)}", "#16a34a")
-            messagebox.showinfo("下载成功", f"文件已保存到:\n{filepath}")
+            self._show_dialog("下载成功", f"文件已保存到:\n{filepath}", tone="ok")
         else:
             message = result.get("message", "未知错误")
             self._set_status(f"下载失败: {message}", "#dc2626")
-            messagebox.showwarning("下载失败", message)
+            self._show_dialog("下载失败", message, tone="warn")
 
     def _on_download_page(self, page_url, message):
         """网盘/提取码类站点：打开试卷详情页，让用户在页面里扫码拿码、自己下载。"""
         self._finish_download()
         webbrowser.open(page_url)
         self._set_status("已打开试卷页面", "#16a34a")
-        messagebox.showinfo(
+        self._show_dialog(
             "试卷页面",
             f"已打开试卷页面:\n{page_url}\n\n"
             "如果页面提示需要提取码：扫页面上的二维码关注公众号，"
             "把页面显示的文章编号发给它，公众号会回你提取码，"
-            "再到网盘页面输入即可下载。")
+            "再到网盘页面输入即可下载。",
+            tone="info")
 
     def _on_download_no_link(self, page_url, message):
         self._finish_download()
@@ -966,9 +1016,9 @@ class ZhentiTabWidget:
             + ("（已停止）" if summary["stopped"] else ""), color)
 
         if fail:
-            messagebox.showwarning("下载完成", body)
+            self._show_dialog("下载完成", body, tone="warn")
         else:
-            messagebox.showinfo("下载完成", body)
+            self._show_dialog("下载完成", body, tone="ok")
 
     # ══════════════════════════════════════════════════════
     #  收藏夹
