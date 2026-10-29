@@ -84,12 +84,14 @@ class ZhentiTabWidget:
         # 也不能直接拿 url 当 iid（重复或空串会让 Tk 抛 TclError）。
         self._by_iid = {}
         self._next_iid = 0
+        self._checked = set()               # 打勾的 iid 集合（下载只作用于这些行）
 
         self._downloading = False
         self._dl_queue = queue.Queue()
-        self._batch_running = False
-        self._batch_queue = queue.Queue()
-        self._batch_stop = threading.Event()
+        self._multi_running = False
+        self._multi_queue = queue.Queue()
+        self._multi_stop = threading.Event()
+        self._multi_results = []
         self._status_full = ""
         self._view_mode = "search"          # search / favorites
         self._capability_hint = False        # 状态栏当前显示的是不是"本平台没这科"的提示
@@ -219,19 +221,21 @@ class ZhentiTabWidget:
         result_inner = tk.Frame(result_frame, bg=BG)
         result_inner.pack(fill=tk.BOTH, expand=True, padx=3, pady=5)
 
-        columns = ("platform", "title", "subject", "grade", "year", "answer")
-        # selectmode="extended"：支持 Ctrl 点选 / Shift 范围选，配合「批量下载」
+        # 第一列是勾选框（☐/☑）：下载只作用于打勾的行，与"选中行"分开
+        columns = ("sel", "platform", "title", "subject", "grade", "year", "answer")
         self.result_tree = ttk.Treeview(result_inner, columns=columns,
-                                        show="headings", selectmode="extended")
+                                        show="headings", selectmode="browse")
         for col, text, width, minwidth, stretch in (
+            ("sel", "☐", 30, 28, False),
             ("platform", "平台", 80, 60, False),
-            ("title", "标题", 255, 150, True),
+            ("title", "标题", 240, 150, True),
             ("subject", "学科", 55, 45, False),
             ("grade", "年级", 60, 50, False),
             ("year", "年份", 62, 50, False),
             ("answer", "答案", 44, 40, False),
         ):
-            self.result_tree.heading(col, text=text, anchor="w")
+            anchor = "center" if col == "sel" else "w"
+            self.result_tree.heading(col, text=text, anchor=anchor)
             self.result_tree.column(col, width=width, minwidth=minwidth, stretch=stretch)
 
         tree_scroll = ttk.Scrollbar(result_inner, orient=tk.VERTICAL,
@@ -241,6 +245,7 @@ class ZhentiTabWidget:
         tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
 
         self.result_tree.bind("<Double-1>", lambda e: self._open_selected())
+        self.result_tree.bind("<Button-1>", self._on_tree_click)
 
     def _build_func_bar(self, parent):
         func_group = ttk.LabelFrame(parent, text="功能区")
@@ -260,10 +265,6 @@ class ZhentiTabWidget:
         self.btn_download = GradientButton(btn_frame, text="下载试卷", width=70, height=28,
                                            command=self._download_selected)
         self.btn_download.pack(side=tk.LEFT, padx=2)
-
-        self.btn_batch = GradientButton(btn_frame, text="批量下载", width=70, height=28,
-                                        command=self._batch_download)
-        self.btn_batch.pack(side=tk.LEFT, padx=2)
 
         self.btn_clear = GradientButton(btn_frame, text="清空", width=70, height=28,
                                         command=self.clear_results)
@@ -497,13 +498,14 @@ class ZhentiTabWidget:
             self.frame.after(100, self._poll_queue)
 
     def _add_result(self, item):
-        """插入一行结果，并登记 iid -> item 映射。"""
+        """插入一行结果，并登记 iid -> item 映射（勾选框默认不勾）。"""
         iid = str(self._next_iid)
         self._next_iid += 1
         self._by_iid[iid] = item
         self.search_results.append(item)
         self.result_count += 1
         self.result_tree.insert("", tk.END, iid=iid, values=(
+            "☐",
             item.get("platform", ""),
             item.get("title", ""),
             item.get("subject", ""),
@@ -511,6 +513,45 @@ class ZhentiTabWidget:
             item.get("year", ""),
             "有" if item.get("has_answer") else "",
         ))
+
+    # ── 勾选框 ─────────────────────────────────────────────
+
+    def _on_tree_click(self, event):
+        """点第一列（☐）切换勾选；点表头（☐）全选/全不选。"""
+        region = self.result_tree.identify_region(event.x, event.y)
+        if self.result_tree.identify_column(event.x) != "#1":
+            return None
+        if region == "heading":
+            self._toggle_check_all()
+            return "break"
+        if region != "cell":
+            return None
+        iid = self.result_tree.identify_row(event.y)
+        if iid:
+            self._toggle_check(iid)
+            return "break"          # 拦掉默认行为，点方框不会改动当前选中行
+        return None
+
+    def _toggle_check(self, iid):
+        if iid in self._checked:
+            self._checked.discard(iid)
+            self.result_tree.set(iid, "sel", "☐")
+        else:
+            self._checked.add(iid)
+            self.result_tree.set(iid, "sel", "☑")
+
+    def _toggle_check_all(self):
+        children = self.result_tree.get_children()
+        check_all = len(self._checked) < len(children)   # 没全勾就全勾，全勾了就全取消
+        for iid in children:
+            self.result_tree.set(iid, "sel", "☑" if check_all else "☐")
+        self._checked = set(children) if check_all else set()
+        self._set_status(f"已勾选 {len(self._checked)} 条" if check_all else "已取消全部勾选", "#2563eb")
+
+    def _checked_items_in_order(self):
+        """按显示顺序返回已勾选的结果项（跳过的行不存在，天然忽略）。"""
+        return [self._by_iid[iid] for iid in self.result_tree.get_children()
+                if iid in self._checked and (self._by_iid.get(iid) or {}).get("url")]
 
     def _on_result_found(self, item):
         self._view_mode = "search"
@@ -533,10 +574,10 @@ class ZhentiTabWidget:
         self.search_worker = None
 
     def stop_search(self):
-        if self._batch_running:
-            # 「停止」按钮在批量下载期间复用为取消下载
-            self._batch_stop.set()
-            self._set_status("正在停止批量下载...", "#d97706")
+        if self._multi_running:
+            # 「停止」按钮在批量下载期间复用为取消
+            self._multi_stop.set()
+            self._set_status("正在停止下载...", "#d97706")
             return
         if self.search_worker and self.search_worker.is_running_thread():
             self._set_status("正在停止...", "#d97706")
@@ -584,6 +625,7 @@ class ZhentiTabWidget:
         self.search_results = []
         self._by_iid = {}
         self._next_iid = 0
+        self._checked = set()
         self.result_count = 0
         self._skipped_count = 0
         self._view_mode = "search"
@@ -620,14 +662,37 @@ class ZhentiTabWidget:
     # ══════════════════════════════════════════════════════
 
     def _download_selected(self):
-        if self._downloading or self._batch_running:
-            # 右键菜单和底部按钮是同一个 handler：只用按钮 state 挡不住右键二次触发
+        """下载：作用于**勾选**的行（1 条走单个流程，多条逐个下载）。
+
+        没勾任何行时退回"当前选中行"，兼容原来的单选下载习惯。
+        底部按钮和右键菜单共用这一个 handler。
+        """
+        if self._downloading or self._multi_running:
+            # 只用按钮 state 挡不住右键二次触发
             self._set_status("正在下载中，请稍候", "#d97706")
             return
-
-        item = self._require_selected()
-        if not item:
+        if self.search_worker and self.search_worker.is_running_thread():
+            self._set_status("正在搜索，等搜索结束再下载", "#d97706")
             return
+
+        targets = self._checked_items_in_order()
+        if not targets:
+            # 没打勾就退回"当前选中行"（沿用原来的单选习惯），两者都没有才提示
+            selection = self.result_tree.selection()
+            item = self._by_iid.get(selection[0]) if selection else None
+            if item is None:
+                messagebox.showinfo(
+                    "提示", "请先勾选要下载的试卷（点每行最左边的方框）\n"
+                            "勾选多条后点下载，会依次下载；需要网页的会一起打开")
+                return
+            targets = [item]
+
+        if len(targets) == 1:
+            self._start_single_download(targets[0])
+        else:
+            self._start_multi_download(targets)
+
+    def _start_single_download(self, item):
         url = item.get("url", "")
         if not url:
             messagebox.showinfo("提示", "该条目没有链接")
@@ -728,162 +793,131 @@ class ZhentiTabWidget:
             webbrowser.open(page_url)
 
     # ══════════════════════════════════════════════════════
-    #  批量下载
+    #  多选下载（勾选多条时）
     # ══════════════════════════════════════════════════════
 
-    def _selected_items_in_order(self):
-        """按显示顺序返回选中的结果项（Treeview.selection() 不保证顺序）。"""
-        selected = set(self.result_tree.selection())
-        return [self._by_iid[iid] for iid in self.result_tree.get_children()
-                if iid in selected and (self._by_iid.get(iid) or {}).get("url")]
-
-    def _batch_download(self):
-        if self._batch_running or self._downloading:
-            self._set_status("批量下载已在进行中", "#d97706")
-            return
-        if self.search_worker and self.search_worker.is_running_thread():
-            self._set_status("正在搜索，等搜索结束再下载", "#d97706")
-            return
-
-        items = self._selected_items_in_order()
-        if not items:
-            messagebox.showinfo(
-                "提示", "请先在列表里选中要下载的试卷\n（按住 Ctrl 点选多行，Shift 选连续多行）")
-            return
-
-        # 无直链平台（download_kind="none"）提前甄别，不浪费网络请求
-        auto, manual = [], []
-        for it in items:
-            key = PLATFORMS.get(it.get("platform", ""), "")
-            if zhenti_core.platform_download_kind(key) == "none":
-                manual.append(it)
-            else:
-                auto.append(it)
-
-        note = ""
-        if manual:
-            note = f"另有 {len(manual)} 份来自无直链平台，只能稍后打开页面手动处理。\n"
-        if not messagebox.askyesno(
-                "批量下载",
-                f"共选中 {len(items)} 份试卷，将逐个自动下载并保存到:\n{ZHENTI_DOWNLOAD_DIR}\n\n"
-                f"{note}开始吗？"):
-            return
-
-        self._batch_running = True
-        self._batch_stop = threading.Event()
-        self._batch_queue = queue.Queue()
-        self._batch_results = []
-        self.btn_batch.config(state="disabled")
+    def _start_multi_download(self, items):
+        self._multi_running = True
+        self._multi_stop = threading.Event()
+        self._multi_queue = queue.Queue()
+        self._multi_results = []
         self.btn_download.config(state="disabled")
         self.btn_stop.config(state="normal")
-        self._set_status(f"批量下载 0/{len(auto)}...", "#2563eb")
+        self._set_status(f"下载 0/{len(items)}...", "#2563eb")
 
-        # 与单个下载相同的原则：子线程只往队列塞消息，界面全在主线程刷新
-        threading.Thread(target=self._batch_worker,
-                         args=(auto, list(manual)), daemon=True).start()
-        self._poll_batch()
+        # 与单个下载同样的原则：子线程只往队列塞消息，界面全在主线程刷新
+        threading.Thread(target=self._multi_worker, args=(items,),
+                         daemon=True).start()
+        self._poll_multi()
 
-    def _batch_worker(self, auto, manual):
-        results = []
-        total = len(auto)
-        for idx, item in enumerate(auto, 1):
-            if self._batch_stop.is_set():
+    def _multi_worker(self, items):
+        results, pages = [], []
+        total = len(items)
+        for idx, item in enumerate(items, 1):
+            if self._multi_stop.is_set():
                 break
             title = item.get("title", "")
-            self._batch_queue.put(
-                ("progress", f"批量下载 {idx}/{total}: {title[:18]}…"))
-            entry = {"title": title, "ok": False, "path": "", "msg": ""}
+            url = item.get("url", "")
+            self._multi_queue.put(
+                ("progress", f"下载 {idx}/{total}: {title[:18]}…"))
+            entry = {"title": title, "ok": False, "msg": "", "page": False}
             try:
-                scraper = zhenti_core._get_scraper()
-                info = scraper.get_download_info(item["url"])
-                if info["type"] == "direct":
-                    r = scraper.download_file(
-                        info["url"], ZHENTI_DOWNLOAD_DIR,
-                        referer=info.get("referer") or item["url"],
-                        stop_event=self._batch_stop)
-                    if self._batch_stop.is_set():
-                        break
-                    entry["ok"] = bool(r.get("success"))
-                    entry["path"] = r.get("filepath", "")
-                    entry["msg"] = r.get("message", "")
-                elif info["type"] == "page":
-                    entry["msg"] = "需提取码，要手动处理"
-                    entry["manual"] = True
-                    manual.append(item)
+                key = PLATFORMS.get(item.get("platform", ""), "")
+                if zhenti_core.platform_download_kind(key) == "none":
+                    # 无直链平台：不浪费请求，直接记成"稍后打开网页"
+                    entry["page"] = True
+                    entry["msg"] = "平台无直链，打开网页"
+                    pages.append(url)
                 else:
-                    entry["msg"] = info.get("message", "页面里没有可用下载链接")
-                    entry["manual"] = True
-                    manual.append(item)
+                    scraper = zhenti_core._get_scraper()
+                    info = scraper.get_download_info(url)
+                    if info["type"] == "direct":
+                        r = scraper.download_file(
+                            info["url"], ZHENTI_DOWNLOAD_DIR,
+                            referer=info.get("referer") or url,
+                            stop_event=self._multi_stop)
+                        if self._multi_stop.is_set():
+                            break
+                        entry["ok"] = bool(r.get("success"))
+                        entry["path"] = r.get("filepath", "")
+                        entry["msg"] = r.get("message", "")
+                    else:
+                        # 网盘/需提取码：勾了多条就一起打开，用户自己页内下载
+                        entry["page"] = True
+                        entry["msg"] = "需提取码，打开试卷页面"
+                        pages.append(url)
             except Exception as e:
                 entry["msg"] = str(e)
             results.append(entry)
-            self._batch_queue.put(("item", entry))
-        self._batch_queue.put(("done", {"results": results, "manual": manual,
-                                        "stopped": self._batch_stop.is_set()}))
+            self._multi_queue.put(("item", entry))
+        self._multi_queue.put(("done", {"results": results, "pages": pages,
+                                        "stopped": self._multi_stop.is_set()}))
 
-    def _poll_batch(self):
+    def _poll_multi(self):
         while True:
             try:
-                kind, data = self._batch_queue.get_nowait()
+                kind, data = self._multi_queue.get_nowait()
             except queue.Empty:
                 break
             if kind == "progress":
                 self._set_status(data, "#2563eb")
             elif kind == "item":
-                self._batch_results.append(data)
-                ok = sum(1 for r in self._batch_results if r["ok"])
+                self._multi_results.append(data)
+                ok = sum(1 for r in self._multi_results if r["ok"])
                 self._set_status(
-                    f"批量下载: 已处理 {len(self._batch_results)}（成功 {ok}）", "#2563eb")
+                    f"已处理 {len(self._multi_results)}（成功 {ok}）", "#2563eb")
             elif kind == "done":
-                self._on_batch_done(data)
+                self._on_multi_done(data)
                 return
-        if self._batch_running:
-            self.frame.after(100, self._poll_batch)
+        if self._multi_running:
+            self.frame.after(100, self._poll_multi)
 
-    def _on_batch_done(self, summary):
-        self._batch_running = False
-        self.btn_batch.config(state="normal")
+    def _on_multi_done(self, summary):
+        self._multi_running = False
         self.btn_download.config(state="normal")
         if not (self.search_worker and self.search_worker.is_running_thread()):
             self.btn_stop.config(state="disabled")
+
         results = summary["results"]
-        manual = summary["manual"]
+        pages = summary["pages"]
         ok = [r for r in results if r["ok"]]
-        # 转手动的（需提取码/无直链）不算失败
-        fail = [r for r in results if not r["ok"] and not r.get("manual")]
-        handed = [r for r in results if r.get("manual")]
+        fail = [r for r in results if not r["ok"] and not r["page"]]
+
+        # 需要网页的：勾了几条就同时打开几条（用户明确要求）
+        opened = 0
+        for url in pages:
+            if url and webbrowser.open(url):
+                opened += 1
+            elif url:
+                opened += 1        # open() 返回 False 也多半已交给系统浏览器，按已打开计
 
         lines = []
         if summary["stopped"]:
-            lines.append("已手动停止，未完成的试卷不再继续。")
-        lines.append(f"自动下载 {len(results)} 份：成功 {len(ok)}，失败 {len(fail)}"
-                     f"，转手动 {len(handed)}。")
+            lines.append("已手动停止，未处理的试卷不再继续。")
+        lines.append(f"共处理 {len(results)} 份：下载成功 {len(ok)}，"
+                     f"失败 {len(fail)}，打开网页 {len(pages)}。")
         for r in fail[:8]:
             lines.append(f"✗ {r['title'][:24]}：{r['msg'][:30]}")
         if len(fail) > 8:
             lines.append(f"…… 其余 {len(fail) - 8} 个失败原因类似")
-        if manual:
-            lines.append(f"共 {len(manual)} 份需手动处理（无直链/需提取码）。")
+        if pages:
+            lines.append("\n需要提取码的页面已打开，请按页面提示扫码获取提取码后自行下载。")
         body = "\n".join(lines)
 
-        color = "#16a34a" if not fail and not manual else "#d97706"
-        self._set_status(
-            f"批量下载结束：成功{len(ok)} 失败{len(fail)} 手动{len(manual)}"
-            + ("（已停止）" if summary["stopped"] else ""), color)
-        if summary["stopped"]:
-            messagebox.showinfo("批量下载已停止", body)
+        if not fail and not pages:
+            color = "#16a34a"
         elif fail:
-            messagebox.showwarning("批量下载完成", body)
+            color = "#d97706"
         else:
-            messagebox.showinfo("批量下载完成", body)
+            color = "#16a34a"
+        self._set_status(
+            f"完成：下载{len(ok)} 失败{len(fail)} 开网页{len(pages)}"
+            + ("（已停止）" if summary["stopped"] else ""), color)
 
-        if manual and not summary["stopped"]:
-            if messagebox.askyesno(
-                    "需手动处理",
-                    f"有 {len(manual)} 份需要手动下载（页面要求提取码或没有直链）。\n"
-                    "要逐个打开它们的试卷页面吗？"):
-                for it in manual:
-                    webbrowser.open(it.get("url", ""))
+        if fail:
+            messagebox.showwarning("下载完成", body)
+        else:
+            messagebox.showinfo("下载完成", body)
 
     # ══════════════════════════════════════════════════════
     #  收藏夹
