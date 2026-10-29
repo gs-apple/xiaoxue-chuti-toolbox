@@ -14,6 +14,10 @@ FONT_TITLE = ("Microsoft YaHei", 12, "bold")
 
 MODES = ["课本作文", "中高考作文"]
 
+# 「中高考作文」里的类型下拉。小升初/中考两项的题目是甘肃平凉（庄浪、静宁）本地卷，
+# 外地学校用不上，2026-10-29 按用户要求连同例文一起清空，选项也不再列出。
+EXAM_TYPES = ["高考作文", "满分原文"]
+
 
 class ZuowenTabWidget:
     def __init__(self, parent):
@@ -210,14 +214,14 @@ class ZuowenTabWidget:
             self.btn_add.grid_remove()  # 隐藏
             self._load_textbook()
         elif mode == "中高考作文":
-            # 切换为小升初/中考/高考 + 年份
+            # 只剩高考卷和满分原文：小升初/中考的题目是平凉本地卷，已按用户要求清空
             self.grade_label.config(text="类型:")
             self.grade_combo.config(
-                values=["小升初", "中考作文", "高考作文", "满分原文"],
+                values=EXAM_TYPES,
                 state="readonly")
-            self.grade_var.set("小升初")
+            self.grade_var.set(EXAM_TYPES[0])
             self.sem_label.config(text="年份:")
-            self._refresh_years("小升初")
+            self._refresh_years(EXAM_TYPES[0])
             self.filter_label.config(text="")
             self.btn_add.grid()  # 显示
             self._load_custom()
@@ -515,7 +519,7 @@ class ZuowenTabWidget:
         row0.pack(fill=tk.X, padx=15, pady=(15, 5))
         tk.Label(row0, text="类型:", font=FONT, bg=BG).pack(side=tk.LEFT)
         type_var = tk.StringVar(value=exam_type)
-        ttk.Combobox(row0, textvariable=type_var, values=["小升初", "中考作文", "高考作文", "满分原文"],
+        ttk.Combobox(row0, textvariable=type_var, values=EXAM_TYPES,
                      state="readonly", width=10, font=FONT).pack(side=tk.LEFT, padx=(4, 15))
         tk.Label(row0, text="年份:", font=FONT, bg=BG).pack(side=tk.LEFT)
         year_var = tk.StringVar(value=year)
