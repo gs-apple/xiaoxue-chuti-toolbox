@@ -871,18 +871,33 @@ class ZhentiTabWidget:
             self._set_status(f"下载失败: {message}", "#dc2626")
             self._show_dialog("下载失败", message, tone="warn")
 
+    @staticmethod
+    def _done_body(total, ok, fail, pages, stopped=False, fail_lines=None):
+        """下载/打开页面的结果文案。
+
+        单条「需要提取码」与批量下载共用这一份措辞，避免两处说法不一致：
+        第一行固定是「页面已打开！」（只有真的打开了网页才写），
+        第二行是条数汇总，之后才是失败明细和提取码提示。
+        """
+        lines = []
+        if pages:
+            lines.append("页面已打开！")
+        lines.append(f"共处理 {total} 份：下载成功 {ok}，失败 {fail}，"
+                     f"打开网页 {pages}。")
+        if stopped:
+            lines.append("（已手动停止，未处理的试卷不再继续。）")
+        lines.extend(fail_lines or [])
+        if pages:
+            lines.append("\n需要提取码的页面已打开，请按页面提示扫码获取提取码后自行下载。")
+        return "\n".join(lines)
+
     def _on_download_page(self, page_url, message):
         """网盘/提取码类站点：打开试卷详情页，让用户在页面里扫码拿码、自己下载。"""
         self._finish_download()
         webbrowser.open(page_url)
         self._set_status("已打开试卷页面", "#16a34a")
-        self._show_dialog(
-            "试卷页面",
-            f"已打开试卷页面:\n{page_url}\n\n"
-            "如果页面提示需要提取码：扫页面上的二维码关注公众号，"
-            "把页面显示的文章编号发给它，公众号会回你提取码，"
-            "再到网盘页面输入即可下载。",
-            tone="info")
+        # 与批量下载同款文案：页面已经替用户打开了，不必再把链接贴一遍
+        self._show_dialog("下载完成", self._done_body(1, 0, 0, 1), tone="ok")
 
     def _on_download_no_link(self, page_url, message):
         self._finish_download()
@@ -990,18 +1005,14 @@ class ZhentiTabWidget:
             elif url:
                 opened += 1        # open() 返回 False 也多半已交给系统浏览器，按已打开计
 
-        lines = []
-        if summary["stopped"]:
-            lines.append("已手动停止，未处理的试卷不再继续。")
-        lines.append(f"共处理 {len(results)} 份：下载成功 {len(ok)}，"
-                     f"失败 {len(fail)}，打开网页 {len(pages)}。")
+        fail_lines = []
         for r in fail[:8]:
-            lines.append(f"✗ {r['title'][:24]}：{r['msg'][:30]}")
+            fail_lines.append(f"✗ {r['title'][:24]}：{r['msg'][:30]}")
         if len(fail) > 8:
-            lines.append(f"…… 其余 {len(fail) - 8} 个失败原因类似")
-        if pages:
-            lines.append("\n需要提取码的页面已打开，请按页面提示扫码获取提取码后自行下载。")
-        body = "\n".join(lines)
+            fail_lines.append(f"…… 其余 {len(fail) - 8} 个失败原因类似")
+
+        body = self._done_body(len(results), len(ok), len(fail), len(pages),
+                               stopped=summary["stopped"], fail_lines=fail_lines)
 
         if not fail and not pages:
             color = "#16a34a"
