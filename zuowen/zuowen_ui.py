@@ -1,4 +1,5 @@
 # zuowen_ui.py — 作文标签页
+import datetime
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -14,9 +15,10 @@ FONT_TITLE = ("Microsoft YaHei", 12, "bold")
 
 MODES = ["课本作文", "中高考作文"]
 
-# 「中高考作文」里的类型下拉。小升初/中考两项的题目是甘肃平凉（庄浪、静宁）本地卷，
-# 外地学校用不上，2026-10-29 按用户要求连同例文一起清空，选项也不再列出。
-EXAM_TYPES = ["高考作文", "满分原文"]
+# 「中高考作文」里的类型下拉。小升初/中考原本收的是甘肃平凉（庄浪、静宁）本地卷，
+# 外地用不上，2026-10-29 已把那些题目和例文清空；但选项仍保留——
+# 各地卷子不同，用户可以用「添加题目」自己往这两个类型里录本地题。
+EXAM_TYPES = ["小升初", "中考作文", "高考作文", "满分原文"]
 
 
 class ZuowenTabWidget:
@@ -214,14 +216,17 @@ class ZuowenTabWidget:
             self.btn_add.grid_remove()  # 隐藏
             self._load_textbook()
         elif mode == "中高考作文":
-            # 只剩高考卷和满分原文：小升初/中考的题目是平凉本地卷，已按用户要求清空
+            # 小升初/中考的本地卷已清空，默认落在第一个真正有题目的类型上
+            # （现在就是高考作文），免得一进页面就是空列表
             self.grade_label.config(text="类型:")
             self.grade_combo.config(
                 values=EXAM_TYPES,
                 state="readonly")
-            self.grade_var.set(EXAM_TYPES[0])
+            default_type = next(
+                (t for t in EXAM_TYPES if self._years_of(t)), EXAM_TYPES[0])
+            self.grade_var.set(default_type)
             self.sem_label.config(text="年份:")
-            self._refresh_years(EXAM_TYPES[0])
+            self._refresh_years(default_type)
             self.filter_label.config(text="")
             self.btn_add.grid()  # 显示
             self._load_custom()
@@ -243,8 +248,13 @@ class ZuowenTabWidget:
         """切换类型时刷新「年份」下拉。"""
         years = self._years_of(exam_type)
         self.sem_combo.config(values=years, state="readonly")
-        if years and self.sem_var.get() not in years:
-            self.sem_var.set(years[0])
+        if years:
+            if self.sem_var.get() not in years:
+                self.sem_var.set(years[0])
+        else:
+            # 这个类型还没有任何题目（如刚清空的小升初/中考）：
+            # 年份留上一个类型的值会让「添加题目」预填错年份，直接落到今年
+            self.sem_var.set(str(datetime.date.today().year))
 
     def _on_grade_changed(self):
         mode = self.mode_var.get()
@@ -297,9 +307,18 @@ class ZuowenTabWidget:
             self.item_list.insert(tk.END, label)
         # 默认选中第一个
         if self._cache:
+            self.filter_label.config(fg="#2563eb", text="")
             self.item_list.selection_set(0)
             self._on_item_selected()
         else:
+            # 小升初/中考等类型清空后是空的，提示一句可以自己录入，
+            # 否则空列表看着像软件出问题
+            if not self._years_of(exam_type):
+                self.filter_label.config(
+                    fg="#d97706",
+                    text=f"「{exam_type}」暂无题目，可点下方「添加题目」录入本地卷")
+            else:
+                self.filter_label.config(fg="#2563eb", text="")
             self._clear_detail()
 
     # ============================================================
@@ -611,19 +630,24 @@ class ZuowenTabWidget:
                 messagebox.showerror("错误", "保存失败", parent=dialog)
                 return
 
-            # 同步内存
-            from zuowen.zuowen_data import XIAOSHENGCHU, ZHONGKAO, GAOKAO, EXAMPLE_ESSAYS
-            target = {"XIAOSHENGCHU": XIAOSHENGCHU, "ZHONGKAO": ZHONGKAO, "GAOKAO": GAOKAO}[json_key]
+            # 同步内存（满分原文原先漏在映射外，选它会 KeyError）
+            from zuowen import zuowen_data as zd
+            target = {"XIAOSHENGCHU": zd.XIAOSHENGCHU, "ZHONGKAO": zd.ZHONGKAO,
+                      "GAOKAO": zd.GAOKAO, "MANFEN": zd.MANFEN}[json_key]
             if yr not in target:
                 target[yr] = []
             target[yr].append(new_topic)
             # 同步例文内存
-            if title not in EXAMPLE_ESSAYS:
-                EXAMPLE_ESSAYS[title] = {"content": "", "word_count": ""}
+            if title not in zd.EXAMPLE_ESSAYS:
+                zd.EXAMPLE_ESSAYS[title] = {"content": "", "word_count": ""}
 
             messagebox.showinfo("添加成功", f"《{title}》已保存到 {etype} {yr}年", parent=dialog)
             dialog.destroy()
-            # 刷新题目列表
+            # 刷新题目列表：先把类型/年份对齐到刚添加的那条，
+            # 否则在「小升初」这类空类型里添加完仍看不到自己的题
+            self.grade_var.set(etype)
+            self._refresh_years(etype)
+            self.sem_var.set(yr)
             self._load_custom()
 
         # 按钮
