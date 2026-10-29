@@ -726,8 +726,9 @@ class PageTurnTests(unittest.TestCase):
         cfg = core.PLATFORM_CONFIGS["yishijuan"]
         got = self.scraper._page_urls("", "https://www.yishijuan.com/xiaoxueshijuan/",
                                       cfg, cfg.max_pages)
-        # 第 3 页起内容与前页重复，默认只到 2 页
-        self.assertEqual(got, ["https://www.yishijuan.com/xiaoxueshijuan/2.html"])
+        # 模板站按页码直接拼出第 2..max_pages 页
+        self.assertEqual(got[0], "https://www.yishijuan.com/xiaoxueshijuan/2.html")
+        self.assertEqual(len(got), cfg.max_pages - 1)
 
     def test_max_pages为1时不翻页(self):
         cfg = core.PLATFORM_CONFIGS["shijuan1"]
@@ -735,10 +736,11 @@ class PageTurnTests(unittest.TestCase):
         self.assertEqual(self.scraper._page_urls(
             html, "https://www.shijuan1.com/a/sjsx5/", cfg, 1), [])
 
-    def test_每平台的默认页数不超过两页(self):
-        """课本换版后老卷子参考价值低，默认只取每列表页最新的前两页。"""
+    def test_各平台的默认页数(self):
+        """第一试卷网 3 页，其余平台 20 页（2026-10-29 用户指定）。"""
         for key, cfg in core.PLATFORM_CONFIGS.items():
-            self.assertLessEqual(cfg.max_pages, 2, f"{key} 默认翻页太深会拖慢搜索")
+            expect = 3 if key == "shijuan1" else 20
+            self.assertEqual(cfg.max_pages, expect, f"{key} 的默认翻页数不对")
 
     def test_每页链接去重且不与列表页自身重复(self):
         html = ('<a href="list_116_2.html">2</a>'

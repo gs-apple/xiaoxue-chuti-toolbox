@@ -213,9 +213,9 @@ class PlatformConfig:
     # page_href_pattern 里的 {page} 会换成页码，在列表页 HTML 里搜，group1=该页 URL
     # （相对路径按列表页做 urljoin）。留空=该站不分页。
     page_href_pattern: str = ""
-    # 默认只翻前 2 页：第 1 页往后越翻越旧，而课本近年换过版（2026 秋季起全面启用
-    # 新版教材），三页往前的存量卷子参考价值很低，翻深了反而稀释结果。
-    max_pages: int = 2                              # 单个列表页最多抓几页（含首页）
+    # 翻页深度：第一试卷网只翻前 3 页（它的存量卷最多，翻深了就是 2023 年的老卷），
+    # 其余平台一律翻到第 20 页，尽量把存量捞全（2026-10-29 用户指定）。
+    max_pages: int = 20                             # 单个列表页最多抓几页（含首页）
     # 页面里没有分页链接（只有 JS 或无导航）时用这个按页码拼 URL：
     # {url}=列表页（带尾斜杠），{page}=页码。与 page_href_pattern 二选一即可。
     page_url_template: str = ""
@@ -274,6 +274,7 @@ PLATFORM_CONFIGS = {
         # 分页形如 list_116_2.html —— 116 是站内栏目号，写死会因改版失效，
         # 所以让正则从列表页里带出来
         page_href_pattern=r'["\'](list_\d+_{page}\.html)["\']',
+        max_pages=3,                                 # 只有这家限 3 页，其余走默认 20
         download_kind="direct",
         # 锚定 downurllist 容器：站点改版时是"明确失败"，而不是从别处捡一个链接下载错文件。
         download_patterns=(
@@ -301,8 +302,10 @@ PLATFORM_CONFIGS = {
         },
         grade_page_url="{g}/",
         subject_names=("语文", "数学", "英语", "科学"),
-        # 栏目页 /shuxue/ 的分页是 index_2.html（相对路径）
-        page_href_pattern=r'["\'](index_{page}\.html)["\']',
+        # 栏目页 /shuxue/ 的分页是 index_2.html（相对路径）。页脚分页条只列到第 5 页，
+        # 但 2026-10-29 实测 index_6 / index_20 都是 200 且有 53 条链接，
+        # 所以按页码直接拼，翻到平台默认的 20 页。
+        page_url_template="index_{page}.html",
         min_title_len=8,
         # 注意：不要放「人教」「部编」「统编」——那是教材版本前缀，几乎每份卷子都带。
         # 2026-10-28 实测这 3 个词挡掉了 47 条真实试卷（全是「统编版2026三年级语文…」这类）。
@@ -331,9 +334,8 @@ PLATFORM_CONFIGS = {
                        "历史", "地理", "政治"),
         # 列表页里没有分页链接（2026-10-28 实测 6 种常见形态都抓不到 href），
         # 但 /xiaoxueshijuan/2.html 确实是第二页：78 条链接里 27 条合格、全是首页没有的。
-        # 第 3 页起每页只多 1 条（内容与前页重复），所以只取前 2 页。
+        # 第 3 页起每页只多 1 条（与前面重复），去重后不影响结果，页数走平台默认值。
         page_url_template="{url}{page}.html",
-        max_pages=2,
         exclude_keywords=["备案", "Copyright", "收藏", "登录", "注册", "关于", "帮助", "javascript"],
         detail_pattern="",                           # 该站链接形态杂，不做详情页校验
         download_kind="none",
@@ -356,8 +358,9 @@ PLATFORM_CONFIGS = {
         },
         subject_names=("语文", "数学", "英语"),
         min_title_len=5,
-        # 分页是绝对路径：/wunianji/shuxue/index_2.html
-        page_href_pattern=r'["\'](/[^"\']*?index_{page}\.html)["\']',
+        # 分页是 /wunianji/shuxue/index_2.html。页脚只列到第 10 页，但 2026-10-29
+        # 实测 index_11 / index_20 都是 200 且有 104 条链接，按页码直接拼到默认 20 页。
+        page_url_template="index_{page}.html",
         # 2026-10-28 实测：详情页里没有任何本地附件，只有一个蓝奏云分享链接，
         # 文件要提取码（只有关注公众号才发）。2026-10-29 按用户拍板：点「下载」
         # 直接打开试卷详情页，让用户在页面里扫码关注公众号拿码、再去网盘下载，
@@ -644,8 +647,12 @@ class PaperScraper:
             return []
         if config.page_url_template:
             base = list_url if list_url.endswith("/") else list_url + "/"
-            return [config.page_url_template.format(url=base, page=page)
-                    for page in range(2, max_pages + 1)]
+            urls = []
+            for page in range(2, max_pages + 1):
+                text = config.page_url_template.format(url=base, page=page)
+                # 模板可以写绝对形态（{url}2.html），也可以只写相对文件名（index_2.html）
+                urls.append(text if text.startswith("http") else urljoin(base, text))
+            return urls
         urls: List[str] = []
         for page in range(2, max_pages + 1):
             found = re.search(config.page_href_pattern.format(page=page), html, re.S)
@@ -824,13 +831,17 @@ class PaperScraper:
                 # 翻页：列表页只给第一页，存量在后面。没配分页规则的站 pages_html 就只有首页。
                 limit = max_pages if isinstance(max_pages, int) and max_pages > 0 else config.max_pages
                 pages_html = [html]
-                for page_url in self._page_urls(html, url, config, limit):
+                for page_no, page_url in enumerate(
+                        self._page_urls(html, url, config, limit), start=2):
                     if _stopped(stop_event):
                         break
+                    # 翻页可能到 20 页，状态栏不动会被当成卡死
+                    _progress(progress_callback,
+                              f"{config.name}: 读取{grade_name}{target_subject}第{page_no}页...")
                     p_html, p_error = self._safe_get(page_url,
                                                      declared_encoding=config.encoding)
                     if p_error:
-                        _progress(progress_callback, f"{config.name}: {p_error}")
+                        # 翻到底了（多数站超页返回 404）：静默收工，不把 404 当故障报
                         break
                     pages_html.append(p_html)
 
@@ -1180,7 +1191,7 @@ def search_papers(platform, subject="", grade="", year="", keyword="",
         grade: GRADE_MAP 的数字码（"1".."12"）；空值需配合 all_grades=True
         year: 四位年份字符串，"" 表示不限
         all_grades: True 时才允许空 grade 爬全部年级
-        max_pages: 单列表页最多抓几页（0=各平台默认，现为 2）
+        max_pages: 单列表页最多抓几页（0=各平台默认：第一试卷网 3，其余 20）
     """
     platform_key = resolve_platform_key(platform)
     if not platform_key:
