@@ -25,6 +25,8 @@ EXAM_TYPES = ["小升初", "中考作文", "高考作文", "满分原文"]
 # 只按固定区间列会把它们彻底藏掉。
 EXAM_YEARS = [str(y) for y in range(2030, 2022, -1)]   # 2030 … 2023
 DEFAULT_EXAM_YEAR = "2026"
+# 各类型的默认年份：满分原文收的是 2001/2020 的旧文，默认落到 2020
+TYPE_DEFAULT_YEAR = {"满分原文": "2020"}
 
 
 class ZuowenTabWidget:
@@ -230,7 +232,7 @@ class ZuowenTabWidget:
                 (t for t in EXAM_TYPES if self._years_of(t)), EXAM_TYPES[0])
             self.grade_var.set(default_type)
             self.sem_label.config(text="年份:")
-            self.sem_var.set(DEFAULT_EXAM_YEAR)   # 默认 2026
+            self.sem_var.set(self._default_year(default_type))
             self._refresh_years(default_type)
             self.filter_label.config(text="")
             self.btn_add.grid()  # 显示
@@ -249,6 +251,10 @@ class ZuowenTabWidget:
         ys = [y for y, v in data.items() if v]
         return sorted(ys, key=lambda x: int(x), reverse=True)
 
+    def _default_year(self, exam_type):
+        """该类型进入时默认选中的年份。"""
+        return TYPE_DEFAULT_YEAR.get(exam_type, DEFAULT_EXAM_YEAR)
+
     def _year_options(self, exam_type):
         """年份下拉的选项：固定 2023–2030 + 该类型已有题目的年份（倒序）。"""
         years = set(EXAM_YEARS) | set(self._years_of(exam_type))
@@ -259,8 +265,8 @@ class ZuowenTabWidget:
         years = self._year_options(exam_type)
         self.sem_combo.config(values=years, state="readonly")
         if self.sem_var.get() not in years:
-            self.sem_var.set(DEFAULT_EXAM_YEAR if DEFAULT_EXAM_YEAR in years
-                             else years[0])
+            default = self._default_year(exam_type)
+            self.sem_var.set(default if default in years else years[0])
 
     def _on_grade_changed(self):
         mode = self.mode_var.get()
@@ -268,6 +274,8 @@ class ZuowenTabWidget:
             self._load_textbook()
         elif mode == "中高考作文":
             self._refresh_years(self.grade_var.get())
+            # 换类型时年份回到该类型的默认值（满分原文→2020，其余→2026）
+            self.sem_var.set(self._default_year(self.grade_var.get()))
             self._load_custom()
 
     def _on_filter_changed(self):
@@ -553,9 +561,10 @@ class ZuowenTabWidget:
 
         def on_type_changed(_event=None):
             # 换类型时年份选项也跟着变（满分原文会多出 2001/2020），
-            # 选中的年份落到默认的 2026
-            year_combo.config(values=self._year_options(type_var.get()))
-            year_var.set(DEFAULT_EXAM_YEAR)
+            # 选中的年份落到该类型的默认值
+            type_now = type_var.get()
+            year_combo.config(values=self._year_options(type_now))
+            year_var.set(self._default_year(type_now))
 
         type_combo.bind("<<ComboboxSelected>>", on_type_changed)
 
