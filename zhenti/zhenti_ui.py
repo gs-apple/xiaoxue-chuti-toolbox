@@ -308,26 +308,25 @@ class ZhentiTabWidget:
             self.context_menu.post(event.x_root, event.y_root)
 
     # ══════════════════════════════════════════════════════
-    #  状态栏 / 下拉联动
-    # ══════════════════════════════════════════════════════
-
-    # ══════════════════════════════════════════════════════
     #  弹窗
     # ══════════════════════════════════════════════════════
 
-    DIALOG_TITLE_SIZE = 14       # 弹窗标题字号
-    DIALOG_BODY_SIZE = 13        # 弹窗正文字号（messagebox 大概 9，看不清）
+    DIALOG_BODY_SIZE = 11        # 弹窗正文字号（messagebox 大概 9）
     DIALOG_WRAP_PX = 470         # 正文折行宽度：一行放不下就折行，不硬挤
 
     def _show_dialog(self, title, body, tone="info"):
         """自绘提示框。
 
         messagebox 的字号跟系统走、改不了，文件路径一长就挤成一行，
-        批量下载的汇总信息更是小到看不清。这里用 Toplevel 自己排版：
-        标题 13 号加粗带色条，正文 12 号按 440px 折行。
-        tone: ok=绿 / warn=橙 / info=蓝
+        批量下载的汇总信息更是小到看不清。这里用 Toplevel 自己排版。
+        弹窗内不重复标题、也不画分隔线（标题只在窗口标题栏上），
+        结果好坏靠按钮底色区分：ok=绿 / warn=橙 / info=蓝。
         """
-        color = {"ok": "#16a34a", "warn": "#d97706", "info": "#2563eb"}.get(tone, "#2563eb")
+        skins = {
+            "ok": ("#22c55e", "#16a34a", "#15803d", "#4ade80", "#22c55e", "#16a34a"),
+            "warn": ("#f59e0b", "#d97706", "#b45309", "#fbbf24", "#f59e0b", "#d97706"),
+        }
+        colors = skins.get(tone)
 
         dlg = tk.Toplevel(self.frame)
         dlg.title(title)
@@ -338,17 +337,16 @@ class ZhentiTabWidget:
         body_frame = tk.Frame(dlg, bg="white", padx=20, pady=16)
         body_frame.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(body_frame, text=title, bg="white", fg=color, anchor="w",
-                 font=("Microsoft YaHei", self.DIALOG_TITLE_SIZE, "bold")).pack(fill=tk.X)
-        tk.Frame(body_frame, bg=color, height=2).pack(fill=tk.X, pady=(6, 12))
-
         tk.Label(body_frame, text=body, bg="white", fg="#222", anchor="w",
                  justify=tk.LEFT, wraplength=self.DIALOG_WRAP_PX,
                  font=("Microsoft YaHei", self.DIALOG_BODY_SIZE)).pack(fill=tk.BOTH, expand=True)
 
+        btn_kw = {} if colors is None else dict(
+            color_top=colors[0], color_mid=colors[1], color_bot=colors[2],
+            hover_top=colors[3], hover_mid=colors[4], hover_bot=colors[5])
         GradientButton(body_frame, text="知道了", width=96, height=32,
                        font=("Microsoft YaHei", 11, "bold"),
-                       command=dlg.destroy).pack(pady=(18, 0))
+                       command=dlg.destroy, **btn_kw).pack(pady=(16, 0))
 
         dlg.update_idletasks()
         w, h = dlg.winfo_reqwidth(), dlg.winfo_reqheight()
