@@ -110,7 +110,7 @@ class ZuowenTabWidget:
         self.grade_label = tk.Label(filter_row, text="年级:", font=FONT, bg=BG)
         self.grade_label.pack(side=tk.LEFT)
         grades = self.engine.get_grades()
-        self.grade_var = tk.StringVar(value="四年级")
+        self.grade_var = tk.StringVar(value="五年级")
         self.grade_combo = ttk.Combobox(filter_row, textvariable=self.grade_var,
                                         values=grades, state="readonly", width=8, font=FONT)
         self.grade_combo.pack(side=tk.LEFT, padx=(4, 0))
@@ -118,7 +118,7 @@ class ZuowenTabWidget:
 
         self.sem_label = tk.Label(filter_row, text="学期:", font=FONT, bg=BG)
         self.sem_label.pack(side=tk.LEFT, padx=(8, 0))
-        self.sem_var = tk.StringVar(value="下学期")
+        self.sem_var = tk.StringVar(value="上学期")
         self.sem_combo = ttk.Combobox(filter_row, textvariable=self.sem_var,
                                       values=["上学期", "下学期"], state="readonly", width=6, font=FONT)
         self.sem_combo.pack(side=tk.LEFT, padx=(4, 0))
@@ -128,7 +128,7 @@ class ZuowenTabWidget:
         self._original_grades = grades
         self._original_semesters = ["上学期", "下学期"]
         # 中高考作文的年份列表（按实际有数据的年份生成，含 2001 满分作文）
-        self._custom_years = [str(y) for y in range(2000, 2027)]
+        self._custom_years = [str(y) for y in range(2000, 2028)]
 
         self.filter_label = tk.Label(filter_row, text="", font=FONT, bg=BG, fg="#2563eb")
         self.filter_label.pack(side=tk.LEFT, padx=(10, 0))
@@ -208,10 +208,10 @@ class ZuowenTabWidget:
             # 恢复原始下拉选项
             self.grade_label.config(text="年级:")
             self.grade_combo.config(values=self._original_grades, state="readonly")
-            self.grade_var.set("四年级")
+            self.grade_var.set("五年级")
             self.sem_label.config(text="学期:")
             self.sem_combo.config(values=self._original_semesters, state="readonly")
-            self.sem_var.set("下学期")
+            self.sem_var.set("上学期")
             self.filter_label.config(text="")
             self.btn_add.grid_remove()  # 隐藏
             self._load_textbook()
@@ -543,7 +543,7 @@ class ZuowenTabWidget:
         tk.Label(row0, text="年份:", font=FONT, bg=BG).pack(side=tk.LEFT)
         year_var = tk.StringVar(value=year)
         ttk.Combobox(row0, textvariable=year_var,
-                     values=[str(y) for y in range(2000, 2027)],
+                     values=[str(y) for y in range(2000, 2028)],
                      state="readonly", width=6, font=FONT).pack(side=tk.LEFT, padx=4)
 
         # 试卷名称（高考用）
