@@ -877,7 +877,7 @@ class ZhentiTabWidget:
 
         单条「需要提取码」与批量下载共用这一份措辞，避免两处说法不一致：
         第一行固定是「页面已打开！」（只有真的打开了网页才写），
-        第二行是条数汇总，之后才是失败明细和提取码提示。
+        第二行是条数汇总，之后才是失败明细。
         """
         lines = []
         if pages:
@@ -887,8 +887,6 @@ class ZhentiTabWidget:
         if stopped:
             lines.append("（已手动停止，未处理的试卷不再继续。）")
         lines.extend(fail_lines or [])
-        if pages:
-            lines.append("\n需要提取码的页面已打开，请按页面提示扫码获取提取码后自行下载。")
         return "\n".join(lines)
 
     def _on_download_page(self, page_url, message):
