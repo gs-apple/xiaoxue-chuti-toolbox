@@ -1,4 +1,4 @@
-# dashang/dashang_ui.py — 打赏标签页：分组栏（打赏支持/软件功能/安全提醒）
+# dashang/dashang_ui.py — 打赏标签页：分组栏（软件功能/打赏支持/安全提醒）
 import tkinter as tk
 from tkinter import ttk
 
@@ -38,7 +38,7 @@ FEATURES = (
 
 
 class DashangTabWidget:
-    """打赏标签页：三个分组栏（打赏支持/软件功能/安全提醒）。"""
+    """打赏标签页：三个分组栏（软件功能/打赏支持/安全提醒）。"""
 
     def __init__(self, parent):
         self.frame = ttk.Frame(parent)
@@ -46,12 +46,26 @@ class DashangTabWidget:
         self._init_ui()
 
     def _init_ui(self):
-        # ── 分组栏一：打赏支持（宽度与"软件功能"一致，收款码靠右）──
-        g1 = tk.LabelFrame(self.frame, text=" 💝 打赏支持 ",
-                           font=TITLE_FONT, bg=BG_COLOR, fg="#e11d48")
+        # ── 分组栏一：软件功能 ─────────────────────────────────
+        g1 = tk.LabelFrame(self.frame, text=" 📋 软件功能 ",
+                           font=TITLE_FONT, bg=BG_COLOR, fg="#1d4ed8")
         g1.pack(fill="x", padx=16, pady=(8, 4))
+        for name, desc in FEATURES:
+            row = tk.Frame(g1, bg=BG_COLOR)
+            row.pack(anchor="w", padx=10, pady=2)
+            tk.Label(row, text=name, font=FEATURE_NAME_FONT,
+                     bg=BG_COLOR, fg=FEATURE_NAME_COLOR,
+                     width=5, anchor="w").pack(side="left")
+            tk.Label(row, text=desc, font=FEATURE_FONT,
+                     bg=BG_COLOR, fg="#444444", justify="left", anchor="w",
+                     wraplength=475).pack(side="left", padx=(2, 0))
 
-        body = tk.Frame(g1, bg=BG_COLOR)
+        # ── 分组栏二：打赏支持（宽度与"软件功能"一致，收款码靠右）──
+        g2 = tk.LabelFrame(self.frame, text=" 💝 打赏支持 ",
+                           font=TITLE_FONT, bg=BG_COLOR, fg="#e11d48")
+        g2.pack(fill="x", padx=16, pady=4)
+
+        body = tk.Frame(g2, bg=BG_COLOR)
         body.pack(fill="x", padx=12, pady=(6, 8))
 
         # 右侧：收款码 + 说明
@@ -83,20 +97,6 @@ class DashangTabWidget:
         tk.Label(left, text="趣味模块基本复刻了他的思路，向大神致敬！",
                  font=THANKS_FONT, bg=BG_COLOR, fg=SPECIAL_COLOR,
                  anchor="w").pack(anchor="w", pady=(1, 0))
-
-        # ── 分组栏二：软件功能 ─────────────────────────────────
-        g2 = tk.LabelFrame(self.frame, text=" 📋 软件功能 ",
-                           font=TITLE_FONT, bg=BG_COLOR, fg="#1d4ed8")
-        g2.pack(fill="x", padx=16, pady=4)
-        for name, desc in FEATURES:
-            row = tk.Frame(g2, bg=BG_COLOR)
-            row.pack(anchor="w", padx=10, pady=2)
-            tk.Label(row, text=name, font=FEATURE_NAME_FONT,
-                     bg=BG_COLOR, fg=FEATURE_NAME_COLOR,
-                     width=5, anchor="w").pack(side="left")
-            tk.Label(row, text=desc, font=FEATURE_FONT,
-                     bg=BG_COLOR, fg="#444444", justify="left", anchor="w",
-                     wraplength=475).pack(side="left", padx=(2, 0))
 
         # ── 分组栏三：安全提醒 ─────────────────────────────────
         g3 = tk.LabelFrame(self.frame, text=" ⚠️ 安全提醒 ",
