@@ -923,7 +923,7 @@ class PaperScraper:
     def get_download_info(self, url: str) -> Dict[str, str]:
         """解析详情页里的下载链接。
 
-        type: direct（可直下）/ cloud（网盘）/ none（该平台没有可用直链）
+        type: direct（可直下）/ page（交给浏览器打开详情页）/ none（该平台没有可用直链）
         """
         config = _config_for_url(url)
         if config is None:
