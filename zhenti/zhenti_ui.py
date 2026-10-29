@@ -27,6 +27,9 @@ BG = BG_COLOR
 PLATFORMS = {cfg.name: key for key, cfg in zhenti_core.PLATFORM_CONFIGS.items()}
 PLATFORM_NAMES = {key: name for name, key in PLATFORMS.items()}
 
+# 平台下拉的首项：一次搜索依次跑全部平台（各平台按自己的翻页深度抓，慢的排在后面）。
+ALL_PLATFORMS_TEXT = "全部平台"
+
 DEFAULT_GRADE = "五年级"
 DEFAULT_STATUS = "就绪 - 选好年级和学科后点搜索"
 YEAR_CHOICES = ["不限"] + [str(y) for y in range(2027, 2014, -1)]
@@ -175,8 +178,9 @@ class ZhentiTabWidget:
 
         tk.Label(row1, text="平台:", font=("Microsoft YaHei", 10), width=5).pack(side=tk.LEFT)
         self.platform_combo = ttk.Combobox(row1, width=12, state="readonly",
-                                           values=list(PLATFORMS.keys()))
-        self.platform_combo.current(0)
+                                           values=[ALL_PLATFORMS_TEXT] + list(PLATFORMS.keys()))
+        # 默认仍停在第一试卷网（最快），"全部平台"放首项方便随时切
+        self.platform_combo.current(1)
         self.platform_combo.pack(side=tk.LEFT, padx=(0, 8))
         self.platform_combo.bind("<<ComboboxSelected>>", lambda e: self._on_platform_changed())
 
@@ -191,6 +195,8 @@ class ZhentiTabWidget:
                                           values=subject_choices(DEFAULT_GRADE))
         self.subject_combo.set("全部")
         self.subject_combo.pack(side=tk.LEFT, padx=(0, 8))
+        # 换学科也要刷新状态栏提示（"本平台没这科"/"全部平台会搜几家"都跟学科有关）
+        self.subject_combo.bind("<<ComboboxSelected>>", lambda e: self._on_grade_changed())
 
         tk.Label(row1, text="年份:", font=("Microsoft YaHei", 10), width=5).pack(side=tk.LEFT)
         self.year_combo = ttk.Combobox(row1, width=7, state="readonly", values=YEAR_CHOICES)
@@ -340,6 +346,23 @@ class ZhentiTabWidget:
 
         platform_key = self._current_platform_key()
         platform_name = self.platform_combo.get()
+        if platform_name == ALL_PLATFORMS_TEXT:
+            # 全部平台：只报"这个年级/学科有几家能搜"，不逐个提示缺科目
+            # （总有一家是全的，提示反而变成噪声）
+            subject = self.subject_combo.get()
+            keys = list(PLATFORMS.values())
+            scope = grade
+            if subject and subject != "全部":
+                usable = zhenti_core.platforms_with_subject(subject, grade)
+                if usable:
+                    keys = [k for k in keys if k in usable]
+                scope = f"{grade}{subject}"
+            n_ok = sum(1 for key in keys
+                       if zhenti_core.platform_supports_grade(key, grade))
+            self._capability_hint = True
+            self._set_status(f"全部平台：{scope}将依次搜索 {n_ok}/{len(PLATFORMS)} 家平台", "#2563eb")
+            return
+
         if not zhenti_core.platform_supports_grade(platform_key, grade):
             supported = zhenti_core.platform_grade_names(platform_key)
             scope = f"{supported[0]}～{supported[-1]}" if len(supported) > 1 else "无"
@@ -400,7 +423,9 @@ class ZhentiTabWidget:
             self._set_status("上一次搜索还没结束，请稍候", "#d97706")
             return
 
-        platform_names = [self.platform_combo.get()]
+        # 平台：选「全部平台」就依次跑全部（慢，但一次点完）
+        all_platforms = self.platform_combo.get() == ALL_PLATFORMS_TEXT
+        platform_names = list(PLATFORMS.keys()) if all_platforms else [self.platform_combo.get()]
 
         # 年级必须落在值域内。Combobox 的 readonly 只挡键入、不挡程序 .set()，
         # 脏值（如旧配置里的"高中"）会让 core 收到非法年级。
@@ -441,7 +466,16 @@ class ZhentiTabWidget:
         # 三年级科学只有中小学试卷网有（第一试卷网 9 个栏目里根本没有科学），
         # 只丢一句"没有科学栏目"，用户下一步还得自己挨个试平台。
         subject = subjects[0]
-        if subject:
+        if all_platforms:
+            # 全部平台时不问"要不要换平台"：没这科的直接跳过，一家都没有才提示
+            if subject:
+                usable = zhenti_core.platforms_with_subject(subject, grade_name)
+                if usable:
+                    platform_keys = [k for k in platform_keys if k in usable]
+                if not platform_keys:
+                    messagebox.showinfo("提示", f"没有平台有{grade_name}{subject}栏目。")
+                    return
+        elif subject:
             current_key = platform_keys[0]
             usable = zhenti_core.platforms_with_subject(subject, grade_name)
             if usable and current_key not in usable:
