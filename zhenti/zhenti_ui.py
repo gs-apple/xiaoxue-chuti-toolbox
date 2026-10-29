@@ -244,7 +244,7 @@ class ZhentiTabWidget:
         self.result_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
 
-        self.result_tree.bind("<Double-1>", lambda e: self._open_selected())
+        self.result_tree.bind("<Double-1>", self._on_tree_double_click)
         self.result_tree.bind("<Button-1>", self._on_tree_click)
 
     def _build_func_bar(self, parent):
@@ -515,6 +515,23 @@ class ZhentiTabWidget:
         ))
 
     # ── 勾选框 ─────────────────────────────────────────────
+
+    def _on_tree_double_click(self, event):
+        """双击数据行才打开网页；双击表头/勾选列一律吞掉。
+
+        以前这里直接 lambda 调 _open_selected：连点表头的"☐"（全选）时，
+        第二下会被 Tk 识别成双击，于是把当前选中行——通常就是第一条——
+        的网页打开了。所以双击必须自己判断点在哪。
+        """
+        region = self.result_tree.identify_region(event.x, event.y)
+        if region != "cell":
+            return "break"                       # 表头 / 分隔线 / 空白区
+        if self.result_tree.identify_column(event.x) == "#1":
+            return "break"                       # 勾选列：交给单击切换
+        if not self.result_tree.identify_row(event.y):
+            return "break"
+        self._open_selected()
+        return "break"
 
     def _on_tree_click(self, event):
         """点第一列（☐）切换勾选；点表头（☐）全选/全不选。"""
